@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PME", "PME\PME.csproj", "{B4461378-A168-4709-9FE9-F6FEA35F4D17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Communication", "Communication\Communication.csproj", "{FEB444D2-30AF-47DD-A30F-5B935EC04B53}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B4461378-A168-4709-9FE9-F6FEA35F4D17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4461378-A168-4709-9FE9-F6FEA35F4D17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4461378-A168-4709-9FE9-F6FEA35F4D17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4461378-A168-4709-9FE9-F6FEA35F4D17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEB444D2-30AF-47DD-A30F-5B935EC04B53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEB444D2-30AF-47DD-A30F-5B935EC04B53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEB444D2-30AF-47DD-A30F-5B935EC04B53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEB444D2-30AF-47DD-A30F-5B935EC04B53}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
