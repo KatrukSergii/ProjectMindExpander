@@ -3,6 +3,8 @@ using System.IO;
 using System.Net;
 using System.Web;
 using Communication.Properties;
+using HtmlAgilityPack;
+using Shared;
 
 namespace Communication
 {
@@ -50,7 +52,10 @@ namespace Communication
                   );
         }
 
-        public void Scrape()
+        /// <summary>
+        /// Submit user credentials to the login page and then store the auth cookies in the cookie container
+        /// </summary>
+        private CookieContainer LoginAndGetCookies()
         {
             // first, request the login form to get the viewstate value
 
@@ -64,13 +69,13 @@ namespace Communication
             // extract the viewstate value and build out POST data
             string viewState = ExtractViewState(responseData);
             string postData =
-                String.Format(POSTDATATEMPLATE, 
+                String.Format(POSTDATATEMPLATE,
                             VIEWSTATENAME, viewState, USERNAMECONTROLNAME, USERNAME, PASSWORDCONTROLNAME, PASSWORD, LOGINBUTTONCONTROLNAME);
 
             // have a cookie container ready to receive the forms auth cookie
             var cookies = new CookieContainer();
 
-            // now post to the login form
+            // post to the login form
             webRequest = WebRequest.Create(LOGINPAGE) as HttpWebRequest;
             webRequest.Method = "POST";
             webRequest.ContentType = "application/x-www-form-urlencoded";
@@ -84,17 +89,41 @@ namespace Communication
             // we don't need the contents of the response, just the cookie it issues
             webRequest.GetResponse().Close();
 
+            return cookies;
+        }
+
+        private Timesheet GetTimeSheetData(CookieContainer authCookies)
+        {
             //// now we can send out cookie along with a request for the protected page
-            webRequest = WebRequest.Create(TIMESHEETPAGE) as HttpWebRequest;
-            webRequest.CookieContainer = cookies;
+            var webRequest = WebRequest.Create(TIMESHEETPAGE) as HttpWebRequest;
+            webRequest.CookieContainer = authCookies;
 
-            responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream());
+            var timesheet = new Timesheet();
 
-            // and read the response
-            responseData = responseReader.ReadToEnd();
-            responseReader.Close();
+            using (var responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream()))
+            {
 
-            Console.Write(responseData);
+                HtmlNode.ElementsFlags.Remove("option");
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.Load(responseReader);
+                if (htmlDoc.DocumentNode != null)
+                {
+                    // Project Codes
+                    foreach (HtmlNode link in htmlDoc.DocumentNode.SelectNodes("//select[@name='ctl00$C1$ProjectGrid$ctl02$ddlProject']/option"))
+                    {
+                        timesheet.ProjectCodes.Add(new PickListItem(int.Parse(link.Attributes["value"].Value), link.InnerText));
+                    }
+
+                }
+            }
+
+            return timesheet;
+        }
+
+        public void Scrape()
+        {
+            var authCookies = LoginAndGetCookies();
+            GetTimeSheetData(authCookies);
         }
     }
 }
