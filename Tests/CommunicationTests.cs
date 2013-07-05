@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Web;
-using Communication;
+﻿using Communication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -12,10 +7,18 @@ namespace Tests
     public class CommunicationTests
     {
         [TestMethod]
-        public void Scrape_GetProjectCodes_4ProjectCodes()
+        public void GetTimesheet_GetProjectCodes_4ProjectCodes()
         {
             var scraper = new Scraper();
-            scraper.Scrape();
+            var timesheet = scraper.GetTimesheet();
+            Assert.IsNotNull(timesheet);
+            Assert.AreEqual(4,timesheet.ProjectCodes.Count);
+        }
+
+        [TestMethod]
+        public void GetProjectTime_GetProjectTimeEntries_4ProjectCodes()
+        {
+           
         }
     }
 

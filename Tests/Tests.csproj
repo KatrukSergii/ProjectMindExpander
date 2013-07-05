@@ -59,6 +59,10 @@
       <Project>{FEB444D2-30AF-47DD-A30F-5B935EC04B53}</Project>
       <Name>Communication</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Shared\Shared.csproj">
+      <Project>{C4682778-4694-41E3-A09B-8ACE37CB3937}</Project>
+      <Name>Shared</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

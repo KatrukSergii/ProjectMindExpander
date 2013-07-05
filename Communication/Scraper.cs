@@ -92,7 +92,7 @@ namespace Communication
             return cookies;
         }
 
-        private Timesheet GetTimeSheetData(CookieContainer authCookies)
+        private Timesheet GetTimesheetData(CookieContainer authCookies)
         {
             //// now we can send out cookie along with a request for the protected page
             var webRequest = WebRequest.Create(TIMESHEETPAGE) as HttpWebRequest;
@@ -113,17 +113,16 @@ namespace Communication
                     {
                         timesheet.ProjectCodes.Add(new PickListItem(int.Parse(link.Attributes["value"].Value), link.InnerText));
                     }
-
                 }
             }
 
             return timesheet;
         }
 
-        public void Scrape()
+        public Timesheet GetTimesheet()
         {
             var authCookies = LoginAndGetCookies();
-            GetTimeSheetData(authCookies);
+            return GetTimesheetData(authCookies);
         }
     }
 }
