@@ -61,7 +61,7 @@ namespace Communication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to %BASEURI%.
+        ///   Looks up a localized string similar to https://secure.projectminder.com/.
         /// </summary>
         internal static string baseUri {
             get {
@@ -70,7 +70,7 @@ namespace Communication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to %LOGINPAGE%.
+        ///   Looks up a localized string similar to LoginView.aspx?ReturnUrl=%2fTimesheets.aspx.
         /// </summary>
         internal static string loginPage {
             get {
@@ -79,7 +79,7 @@ namespace Communication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to %PASSWORD%.
+        ///   Looks up a localized string similar to password123.
         /// </summary>
         internal static string password {
             get {
@@ -88,7 +88,7 @@ namespace Communication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to %TIMESHEETPAGE%.
+        ///   Looks up a localized string similar to TimesheetView.aspx.
         /// </summary>
         internal static string timesheetPage {
             get {
@@ -97,7 +97,7 @@ namespace Communication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to %USERNAME%.
+        ///   Looks up a localized string similar to pete.johnson@iris.co.uk.
         /// </summary>
         internal static string username {
             get {

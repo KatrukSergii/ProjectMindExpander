@@ -118,18 +118,18 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="loginPage" xml:space="preserve">
-    <value>%LOGINPAGE%</value>
+    <value>LoginView.aspx?ReturnUrl=%2fTimesheets.aspx</value>
   </data>
   <data name="password" xml:space="preserve">
-    <value>%PASSWORD%</value>
+    <value>password123</value>
   </data>
   <data name="timesheetPage" xml:space="preserve">
-    <value>%TIMESHEETPAGE%</value>
+    <value>TimesheetView.aspx</value>
   </data>
   <data name="baseUri" xml:space="preserve">
-    <value>%BASEURI%</value>
+    <value>https://secure.projectminder.com/</value>
   </data>
   <data name="username" xml:space="preserve">
-    <value>%USERNAME%</value>
+    <value>pete.johnson@iris.co.uk</value>
   </data>
 </root>
