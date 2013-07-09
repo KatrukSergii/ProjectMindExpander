@@ -79,7 +79,7 @@ namespace Communication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to password123.
+        ///   Looks up a localized string similar to Bttf1985!.
         /// </summary>
         internal static string password {
             get {

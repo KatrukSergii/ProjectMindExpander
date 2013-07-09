@@ -6,10 +6,13 @@ namespace Shared
     {
         public Timesheet()
         {
-            ProjectCodes = new List<PickListItem>();
+            
         }
 
-        public List<PickListItem> ProjectCodes { get; set; }
+        public List<ProjectTaskTimesheetItem> ProjectTimeItems { get; set; }
+        public List<ProjectTaskTimesheetItem> NonProjectActivityItems { get; set; }
+        
+        // Totals
     }
 }
 

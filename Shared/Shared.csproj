@@ -39,7 +39,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interfaces\ITimesheetParser.cs" />
     <Compile Include="PickListItem.cs" />
+    <Compile Include="ProjectTaskTimesheetItem.cs" />
+    <Compile Include="TimeEntry.cs" />
     <Compile Include="Timesheet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -5,6 +5,7 @@ using System.Web;
 using Communication.Properties;
 using HtmlAgilityPack;
 using Shared;
+using Shared.Interfaces;
 
 namespace Communication
 {
@@ -25,16 +26,24 @@ namespace Communication
         private const string PASSWORDCONTROLNAME = "txtPassword";
         private const string LOGINBUTTONCONTROLNAME = "btnLogin";
         private const string POSTDATATEMPLATE = "{0}={1}&{2}={3}&{4}={5}&{6}=Login";
-        
-        public Scraper()
+
+        private ITimesheetParser _parser;
+
+        public Scraper(ITimesheetParser parser)
         {
             var baseUri = new Uri(Resources.baseUri);
             LOGINPAGE = new Uri(baseUri, Resources.loginPage);
             TIMESHEETPAGE = new Uri(baseUri,Resources.timesheetPage);
             USERNAME = Resources.username;
             PASSWORD = Resources.password;
+            _parser = parser;
         }
 
+        /// <summary>
+        /// Reads the Viewstate hidden field from the HTML page
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns>string representing the viewstate</returns>
         private string ExtractViewState(string s)
         {
 
@@ -92,28 +101,25 @@ namespace Communication
             return cookies;
         }
 
+        /// <summary>
+        /// Constructs a Timesheet object from the contents of the HTML page
+        /// </summary>
+        /// <param name="authCookies"></param>
+        /// <returns></returns>
         private Timesheet GetTimesheetData(CookieContainer authCookies)
         {
             //// now we can send out cookie along with a request for the protected page
             var webRequest = WebRequest.Create(TIMESHEETPAGE) as HttpWebRequest;
             webRequest.CookieContainer = authCookies;
 
+            var parser = new TimesheetParser();
+            //var timesheet = parser.Parse(webRequest.GetResponse().GetResponseStream());
+
             var timesheet = new Timesheet();
 
             using (var responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream()))
             {
-
-                HtmlNode.ElementsFlags.Remove("option");
-                var htmlDoc = new HtmlDocument();
-                htmlDoc.Load(responseReader);
-                if (htmlDoc.DocumentNode != null)
-                {
-                    // Project Codes
-                    foreach (HtmlNode link in htmlDoc.DocumentNode.SelectNodes("//select[@name='ctl00$C1$ProjectGrid$ctl02$ddlProject']/option"))
-                    {
-                        timesheet.ProjectCodes.Add(new PickListItem(int.Parse(link.Attributes["value"].Value), link.InnerText));
-                    }
-                }
+                timesheet = parser.Parse(responseReader);
             }
 
             return timesheet;
