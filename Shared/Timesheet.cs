@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Shared
 {
@@ -6,13 +7,16 @@ namespace Shared
     {
         public Timesheet()
         {
-            
+            ProjectTimeItems = new List<ProjectTaskTimesheetItem>();   
+            NonProjectActivityItems = new List<ProjectTaskTimesheetItem>();
+            RequiredHours = new List<TimeSpan>();
         }
 
+        public string Title { get; set; }
         public List<ProjectTaskTimesheetItem> ProjectTimeItems { get; set; }
         public List<ProjectTaskTimesheetItem> NonProjectActivityItems { get; set; }
-        
-        // Totals
+        public List<TimeSpan> RequiredHours { get; set; }
+        public TimeSpan TotalRequiredHours { get; set; }
     }
 }
 

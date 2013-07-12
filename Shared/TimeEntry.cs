@@ -4,7 +4,7 @@ namespace Shared
 {
     public class TimeEntry
     {
-        public DateTime LoggedTime { get; set; }
+        public TimeSpan LoggedTime { get; set; }
         
         // N.Y.I.
         //DateTime ExtraTime { get; set; }
