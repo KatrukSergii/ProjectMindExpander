@@ -11,6 +11,8 @@ namespace Tests
         /// <param name="timesheet"></param>
         public static void PrettyPrintTimesheet(Timesheet timesheet)
         {
+            Console.WriteLine(timesheet.TimesheetId + ":  " + timesheet.Title + Environment.NewLine);
+
             Console.WriteLine("MON".PadRight(10) + "TUE".PadRight(10) + "WED".PadRight(10) + "THU".PadRight(10)  + "FRI".PadRight(10) + "SAT".PadRight(10) + "SUN".PadRight(10));
             
             Console.WriteLine(@"PROJECT ITEMS");

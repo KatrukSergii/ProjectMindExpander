@@ -26,8 +26,7 @@ namespace Tests
         {
             var timesheetParser = new HtmlParser();
             var scraper = new WebScraper(timesheetParser);
-            Timesheet timesheet = null;
-            var authCookies = scraper.LoginAndGetCookies(out timesheet);
+            var timesheet = scraper.LoginAndGetTimesheet();
             Assert.IsNotNull(timesheet);
             Assert.AreEqual(37.5, timesheet.TotalRequiredHours.TotalHours);
             TestHelper.PrettyPrintTimesheet(timesheet);
@@ -38,10 +37,9 @@ namespace Tests
         {
             var timesheetParser = new HtmlParser();
             var scraper = new WebScraper(timesheetParser);
-            var timesheet = new Timesheet();
-            var authCookies = scraper.LoginAndGetCookies(out timesheet);
+            var timesheet = scraper.LoginAndGetTimesheet();
             TestHelper.PrettyPrintTimesheet(timesheet);
-            var updatedTimesheet = scraper.UpdateTimeSheet(timesheet, authCookies);
+            var updatedTimesheet = scraper.UpdateTimeSheet(timesheet);
             TestHelper.PrettyPrintTimesheet(updatedTimesheet);
         }  
 

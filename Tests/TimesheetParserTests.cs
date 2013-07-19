@@ -70,26 +70,9 @@ namespace Tests
             Assert.IsNotNull(timesheet);
             Assert.IsNotNull(timesheet.ProjectTimeItems);
             Assert.AreEqual(7, timesheet.ProjectTimeItems.Count);
-
+            Assert.AreEqual("60621", timesheet.TimesheetId);
             TestHelper.PrettyPrintTimesheet(timesheet);
 
         }
-
-        [TestMethod]
-        [DeploymentItemAttribute("TestTimeSheet.htm")]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void TEMPParse_LoginError()
-        {
-            Timesheet timesheet;
-            string viewstate = string.Empty;
-
-            using (var streamReader = new StreamReader("TestTimeSheet.htm"))
-            {
-                var parser = _container.Resolve<IHtmlParser>();
-                var htmlString = streamReader.ReadToEnd();
-                timesheet = parser.ParseTimesheet(htmlString, out viewstate);
-            }
-        }
-
     }
 }

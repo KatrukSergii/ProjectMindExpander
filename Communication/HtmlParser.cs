@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Web;
 using HtmlAgilityPack;
 using Shared;
 using Shared.Interfaces;
@@ -10,6 +11,8 @@ namespace Communication
 {
     public class HtmlParser : IHtmlParser
     {
+        private const string VIEWSTATENAME = "__VIEWSTATE";
+        private const string VALUEDELIMITER = "value=\"";
         private const string ViewstateSelector = "//input[@name = '__VIEWSTATE']";
 
         /// <summary>
@@ -38,7 +41,7 @@ namespace Communication
             const string titleSelector = "//div[@class='subtitle']";
             const string loginErrorSelector = "//div[@id='login-error']/h4";
 
-            const string timesheetIdSelector = "//input[@name = 'ctl00$C1$hdnTimesheetId}']";
+            const string timesheetIdSelector = "//input[@name = 'ctl00$C1$hdnTimesheetId']";
 
             var timesheet = new Timesheet();
             viewstate = string.Empty;
@@ -73,17 +76,33 @@ namespace Communication
 
         public string ParseViewState(string html)
         {
-            var htmlDoc = new HtmlDocument();
-            var stringReader = new StringReader(html);
-            htmlDoc.Load(stringReader);
-            string viewstate = string.Empty;
 
-            if (htmlDoc.DocumentNode != null)
-            {
-                viewstate = htmlDoc.DocumentNode.SelectSingleNode(ViewstateSelector).Attributes["value"].Value;
-            }
+            var viewStateNamePosition = html.IndexOf(VIEWSTATENAME, StringComparison.Ordinal);
+            var viewStateValuePosition = html.IndexOf(VALUEDELIMITER, viewStateNamePosition, StringComparison.Ordinal);
+
+            var viewStateStartPosition = viewStateValuePosition + VALUEDELIMITER.Length;
+            var viewStateEndPosition = html.IndexOf("\"", viewStateStartPosition, StringComparison.Ordinal);
+
+            var viewstate =  HttpUtility.UrlEncodeUnicode(
+                     html.Substring(
+                        viewStateStartPosition,
+                        viewStateEndPosition - viewStateStartPosition
+                     )
+                  );
 
             return viewstate;
+        
+            //var htmlDoc = new HtmlDocument();
+            //var stringReader = new StringReader(html);
+            //htmlDoc.Load(stringReader);
+            //string viewstate = string.Empty;
+
+            //if (htmlDoc.DocumentNode != null)
+            //{
+            //    viewstate = htmlDoc.DocumentNode.SelectSingleNode(ViewstateSelector).Attributes["value"].Value;
+            //}
+
+            //return viewstate;
         }
 
         /// <summary>

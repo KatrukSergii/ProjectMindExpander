@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Cache;
 using System.Text;
 using System.Web;
 using Communication.Properties;
@@ -14,8 +15,6 @@ namespace Communication
     /// </summary>
     public class WebScraper
     {
-        private string _viewState;
-
         private readonly Uri LOGINPAGE;
         private readonly Uri TIMESHEETPAGE;
 
@@ -23,13 +22,14 @@ namespace Communication
         private readonly string PASSWORD;
 
         private const string VIEWSTATENAME = "__VIEWSTATE";
-        private const string VALUEDELIMITER = "value=\"";
+        
         private const string USERNAMECONTROLNAME = "txtUsername";
         private const string PASSWORDCONTROLNAME = "txtPassword";
         private const string LOGINBUTTONCONTROLNAME = "btnLogin";
-        private const string POSTDATATEMPLATE = "{0}={1}&{2}={3}&{4}={5}&{6}=Login";
 
         private IHtmlParser _parser;
+        private string _viewState;
+        private CookieContainer _cookies;
 
         public WebScraper(IHtmlParser parser)
         {
@@ -39,79 +39,38 @@ namespace Communication
             USERNAME = Resources.username;
             PASSWORD = Resources.password;
             _parser = parser;
+            _cookies = new CookieContainer();
+            var policy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
+            HttpWebRequest.DefaultCachePolicy = policy;
         }
 
         /// <summary>
-        /// Reads the Viewstate hidden field from the HTML page
+        /// Submit user credentials to the login page, store the auth cookies in the cookie container and return a timesheet
         /// </summary>
-        /// <param name="s"></param>
-        /// <returns>string representing the viewstate</returns>
-        private string ExtractViewState(string s)
+        public Timesheet LoginAndGetTimesheet()
         {
-
-            var viewStateNamePosition = s.IndexOf(VIEWSTATENAME, StringComparison.Ordinal);
-            var viewStateValuePosition = s.IndexOf(VALUEDELIMITER, viewStateNamePosition, StringComparison.Ordinal);
-
-            var viewStateStartPosition = viewStateValuePosition + VALUEDELIMITER.Length;
-            var viewStateEndPosition = s.IndexOf("\"", viewStateStartPosition, StringComparison.Ordinal);
-
-            return HttpUtility.UrlEncodeUnicode(
-                     s.Substring(
-                        viewStateStartPosition,
-                        viewStateEndPosition - viewStateStartPosition
-                     )
-                  );
-        }
-
-        /// <summary>
-        /// Submit user credentials to the login page and then store the auth cookies in the cookie container
-        /// </summary>
-        public CookieContainer LoginAndGetCookies(out Timesheet timesheet)
-        {
-            //// first, request the login form to get the viewstate value
             var webRequest = WebRequest.Create(LOGINPAGE) as HttpWebRequest;
             string responseData = GetResponseData(webRequest);
 
-            // extract the viewstate value and build out POST data
-            _viewState = ExtractViewState(responseData);
-
-            var cookies = new CookieContainer();
-            //var responseData = GetWebResponse(LOGINPAGE, cookies);
+            _viewState = _parser.ParseViewState(responseData);
             //_viewState = _parser.ParseViewState(responseData);
 
             string postData = HtmlHelper.ConstructPostDataString(VIEWSTATENAME, _viewState,
                                                                 USERNAMECONTROLNAME, USERNAME, 
                                                                 PASSWORDCONTROLNAME, PASSWORD, 
                                                                 LOGINBUTTONCONTROLNAME, "Login");
-                //String.Format(POSTDATATEMPLATE,
-                //            //VIEWSTATENAME, _viewState, 
-                //            USERNAMECONTROLNAME, USERNAME, PASSWORDCONTROLNAME, PASSWORD, LOGINBUTTONCONTROLNAME);
 
-            //// have a cookie container ready to receive the forms auth cookie
-            
+            responseData = GetWebResponse(LOGINPAGE, _cookies, postData);
 
-            //// post to the login form
-            //webRequest = WebRequest.Create(LOGINPAGE) as HttpWebRequest;
-            //webRequest.Method = "POST";
-            //webRequest.ContentType = "application/x-www-form-urlencoded";
-            //webRequest.CookieContainer = cookies;
-
-            //// write the form values into the request message
-            //var requestWriter = new StreamWriter(webRequest.GetRequestStream());
-            //requestWriter.Write(postData);
-            //requestWriter.Close();
-
-            //// we don't need the contents of the response, just the cookie it issues
-            //responseData = GetResponseData(webRequest);
-            ////_viewState = ExtractViewState(responseData);
-
-            responseData = GetWebResponse(LOGINPAGE, cookies, postData);
-
-            timesheet = _parser.ParseTimesheet(responseData, out _viewState);
-            
-            return cookies;
+            var timesheet = _parser.ParseTimesheet(responseData, out _viewState);
+            return timesheet;
         }
 
+        /// <summary>
+        /// Returns the reponse data as a string from the webRequest
+        /// </summary>
+        /// <param name="webRequest"></param>
+        /// <returns></returns>
         private string GetResponseData(HttpWebRequest webRequest)
         {
             string responseData;
@@ -155,65 +114,43 @@ namespace Communication
             return response;
         }
 
-        /// <summary>
-        /// Constructs a Timesheet object from the contents of the HTML page
-        /// </summary>
-        /// <param name="authCookies"></param>
-        /// <returns></returns>
-        public Timesheet GetTimesheet(CookieContainer authCookies)
-        {
-            //// now we can send out cookie along with a request for the protected page
-            //var webRequest = WebRequest.Create(TIMESHEETPAGE) as HttpWebRequest;
-           // webRequest.CookieContainer = authCookies;
+        ///// <summary>
+        ///// Constructs a Timesheet object from the contents of the HTML page
+        ///// </summary>
+        ///// <returns></returns>
+        //public Timesheet GetTimesheet()
+        //{
+        //    var parser = new HtmlParser();
+        //    var response = GetWebResponse(TIMESHEETPAGE, _cookies);
 
-            var parser = new HtmlParser();
-            //var timesheet = parser.ParseTimesheet(webRequest.GetResponse().GetResponseStream());
+        //    Timesheet timesheet = parser.ParseTimesheet(response, out _viewState);
 
-            //string responseData;
-            
-            //using (var responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream()))
-            //{
-            //     responseData = responseReader.ReadToEnd();
-            //}
-            //var stringReader = new StringReader(responseData);
-            var response = GetWebResponse(TIMESHEETPAGE, authCookies);
-
-            Timesheet timesheet = parser.ParseTimesheet(response, out _viewState);
-
-            return timesheet;
-        }
+        //    return timesheet;
+        //}
 
         /// <summary>
         /// Submit timesheet changes and read in the newly saved timesheet
         /// </summary>
         /// <param name="timesheet">timesheet with changes</param>
-        /// <param name="authCookies">authentication cookie container</param>
         /// <returns></returns>
-        public Timesheet UpdateTimeSheet(Timesheet timesheet, CookieContainer authCookies)
+        public Timesheet UpdateTimeSheet(Timesheet timesheet)
         {
-            //if (string.IsNullOrEmpty(_viewState))
-            //{
-            //    throw new InvalidOperationException("Cannot update the timesheet without logging-in first (viewstate is null)");
-            //}
-        
-            //TODO Get Timesheet ID
-            const string timesheetId = "60835";
-
             string postData = HtmlHelper.ConstructPostDataString(
                                                        //VIEWSTATENAME, _viewState,  // We don't seem to need the viewstate - cool!
                                                       USERNAMECONTROLNAME, USERNAME,
                                                       PASSWORDCONTROLNAME, PASSWORD,
                                                       "__EVENTTARGET", "ctl00$btnSave",
                                                       "ctl00$hSave", "Y",
-                                                      "ctl00$C1$hdnTimesheetId", timesheetId,
-                                                      "ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", "5:20"
-                                                      );
+                                                      "ctl00$C1$hdnTimesheetId", timesheet.TimesheetId);
+
+            postData += "&" + ExtractChangesAsQuerystring(timesheet);
+                                                     
 
             // post to the login form
             var webRequest = WebRequest.Create(TIMESHEETPAGE) as HttpWebRequest;
             webRequest.Method = "POST";
             webRequest.ContentType = "application/x-www-form-urlencoded";
-            webRequest.CookieContainer = authCookies;
+            webRequest.CookieContainer = _cookies;
 
             // write the form values into the request message
             var requestWriter = new StreamWriter(webRequest.GetRequestStream());
@@ -237,6 +174,16 @@ namespace Communication
             //ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0	6:20
 
             return updatedTimesheet;
+        }
+
+        /// <summary>
+        /// Finds all timesheet items that have changes and returns the new values as a querystring (i.e. "item=value&item2=value2")
+        /// </summary>
+        /// <returns></returns>
+        private string ExtractChangesAsQuerystring(Timesheet timesheet)
+        {
+            var queryString = HtmlHelper.ConstructPostDataString("ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", "6:20");
+            return queryString;
         }
     }
 }
