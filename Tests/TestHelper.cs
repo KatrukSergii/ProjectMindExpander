@@ -22,7 +22,7 @@ namespace Tests
                 Console.WriteLine(string.Format("Project: {0} ({1}), Task: {2} ({3})", projectTimeItem.ProjectCode.Name, projectTimeItem.ProjectCode.Value, projectTimeItem.TaskCode.Name, projectTimeItem.TaskCode.Value));
                 for (int i = 0; i < 7; i++)
                 {
-                    Console.Write(projectTimeItem[i].LoggedTime.ToString().PadRight(10));
+                    Console.Write(projectTimeItem.TimeEntries[i].LoggedTime.ToString().PadRight(10));
                 }
                 Console.WriteLine(Environment.NewLine);
             }
@@ -34,7 +34,7 @@ namespace Tests
                 Console.WriteLine(string.Format("Project: {0} ({1}), Task: {2} ({3})", projectTimeItem.ProjectCode.Name, projectTimeItem.ProjectCode.Value, projectTimeItem.TaskCode.Name, projectTimeItem.TaskCode.Value));
                 for (int i = 0; i < 7; i++)
                 {
-                    Console.Write(projectTimeItem[i].LoggedTime.ToString().PadRight(10));
+                    Console.Write(projectTimeItem.TimeEntries[i].LoggedTime.ToString().PadRight(10));
                 }
                 Console.WriteLine(Environment.NewLine);
             }

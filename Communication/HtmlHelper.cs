@@ -9,13 +9,14 @@ namespace Communication
 {
     public static class HtmlHelper
     {
+        public const string VIEWSTATENAME = "__VIEWSTATE";
 
         /// <summary>
         /// Create a string for the postdata, e.g. param1=value1&param2=value2...&btnLogin=Login"
         /// </summary>
         /// <param name="values"></param>
         /// <returns></returns>
-        public static string ConstructPostDataString(params string[] values)
+        public static string ConstructQuerystring(params string[] values)
         {
             if (values.Length % 2 != 0)
             {
@@ -47,9 +48,37 @@ namespace Communication
 
             }
 
-            //sb.Append("&btnLogin=Login");
+            return sb.ToString();
+        }
+
+        public static string ConstructQuerystring(Dictionary<string, string> values)
+        {
+            var sb = new StringBuilder();
+            var last = values.Last();
+
+            foreach (var keyValuePair in values)
+            {
+                sb.Append(keyValuePair.Key);
+                sb.Append("=");
+                sb.Append(keyValuePair.Value);
+                if (keyValuePair.Key != last.Key)
+                {
+                    sb.Append("&");
+                }
+            }
 
             return sb.ToString();
         }
+
+        ///// <summary>
+        ///// Takes a querystring and appends extra values to the end
+        ///// </summary>
+        ///// <param name="querystring"></param>
+        ///// <param name="values"></param>
+        ///// <returns></returns>
+        //public static string QuerystringCombine(this string querystring, Dictionary<string, string> values)
+        //{
+        //    return querystring + ("&" + ConstructQueryString(values));
+        //}
     }
 }

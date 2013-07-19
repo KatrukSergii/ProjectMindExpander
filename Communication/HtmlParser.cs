@@ -5,15 +5,20 @@ using System.IO;
 using System.Web;
 using HtmlAgilityPack;
 using Shared;
+using Shared.Enum;
 using Shared.Interfaces;
 
 namespace Communication
 {
     public class HtmlParser : IHtmlParser
     {
-        private const string VIEWSTATENAME = "__VIEWSTATE";
-        private const string VALUEDELIMITER = "value=\"";
         private const string ViewstateSelector = "//input[@name = '__VIEWSTATE']";
+
+        public string GetControlName(ProjectTimeType projectTimeType, int projectTaskIndex, int dayIndex,
+                                     TimeEntryFieldType timeEntryType)
+        {
+           throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Return Timesheet object based upon the contents of a HTML string representing the timesheet webpage.
@@ -26,14 +31,19 @@ namespace Communication
         {
             const string projectSelector = "//select[@name = 'ctl00$C1$ProjectGrid$ctl{0}$ddlProject']/option[@selected='selected']";
             const string projectTaskSelector = "//select[@name = 'ctl00$C1$ProjectGrid$ctl{0}$ddlProjectTask']/option[@selected='selected']";
-            // TODO need Extra time, Notes, Work Details Id
+            
             const string loggedTimeSelector = "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$txtLoggedTime{1}']";
+            const string extraTimeSelector =  "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$hdExtraTime{1}']";
+            const string notesSelector =  "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$hdNotes0{1}']";
+            const string workDetailSelector =  "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$hdWorkDetailId0{1}']";
 
             const string nonProjectSelector = "//select[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$ddlInternalProject']/option[@selected='selected']";
             const string nonProjectTaskSelector = "//select[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$ddlInternalProjectTask']/option[@selected='selected']";
             
-            // TODO need Extra time, Notes, Work Details Id
             const string nonProjectLoggedTimeSelector = "//input[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$txtLoggedTime{1}']";
+            const string nonProjectExtraTimeSelector = "//input[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$hdExtraTime{1}']";
+            const string nonProjectNotesSelector = "//input[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$hdNotes{1}']";
+            const string nonProjectWorkDetailSelector = "//input[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$hdWorkDetailId{1}']";
 
             const string requiredHoursSelector = "//input[@name = 'ctl00$C1$hdDailyRequired{0}']";
             const string totalRequiredHoursSelector = "//input[@name = 'ctl00$C1$hdDailyRequiredTotal']";
@@ -62,8 +72,8 @@ namespace Communication
                 timesheet.TimesheetId =
                     htmlDoc.DocumentNode.SelectSingleNode(timesheetIdSelector).Attributes["value"].Value;
 
-                timesheet.ProjectTimeItems = GetTimesheetItems(htmlDoc.DocumentNode,projectSelector,projectTaskSelector,loggedTimeSelector);
-                timesheet.NonProjectActivityItems = GetTimesheetItems(htmlDoc.DocumentNode, nonProjectSelector, nonProjectTaskSelector, nonProjectLoggedTimeSelector);
+                timesheet.ProjectTimeItems = GetTimesheetItems(htmlDoc.DocumentNode,projectSelector,projectTaskSelector,loggedTimeSelector,extraTimeSelector,notesSelector,workDetailSelector);
+                timesheet.NonProjectActivityItems = GetTimesheetItems(htmlDoc.DocumentNode, nonProjectSelector, nonProjectTaskSelector, nonProjectLoggedTimeSelector, nonProjectExtraTimeSelector, nonProjectNotesSelector, nonProjectWorkDetailSelector );
 
                 timesheet.RequiredHours = GetRequiredHours(htmlDoc.DocumentNode, requiredHoursSelector);
                 timesheet.TotalRequiredHours = htmlDoc.DocumentNode.SelectSingleNode(totalRequiredHoursSelector).Attributes["value"].Value.ToTimeSpan();
@@ -76,33 +86,17 @@ namespace Communication
 
         public string ParseViewState(string html)
         {
+            var htmlDoc = new HtmlDocument();
+            var stringReader = new StringReader(html);
+            htmlDoc.Load(stringReader);
+            string viewstate = string.Empty;
 
-            var viewStateNamePosition = html.IndexOf(VIEWSTATENAME, StringComparison.Ordinal);
-            var viewStateValuePosition = html.IndexOf(VALUEDELIMITER, viewStateNamePosition, StringComparison.Ordinal);
-
-            var viewStateStartPosition = viewStateValuePosition + VALUEDELIMITER.Length;
-            var viewStateEndPosition = html.IndexOf("\"", viewStateStartPosition, StringComparison.Ordinal);
-
-            var viewstate =  HttpUtility.UrlEncodeUnicode(
-                     html.Substring(
-                        viewStateStartPosition,
-                        viewStateEndPosition - viewStateStartPosition
-                     )
-                  );
+            if (htmlDoc.DocumentNode != null)
+            {
+                viewstate = HttpUtility.UrlEncodeUnicode(htmlDoc.DocumentNode.SelectSingleNode(ViewstateSelector).Attributes["value"].Value); 
+            }
 
             return viewstate;
-        
-            //var htmlDoc = new HtmlDocument();
-            //var stringReader = new StringReader(html);
-            //htmlDoc.Load(stringReader);
-            //string viewstate = string.Empty;
-
-            //if (htmlDoc.DocumentNode != null)
-            //{
-            //    viewstate = htmlDoc.DocumentNode.SelectSingleNode(ViewstateSelector).Attributes["value"].Value;
-            //}
-
-            //return viewstate;
         }
 
         /// <summary>
@@ -137,7 +131,12 @@ namespace Communication
             return requiredHours;
         }
 
-        private List<ProjectTaskTimesheetItem> GetTimesheetItems(HtmlNode htmlNode, string projectSelector, string projectTaskSelector, string loggedTimeSelector)
+        private List<ProjectTaskTimesheetItem> GetTimesheetItems(HtmlNode htmlNode, string projectSelector, 
+            string projectTaskSelector, 
+            string loggedTimeSelector, 
+            string extraTimeSelector, 
+            string notesSelector, 
+            string workDetailSelector)
         {
             var projectTimeItems = new List<ProjectTaskTimesheetItem>();
             
@@ -161,9 +160,16 @@ namespace Communication
                     for (int j = 0; j < 7; j++)
                     {
                         var timeValue = htmlNode.SelectSingleNode(string.Format(loggedTimeSelector, index, j.ToString(CultureInfo.InvariantCulture)));
+                        var extraTimeValue = htmlNode.SelectSingleNode(string.Format(extraTimeSelector, index, j.ToString(CultureInfo.InvariantCulture)));
+                        var notesValue = htmlNode.SelectSingleNode(string.Format(notesSelector, index, j.ToString(CultureInfo.InvariantCulture)));
+                        var workDetailValue = htmlNode.SelectSingleNode(string.Format(workDetailSelector, index, j.ToString(CultureInfo.InvariantCulture)));
+
                         if (timeValue.Attributes["Value"] != null)
                         {
-                            timesheetItem[j].LoggedTime = TimeSpan.Parse(timeValue.Attributes["value"].Value);
+                            timesheetItem.TimeEntries[j].LoggedTime = TimeSpan.Parse(timeValue.Attributes["value"].Value);
+                            timesheetItem.TimeEntries[j].ExtraTime = TimeSpan.Parse(extraTimeValue.Attributes["value"].Value);
+                            timesheetItem.TimeEntries[j].Notes = notesValue.Attributes["value"].Value;
+                            timesheetItem.TimeEntries[j].WorkDetailId = int.Parse(workDetailValue.Attributes["value"].Value);
                         }
                     }
 

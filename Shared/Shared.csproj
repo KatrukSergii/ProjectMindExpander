@@ -39,6 +39,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enum\ProjectTimeType.cs" />
+    <Compile Include="Enum\TimeEntryFieldType.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Interfaces\IHtmlParser.cs" />
     <Compile Include="PickListItem.cs" />
