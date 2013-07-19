@@ -13,6 +13,7 @@ namespace Shared
         }
 
         public string Title { get; set; }
+        public string TimesheetId { get; set; }
         public List<ProjectTaskTimesheetItem> ProjectTimeItems { get; set; }
         public List<ProjectTaskTimesheetItem> NonProjectActivityItems { get; set; }
         public List<TimeSpan> RequiredHours { get; set; }

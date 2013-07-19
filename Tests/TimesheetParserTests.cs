@@ -58,56 +58,38 @@ namespace Tests
         public void Parse_FullTimesheet_ProjectTimeEntries()
         {
             Timesheet timesheet;
+            string viewState = string.Empty;
+
             using (var streamReader = new StreamReader("TestTimeSheet.htm"))
             {
-                var parser = _container.Resolve<ITimesheetParser>();
-                timesheet = parser.Parse(streamReader);
+                var parser = _container.Resolve<IHtmlParser>();
+                var htmlString  = streamReader.ReadToEnd();
+                timesheet = parser.ParseTimesheet(htmlString, out viewState);
             }
-
 
             Assert.IsNotNull(timesheet);
             Assert.IsNotNull(timesheet.ProjectTimeItems);
             Assert.AreEqual(7, timesheet.ProjectTimeItems.Count);
 
-            PrettyPrintTimesheet(timesheet);
+            TestHelper.PrettyPrintTimesheet(timesheet);
 
         }
 
         [TestMethod]
-        public void ConstructPostParamsString()
+        [DeploymentItemAttribute("TestTimeSheet.htm")]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void TEMPParse_LoginError()
         {
-            var w = new WebScraper(new TimesheetParser());
-            var postString = w.ConstructPostDataString("a", "1", "b", "2");
+            Timesheet timesheet;
+            string viewstate = string.Empty;
 
-        }
-
-        /// <summary>
-        /// Write contents of the timesheet to the console
-        /// </summary>
-        /// <param name="timesheet"></param>
-        private void PrettyPrintTimesheet(Timesheet timesheet)
-        {
-            Console.WriteLine("PROJECT ITEMS");
-            foreach (var projectTimeItem in timesheet.ProjectTimeItems)
+            using (var streamReader = new StreamReader("TestTimeSheet.htm"))
             {
-                Console.WriteLine(string.Format("Project: {0} ({1}), Task: {2} ({3})", projectTimeItem.ProjectCode.Name, projectTimeItem.ProjectCode.Value, projectTimeItem.TaskCode.Name, projectTimeItem.TaskCode.Value));
-                for (int i = 0; i < 7; i++)
-                {
-                    Console.Write(projectTimeItem[i].LoggedTime.ToString() + ",");
-                }
-                Console.WriteLine("");
-            }
-
-             Console.WriteLine("NON-PROJECT ITEMS");
-            foreach (var projectTimeItem in timesheet.NonProjectActivityItems)
-            {
-                Console.WriteLine(string.Format("Project: {0} ({1}), Task: {2} ({3})", projectTimeItem.ProjectCode.Name, projectTimeItem.ProjectCode.Value, projectTimeItem.TaskCode.Name, projectTimeItem.TaskCode.Value));
-                for (int i = 0; i < 7; i++)
-                {
-                    Console.Write(projectTimeItem[i].LoggedTime.ToString() + ",");
-                }
-                Console.WriteLine("");
+                var parser = _container.Resolve<IHtmlParser>();
+                var htmlString = streamReader.ReadToEnd();
+                timesheet = parser.ParseTimesheet(htmlString, out viewstate);
             }
         }
+
     }
 }
