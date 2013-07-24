@@ -1,13 +1,10 @@
-﻿using System;
+﻿using Communication.Properties;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Cache;
-using System.Text;
-using System.Web;
-using Communication.Properties;
-using Shared;
-using Shared.Interfaces;
+using Model;
 
 namespace Communication
 {
@@ -181,6 +178,7 @@ namespace Communication
         /// <returns></returns>
         private Dictionary<string,string> ExtractChanges(Timesheet timesheet)
         {
+
             var changes = new Dictionary<string, string> {{ "ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", "3:20" }};
             return changes;
         }

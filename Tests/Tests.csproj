@@ -68,6 +68,10 @@
       <Project>{FEB444D2-30AF-47DD-A30F-5B935EC04B53}</Project>
       <Name>Communication</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Model\Model.csproj">
+      <Project>{9C24F223-A542-42E4-9C5D-F1A11DC88CFF}</Project>
+      <Name>Model</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Shared\Shared.csproj">
       <Project>{C4682778-4694-41E3-A09B-8ACE37CB3937}</Project>
       <Name>Shared</Name>

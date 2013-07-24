@@ -1,5 +1,7 @@
 ﻿
-namespace Shared.Interfaces
+using Model;
+
+namespace Communication
 {
     public interface IHtmlParser
     {

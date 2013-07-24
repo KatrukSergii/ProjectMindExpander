@@ -4,9 +4,9 @@ using System.Globalization;
 using System.IO;
 using System.Web;
 using HtmlAgilityPack;
+using Model;
 using Shared;
 using Shared.Enum;
-using Shared.Interfaces;
 
 namespace Communication
 {
@@ -64,7 +64,7 @@ namespace Communication
             
             if (htmlDoc.DocumentNode != null)
             {
-                AssertNoError(htmlDoc.DocumentNode, loginErrorSelector);
+                AssertNoErrors(htmlDoc.DocumentNode, loginErrorSelector);
 
                 // Timesheet title, e.g. '08 Jul 2013 to 14 Jul 2013 by Joe Bloggs (Draft)'
                 timesheet.Title = htmlDoc.DocumentNode.SelectSingleNode(titleSelector).InnerText.Trim();
@@ -106,7 +106,7 @@ namespace Communication
         /// <param name="errorSelector"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        private void AssertNoError(HtmlNode htmlNode, string errorSelector)
+        private void AssertNoErrors(HtmlNode htmlNode, string errorSelector)
         {
             var errorNode = htmlNode.SelectSingleNode(errorSelector);
             if (errorNode != null && !string.IsNullOrEmpty(errorNode.InnerText))
@@ -115,6 +115,12 @@ namespace Communication
             }
         }
 
+        /// <summary>
+        /// The required hours per day is a hidden field (should  be 7:30)
+        /// </summary>
+        /// <param name="htmlNode"></param>
+        /// <param name="requiredHoursSelector"></param>
+        /// <returns></returns>
         private List<TimeSpan> GetRequiredHours(HtmlNode htmlNode, string requiredHoursSelector)
         {
             var requiredHours = new List<TimeSpan>();
@@ -142,6 +148,7 @@ namespace Communication
             
             HtmlNode projectCode = null;
 
+            // index starts at 2 because of the naming of the ASP.net controls - i.e. first is ctl00$C1$ProjectGrid$ctl2
             var i = 2;
             
             while (projectCode != null || i == 2)
@@ -157,6 +164,7 @@ namespace Communication
                     HtmlNode taskCode = htmlNode.SelectSingleNode(string.Format(projectTaskSelector, index));
                     var timesheetItem = AddTimesheetItem(projectTimeItems, projectCode, taskCode);
 
+                    // always 7 days a week
                     for (int j = 0; j < 7; j++)
                     {
                         var timeValue = htmlNode.SelectSingleNode(string.Format(loggedTimeSelector, index, j.ToString(CultureInfo.InvariantCulture)));

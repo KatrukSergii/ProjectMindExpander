@@ -1,0 +1,1341 @@
+﻿// ObservableItem.tt
+<#@ template debug="true" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ Assembly Name="System.Windows.Forms.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Reflection" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ include file="..\..\Manager.ttinclude"#>
+<#@ include file="EF.Utility.CS.ttinclude"#>
+
+/*
+	This template creates an observable child based on a DTO
+	For a list of included DTO's see the Include list at the bottom of this file
+*/
+
+<#
+	// change this value to output debug statements
+	bool includeDebug = false;
+	
+	CodeGenerationTools code = new CodeGenerationTools(this);
+	var manager = Manager.Create(Host, GenerationEnvironment);
+	
+	CSharpCodeProvider cSharpCodeProvider = new CSharpCodeProvider();
+
+	var compilerParameters = new CompilerParameters(new String[] { 
+		"System.dll", "System.Core.dll" });
+	
+	// get a list of source files and dynamically compile them
+	var sourceFiles = new List<string>();
+	string dtoSourcePath = Host.ResolveAssemblyReference(@"$(SolutionDir)Iris.ServiceNG.DistributedServices.MainModule.DataTransfer");
+	sourceFiles.AddRange(System.IO.Directory.GetFiles(dtoSourcePath, "*.cs"));
+
+	string dtoCoreSourcePath = Host.ResolveAssemblyReference(@"$(SolutionDir)Iris.ServiceNG.DistributedServices.DataTransfer.Core");
+	sourceFiles.AddRange(System.IO.Directory.GetFiles(dtoCoreSourcePath, "*.cs"));
+	
+	string CrossCuttingDomainRootPath = Host.ResolveAssemblyReference(@"$(SolutionDir)Iris.ServiceNG.Domain.CrossCutting");
+	var files = System.IO.Directory.GetFiles(CrossCuttingDomainRootPath, "*.cs", SearchOption.AllDirectories);
+	sourceFiles.AddRange(files.Where(x=> !Path.GetDirectoryName(x).EndsWith("Properties")));
+	
+	string InfrastructureSourcePath = Host.ResolveAssemblyReference(@"$(SolutionDir)Iris.ServiceNG.Infrastructure.CrossCutting\DesignByContract");
+	sourceFiles.AddRange(System.IO.Directory.GetFiles(InfrastructureSourcePath, "*.cs"));
+	
+	string InfrastructureExtensionSourcePath = Host.ResolveAssemblyReference(@"$(SolutionDir)Iris.ServiceNG.Infrastructure.CrossCutting\Extensions");
+	sourceFiles.AddRange(System.IO.Directory.GetFiles(InfrastructureExtensionSourcePath, "*.cs"));
+	
+	string validationSourcePath = Host.ResolveAssemblyReference(@"$(SolutionDir)Iris.ServiceNG.Infrastructure.CrossCutting\Validation");
+	sourceFiles.AddRange(System.IO.Directory.GetFiles(validationSourcePath, "*.cs"));
+	var loggingSourcePath = Host.ResolveAssemblyReference(@"$(SolutionDir)Iris.ServiceNG.Infrastructure.CrossCutting\Logging");
+	sourceFiles.AddRange(System.IO.Directory.GetFiles(loggingSourcePath, "*.cs"));
+	
+	string measurementSourcePath = Host.ResolveAssemblyReference(@"$(SolutionDir)Iris.ServiceNG.Core\Measurement");
+	sourceFiles.AddRange(System.IO.Directory.GetFiles(measurementSourcePath, "*.cs"));
+	
+	string coreSourcePath = Host.ResolveAssemblyReference(@"$(SolutionDir)Iris.ServiceNG.Core");
+	sourceFiles.AddRange(System.IO.Directory.GetFiles(coreSourcePath, "*.cs"));
+	
+	string InfrastructureRootPath = Host.ResolveAssemblyReference(@"$(SolutionDir)Iris.ServiceNG.Infrastructure.CrossCutting");
+	sourceFiles.AddRange(System.IO.Directory.GetFiles(InfrastructureRootPath, "*.cs"));
+
+	var compilerResults = cSharpCodeProvider.CompileAssemblyFromFile(compilerParameters, sourceFiles.ToArray());
+	cSharpCodeProvider.Dispose();
+
+	if(includeDebug)
+	{
+		WriteLine("// Compiler output:");
+		foreach(string output in compilerResults.Output)
+		{
+			WriteLine("//" + output);
+		}
+		WriteLine("// Generated assembly output to {0}", compilerResults.PathToAssembly);
+		
+		WriteLine("// Getting types...");
+	}
+
+	Type[] types = null;
+	
+	try
+	{
+		types = compilerResults.CompiledAssembly.GetTypes();
+	}
+	catch(ReflectionTypeLoadException rex)
+	{
+		WriteLine("// Type load exception found");
+		foreach(var tex in rex.LoaderExceptions)
+		{
+			WriteLine("// " + tex.Message);
+		}
+		throw;
+	}
+	catch(Exception ex)
+	{
+		WriteLine("// " + ex.Message);
+		WriteLine("// " + ex.GetType().FullName);
+		throw;
+	}
+	
+	foreach(Type type in types)
+	{
+		if(includeDebug)
+		{
+			WriteLine(string.Format("// Processing {0}...", type.Name));
+			WriteLine("// Found type {0}", type.FullName);
+		}
+		if(!type.Name.EndsWith("DTO"))
+			continue;
+		if(!Include.Contains(type.Name))
+		{
+			if (includeDebug)
+			{
+				WriteLine("//\t\t Not in Include: {0}", type.Name);
+			}
+			continue;
+		}
+		if(IsExcluded(type))
+		{
+			if (includeDebug)
+			{
+				WriteLine("//\t\t Excluded: {0}", type.Name);
+			}
+			continue;
+		}
+		string businessObjectName = GetBusinessObjectName(type.Name);
+		string observableTypeName = GetObservableItemName(type.Name);
+		string dtoTypeName = type.Name;
+		manager.StartNewFile(string.Format("{0}.Designer.cs", observableTypeName));
+#>
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Iris.ServiceNG.DistributedServices.MainModule.DataTransfer;
+using Iris.ServiceNG.DistributedServices.DataTransfer.Core;
+using Iris.ServiceNG.Silverlight.Shared.ViewModels;
+using Iris.ServiceNG.CrossCutting.Domain.MobileAPI;
+using Iris.ServiceNG.CrossCutting.Infrastructure.Validation;
+using Iris.ServiceNG.CrossCutting.Infrastructure.Logging;
+using Iris.ServiceNG.Core.Extensions;
+using Iris.ServiceNG.CrossCutting.Infrastructure.DesignByContract;
+using Iris.ServiceNG.CrossCutting.Infrastructure.Extensions;
+
+/*
+This file is autogenerated and should not be altered manually. 
+Any required changes should be implemented in the template or
+added in a partial class.
+*/
+namespace Iris.ServiceNG.Silverlight.Shared.ObservableItems
+{
+	
+	
+	public partial class <#= observableTypeName #> : ObservableItemBase< <#= type.Name #>>
+	{
+		private static readonly ILog Logger = LogManager.GetLogger(typeof(<#= observableTypeName #> ));
+		
+		#region Property Bag
+		
+		public override object this[string key]
+		{
+			get
+			{
+				switch(key)
+				{
+<#  
+				foreach (PropertyInfo property in type.GetProperties())
+				{
+					if(IsExcluded(property))
+						continue;
+#>
+					case "<#= property.Name #>":
+						return <#= property.Name #>;
+<#						
+				}
+#>
+					default:
+						throw new ArgumentOutOfRangeException("key", string.Format("The property {0} does not exist on this object", key));
+				}
+			}
+		}
+		
+		#endregion // Property Bag
+		
+		// Allow any further initialization to take place
+		partial void Initialize();
+
+		// Allow further To DTO processing
+		partial void ToDTOAdditional(<#= dtoTypeName #> dto);
+
+		#region Constructors
+		
+		/// <summary>
+		/// Parameterless constructor
+		/// </summary>
+		public <#= observableTypeName #>()
+		{
+			Logger.Debug("Instantiating <#= observableTypeName #>");
+			
+			IsValidationEnabled = false;
+			<#= string.Format("{0} = new {0}DTO();", businessObjectName) #>
+<#
+PushIndent("\t\t\t");
+foreach (PropertyInfo property in type.GetProperties())
+{
+	if(includeDebug)
+	{
+		WriteLine("// property {0}, exclude {1}", property.Name, IsExcluded(property) );
+	}
+		
+	if(IsExcluded(property))
+		continue;
+
+	if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+	{
+		string propertyType = GetPropertyType(property.PropertyType.ToString(), property);
+#>
+Value.<#= property.Name #> = new List< <#= property.PropertyType.GetGenericArguments()[0].Name #>>();
+<#= property.Name #> = new <#= propertyType #>();
+<#
+		continue;
+	}
+		
+	if (!property.CanWrite)
+		continue;
+	
+	switch(property.Name)
+	{
+		case "Guid":
+			// do nothing
+			break;
+		case "ValidationResults":
+			// WriteLine("// allow the DTO to keep track of the mapped domain object's errors");
+			// WriteLine("ValidationResults = null;");
+			break;
+		case "IsEnabled":
+			WriteLine(string.Format("{0} = true;", property.Name));
+			break;
+		default:
+			string v = "String.Empty";
+			if (property.PropertyType.ToString().ToLower().IndexOf("nullable") > 0)
+			{
+				v = "null";
+			}
+			else
+			{
+				if (String.Compare(property.PropertyType.ToString(), "System.Int32", true) == 0)
+				{
+					v = "0";
+				}
+				else if (String.Compare(property.PropertyType.ToString(), "System.DateTime", true) == 0)
+				{
+					v = "DateTime.Now";
+				}
+				else if (String.Compare(property.PropertyType.ToString(), "System.Boolean", true) == 0)
+				{
+					v = "false";
+				}
+				else if (String.Compare(property.PropertyType.ToString(), "System.Int16", true) == 0)
+				{
+					v = "0";
+				}
+				else if (String.Compare(property.PropertyType.ToString(), "System.TimeSpan", true) == 0)
+				{
+					v = "TimeSpan.Zero";
+				}
+				else if (String.Compare(property.PropertyType.ToString(), "System.DayOfWeek", true) == 0)
+				{
+					v = "DayOfWeek.Monday";
+				}
+				else if (String.Compare(property.PropertyType.ToString(), "System.Decimal", true) == 0)
+				{
+					v = "0.0M";
+				}
+				else if (property.PropertyType.ToString().EndsWith("DTO",StringComparison.InvariantCultureIgnoreCase))
+				{
+					string propertyType = GetPropertyType(property.PropertyType.ToString(), property);
+					v = string.Format("new {0}()",propertyType);
+				}
+			}
+			// do not initialize Enums
+			if (String.Compare(property.PropertyType.BaseType.FullName,"System.Enum",true) != 0)
+			{
+				WriteLine(string.Format("{0} = {1};", property.Name, v));
+			}
+			break;
+	}
+}
+PopIndent();
+#>
+
+			ApplyChanges();
+			Initialize();
+<# if (!IsExcludedFromValidation(type))
+{
+#>
+			IsValidationEnabled = true;
+<# 
+}   
+#>
+		}
+		
+		/// <summary>
+		/// Constructor populating from DTO
+		/// </summary>
+		public <#= observableTypeName #>(<#= string.Format("{0}DTO", businessObjectName) #> <#= string.Format("{0}DTO", code.CamelCase(businessObjectName)) #>)
+		{
+			Logger.Debug("Instantiating <#= observableTypeName #> (with DTO)");
+			
+			IsValidationEnabled = false;
+			<#= string.Format("{0} = {1}DTO;", businessObjectName, code.CamelCase(businessObjectName)) #>
+<#
+PushIndent("\t\t\t");
+foreach (PropertyInfo property in type.GetProperties())
+{
+	if(IsExcluded(property))
+		continue;
+	
+	if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+	{
+		string propertyType = GetPropertyType(property.PropertyType.ToString(), property);
+#>
+if(Value.<#= property.Name #> == null)
+{
+	Value.<#= property.Name #> = new List< <#= property.PropertyType.GetGenericArguments()[0].Name #>>();
+}
+<#= property.Name #> = new <#= propertyType #>();
+<#
+		if (IsDataTransferObject(property.PropertyType.GetGenericArguments()[0].BaseType.FullName))
+		{
+			string listObservableTypeName = GetObservableItemName(property.PropertyType.GetGenericArguments()[0].Name);
+#>
+Value.<#= property.Name #>.ForEach(x => <#= property.Name #>.Add(new <#= listObservableTypeName #>(x)));
+<#
+		}
+		continue;
+	}
+
+	if (!property.CanWrite)
+		continue;
+
+	switch(property.Name)
+	{
+		case "Guid":
+			break;
+		case "ValidationResults":
+#>
+// the DTO may be the result of an update from the server and may
+// contain validation results which need to be exposed up to the
+// the observable item
+if(<#= code.CamelCase(dtoTypeName) #>.ValidationResults != null)
+{
+	Validator.ValidationResults.AddRange(<#= string.Format("{0}DTO", code.CamelCase(businessObjectName)) #>.ValidationResults);
+}
+<#
+			break;
+		default:
+			if(property.PropertyType == typeof(string))
+			{
+#>
+<#= code.CamelCase(businessObjectName) #>DTO.<#= property.Name #> = <#= code.CamelCase(businessObjectName) #>DTO.<#= property.Name #> ?? (<#= code.CamelCase(businessObjectName) #>DTO.<#= property.Name #> = string.Empty);
+<#
+			}
+#>
+<#= property.Name #> = <#= code.CamelCase(businessObjectName) #>DTO.<#= property.Name #>;
+<#
+			break;
+	}
+}
+PopIndent();
+#>
+
+			CommitChanges();
+			Initialize();
+<# if (!IsExcludedFromValidation(type))
+{
+#>
+			IsValidationEnabled = true;
+<# 
+} 
+#>
+		}
+
+		#endregion
+
+		#region ToDTO
+		
+		/// <summary>
+		/// Return a DTO version of the observable item
+		/// </summary>
+		public <#= string.Format("{0}DTO ToDTO", businessObjectName) #>()
+		{
+			<#= string.Format("{0}DTO dto = new {0}DTO();", businessObjectName) #>
+			Value.AssignGuidIfRequired();
+			dto.Guid = Value.Guid;
+			
+			// simple properties
+<#
+		foreach (PropertyInfo property in type.GetProperties())
+		{
+			if(property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+				continue;
+
+			if (!property.CanWrite)
+				continue;
+			
+			if(IsExcluded(property))
+				continue;
+
+			if (string.Compare(property.Name, "ValidationResults", true) == 0)
+				continue;
+#>
+			dto.<#= property.Name #> = <#= property.Name #>;
+<#
+		}
+#>
+			
+			// collection properties
+<#
+foreach (PropertyInfo property in type.GetProperties())
+{
+	if(IsExcluded(property))
+		continue;
+	if (!property.CanWrite)
+		continue;
+	if (!property.PropertyType.IsGenericType || property.PropertyType.GetGenericTypeDefinition() != typeof(List<>))
+		continue;
+	Type genericArgument = property.PropertyType.GetGenericArguments()[0];
+	if (!IsDataTransferObject(genericArgument.BaseType.FullName))
+		continue;
+	string observableName = GetObservableItemName(genericArgument.Name);
+#>
+			dto.<#= property.Name #> = new List< <#= genericArgument.Name #>>();
+			foreach (<#= observableName #> <#= code.CamelCase(observableName) #> in <#= property.Name #>)
+			{
+				dto.<#= property.Name #>.Add(<#= string.Format("{0}", code.CamelCase(observableName)) #>.ToDTO());
+			}
+			
+<#
+}
+#>
+			ToDTOAdditional(dto);
+			return dto;
+		}
+		
+		#endregion
+		
+		#region DTO Properties
+		
+		/// <summary>
+		/// The original DTO with the original values retrieved
+		/// from the server. Call ApplyChanges to apply the current
+		/// values to the underlying DTO.
+		/// </summary>
+		<#= string.Format("public {0}DTO {0}", businessObjectName) #>
+		{
+			get;
+			private set;
+		}
+		
+		/// <summary>
+		/// The original DTO with the original values retrieved
+		/// from the server. Call ApplyChanges to apply the current
+		/// values to the underlying DTO.
+		/// </summary>
+		public override <#= string.Format("{0}DTO", businessObjectName) #> Value
+		{
+			get
+			{
+				return <#= businessObjectName #>;
+			}
+		}
+		
+		#endregion
+
+<# if(HasProperty(type, string.Format("{0}DbId", businessObjectName)))
+{#>
+		public override void SetValue(EntityResultDTO result)
+		{
+			Id = result.Id;
+			<#= businessObjectName #>DbId = result.Id;
+			Value.Id = result.Id;
+			Value.<#= businessObjectName #>DbId = result.Id;
+			Timestamp = result.Timestamp;
+			Value.Timestamp = result.Timestamp;
+		}
+<#}#>
+
+		public override void SetValue(<#= dtoTypeName #> newValue)
+		{
+			base.SetValue(newValue);
+			<#= businessObjectName #> = newValue;
+			UpdateCurrentValuesFromDTO();
+			Id = newValue.Id;
+			Timestamp = newValue.Timestamp;
+
+			// update the auditing values as these are irrelevant
+			// to any comparisons such as HasChanges
+<# if(HasProperty(type, "AmendedByDbId"))
+{
+#>
+			AmendedByDbId = newValue.AmendedByDbId;
+<#
+}
+if(HasProperty(type, "AmendedDate"))
+{
+#>
+			AmendedDate = newValue.AmendedDate;
+<#
+}#>
+		}
+		
+		#region Properties
+<#
+// now create each of the properties
+PushIndent("\t\t");
+foreach (PropertyInfo property in type.GetProperties())
+{
+	if (!property.CanWrite)
+		continue;
+	if(IsExcluded(property))
+		continue;
+
+	switch(property.Name)
+	{
+		case "Guid":
+		case "ValidationResults":
+			break;
+		default:
+			string propertyType = GetPropertyType(property.PropertyType.ToString(), property);
+			string nullable = String.Empty;
+			bool createIfNull = false;
+			if (property.PropertyType.ToString().ToLower().IndexOf("nullable") > 0)
+			{
+				nullable = "?";
+			}
+			if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+			{
+				nullable = String.Empty;
+				createIfNull = true;
+			}
+
+			WriteLine("");
+			WriteLine(string.Format("private {0}{1} _{2};", propertyType, nullable, code.CamelCase(property.Name)));
+			if(property.Name == "IsDeleted")
+			{		
+				WriteLine(string.Format("public override {0}{1} {2}", propertyType, nullable, property.Name));	
+			}
+			else	
+			{
+				WriteLine(string.Format("public {0}{1} {2}", propertyType, nullable, property.Name));	
+			}
+			WriteLine("{");
+			WriteLine("\tget");
+			WriteLine("\t{");
+			if (createIfNull)
+			{
+				WriteLine(string.Format("\t\tif (_{0} == null)", code.CamelCase(property.Name)));
+				WriteLine("\t\t{");
+				WriteLine(string.Format("\t\t\t_{0} = new {1}();", code.CamelCase(property.Name), propertyType));
+				WriteLine("\t\t}");
+			}
+			WriteLine("\t\treturn _{0};", code.CamelCase(property.Name));
+			WriteLine("\t}");
+			WriteLine("\tset");
+			WriteLine("\t{");
+#>		
+		SetValue(ref _<#= code.CamelCase(property.Name) #>, value, "<#= property.Name #>", "HasChanges");
+			
+		if(IsValidationEnabled)
+		{
+			Validator.ValidateProperty(ValidationTargetType, "<#=property.Name#>", value);
+			OnDataChanged(EventArgs.Empty);
+		}
+<#
+			if (string.Compare(property.Name, "IsDeleted", true) == 0)
+			{
+				WriteLine("\t\tOnPropertyChanged(\"DeletedText\");");
+			}
+			if (!(property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>)))
+			{
+				WriteLine("\t\tOn{0}Changed(value);", property.Name);
+			}
+			WriteLine("\t}");
+			WriteLine("}");
+			
+			if (!(property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>)))
+			{
+			#>
+partial void On<#= property.Name #>Changed(<#= GetPropertyTypeName(property) #> <#= code.CamelCase(property.Name) #>);
+<#
+}
+#>
+
+private <#= propertyType #><#= nullable #> _current<#= property.Name #>;
+public <#= propertyType #><#= nullable #> Current<#= property.Name #>
+{
+	get
+	{
+<#
+if (createIfNull)
+{#>
+		if (_current<#= property.Name #> == null)
+		{
+			_current<#= property.Name #> = new <#= propertyType #>();
+		}
+<# } #>
+		return _current<#= property.Name #>;
+	}
+	set
+	{
+		_current<#= property.Name #> = value;
+	}
+}
+<#
+		break;
+	}
+}
+PopIndent();
+#>
+
+		#endregion
+
+		public string DeletedText { get { return IsDeleted ? "Deleted" : String.Empty; } }	// TODO: Lexicon
+		
+		#region Compare
+		
+		/// <summary>
+		/// Compares the supplied DTO with the current values
+		/// </summary>
+		/// <param name="compareDTO">DTO to compare against</param>
+		/// <returns>Zero if current item and DTO are equal; otherwise -1</returns>
+		public int Compare(<#= string.Format("{0}DTO compareDTO", businessObjectName) #>)
+		{
+<#
+foreach (PropertyInfo property in type.GetProperties())
+{
+	if (!property.CanWrite)
+		continue;
+	
+	if(IsExcluded(property))
+		continue;
+	if(IsExcludedFromComparison(property))
+			continue;
+
+	if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+	{
+		if (IsDataTransferObject(property.PropertyType.GetGenericArguments()[0].BaseType.FullName))
+		{
+#>
+			if(<#= property.Name #>.Count != Value.<#= property.Name #>.Count)
+			{
+				Logger.Debug("Count of '<#= property.Name #>' on object '<#= businessObjectName #>' is different");
+				return -1;
+			}
+			for(int i = 0; i < <#= property.Name #>.Count; i++)
+			{
+				if(<#= property.Name #>[i].Compare(Value.<#= property.Name #>[i]) != 0)
+				{
+					Logger.Debug("'<#= property.Name #>' on object '<#= businessObjectName #>' is different");
+					return -1;
+				}
+			}
+<#		
+		}
+		continue;
+	}
+
+	bool nullable = false;
+	if (property.PropertyType.ToString().ToLower().IndexOf("nullable") > 0)
+	{
+		nullable = true;
+	}
+
+	switch(property.Name)
+	{
+		case "Guid":
+		case "ValidationResults":
+		case "Timestamp":
+			break;
+		default:
+			bool skip = false;
+			if (nullable)
+			{
+#>
+			if (<#= property.Name #> != compareDTO.<#= property.Name #>)
+			{
+				Logger.Debug("'<#= property.Name #>' on object '<#= businessObjectName #>' is different");
+				return -1;
+			}
+			else if (<#= property.Name #> != null && <#= property.Name #>.Value.CompareTo(compareDTO.<#= property.Name #>) != 0)
+<#
+			}
+			else
+			{
+				string propertyTypeName = property.PropertyType.ToString();
+				if (string.Compare(propertyTypeName, "System.String", true) == 0)
+				{
+#>
+			if (<#= property.Name #> != null && <#= property.Name #>.CompareTo(compareDTO.<#= property.Name #>) != 0)
+<#
+				}
+				else if (propertyTypeName.EndsWith("DTO"))
+				{
+					skip = true;
+#>
+			// comparing DTO properties is not currently supported
+			// single instance observable items are not currently added
+			// as properties and must be added using the ToDTOAdditional/
+			// Initialize methods
+<#
+				}
+				else
+				{
+#>
+			if (<#= property.Name #>.CompareTo(compareDTO.<#= property.Name #>) != 0)
+<#
+				}
+			}
+			if(!skip)
+			{
+#>
+			{
+				Logger.Debug("'<#= property.Name #>' on object '<#= businessObjectName #>' is different");
+				return -1;
+			}
+<#
+			}
+			break;
+	}
+}
+#>		
+			return 0;
+		}
+		
+		/// <summary>
+		/// Compares the current properties to the original DTO
+		/// </summary>
+		/// <returns>True if there are any differences</returns>
+		protected override bool CalculateHasChanges()
+		{
+			if (Compare(<#= string.Format("{0}", businessObjectName) #>) != 0)
+			{
+				return true;
+			}
+			if (ChildrenHaveChanges())
+			{
+				return true;
+			}
+			return false;
+		}
+
+		#endregion
+		
+		#region Commit
+
+		/// <summary>
+		/// Commits the changes from the temporary edit
+		/// </summary>
+		public void CommitChanges()
+		{
+<#
+PushIndent("\t\t\t");
+foreach (PropertyInfo property in type.GetProperties())
+{
+	if (!property.CanWrite)
+		continue;
+	if(IsExcluded(property))
+		continue;
+
+	if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+	{
+		WriteLine(string.Format("// NOTE: CommitChanges is not supported on {0}", property.Name));
+		continue;
+	}
+
+	switch(property.Name)
+	{
+		case "Guid":
+		case "ValidationResults":
+			break;
+		default:
+#>
+Current<#= property.Name #> = <#= property.Name #>;
+<#			
+			break;
+	}
+}
+PopIndent();
+#>
+			OnPropertyChanged("HasChanges");
+		}
+		
+		/// <summary>
+		/// Abandons the changes from the temporary edit
+		/// and restores the values
+		/// </summary>
+		public void CancelChanges()
+		{
+<#
+PushIndent("\t\t\t");
+foreach (PropertyInfo property in type.GetProperties())
+{
+	if(IsExcluded(property))
+		continue;
+	if (!property.CanWrite)
+		continue;
+
+	if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+	{
+		WriteLine(string.Format("// NOTE: CancelChanges is not supported on {0}", property.Name));
+		continue;
+	}
+
+	switch(property.Name)
+	{
+		case "Guid":
+		case "ValidationResults":
+			break;
+		default:
+#>
+<#= property.Name #> = Current<#= property.Name #>;
+<#			
+			break;
+	}
+}
+PopIndent();
+#>
+			OnPropertyChanged("HasChanges");
+		}
+		
+		/// <summary>
+		/// Updates the Current_ values from the DTO
+		/// but leaves the UI values as they were
+		/// </summary>
+		private void UpdateCurrentValuesFromDTO()
+		{
+<#
+PushIndent("\t\t\t");
+foreach (PropertyInfo property in type.GetProperties())
+{
+	if(IsExcluded(property))
+		continue;
+	if (!property.CanWrite)
+		continue;
+
+	if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+	{
+		WriteLine(string.Format("// NOTE: UpdateCurrentValuesFromDTO is not supported on {0}", property.Name));
+		continue;
+	}
+
+	switch(property.Name)
+	{
+		case "Guid":
+		case "ValidationResults":
+			break;
+		default:
+#>
+Current<#= property.Name #> = <#= businessObjectName #>.<#= property.Name #>;
+<#			
+			break;
+	}
+}
+PopIndent();
+#>
+		}
+
+		/// <summary>
+		/// Abandons the changes from the temporary edit
+		/// and restores the values
+		/// </summary>
+		public override void AbandonChanges()
+		{
+<#
+PushIndent("\t\t\t");
+foreach (PropertyInfo property in type.GetProperties())
+{
+	if(IsExcluded(property))
+		continue;
+	if (!property.CanWrite)
+		continue;
+
+	if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+	{
+		WriteLine(string.Format("// NOTE: AbandonChanges is not supported on {0}", property.Name));
+		continue;
+	}
+
+	switch(property.Name)
+	{
+		case "Guid":
+		case "ValidationResults":
+			break;
+		default:
+#>
+<#= property.Name #> = <#= businessObjectName #>.<#= property.Name #>;
+Current<#= property.Name #> = <#= businessObjectName #>.<#= property.Name #>;
+<#			
+			break;
+	}
+}
+PopIndent();
+#>
+			OnPropertyChanged("HasChanges");
+		}
+		
+		/// <summary>
+		/// Applies the current values to the underlying
+		/// DTO
+		/// </summary>
+		public override void ApplyChanges()
+		{
+			CommitChanges();
+<#
+PushIndent("\t\t\t");
+foreach (PropertyInfo property in type.GetProperties())
+{
+	if (!property.CanWrite)
+		continue;
+	if(IsExcluded(property))
+		continue;
+
+	if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+	{
+		WriteLine(string.Format("// NOTE: ApplyChanges is not supported on {0}", property.Name));
+		continue;
+	}
+
+	switch(property.Name)
+	{
+		case "Guid":
+		case "ValidationResults":
+			break;
+		default:
+#>
+<#= businessObjectName #>.<#= property.Name #> = Current<#= property.Name #>;
+<#			
+			break;
+	}
+}
+PopIndent();
+#>
+		}
+
+		#endregion
+		
+		#region Validation
+		
+		/// <summary>
+		/// Validates the object by forcing all properties
+		/// to be set
+		/// </summary>
+		public override bool Validate()
+		{
+			bool isValid = true;
+			Validator.ValidationResults.Clear();
+<#
+PushIndent("\t\t\t");
+if (!IsExcludedFromValidation(type))
+{
+	foreach (PropertyInfo property in type.GetProperties())
+	{
+		if (!property.CanWrite)
+			continue;
+	
+		if(IsExcluded(property))
+			continue;
+		
+		if(IsExcludedFromValidation(property))
+			continue;
+	
+		if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+		{
+			if (IsDataTransferObject(property.PropertyType.GetGenericArguments()[0].BaseType.FullName))
+			{
+#>
+<#= property.Name #>.ForEach(x => 
+	{
+		if(!x.Validate())
+		{
+			isValid = false;
+		}
+	});
+<#		
+		}
+		continue;
+	}
+
+	switch(property.Name)
+	{
+		case "Guid":
+		case "ValidationResults":
+			break;
+		default:
+#>
+<#= property.Name #> = <#= property.Name #>;
+<#			
+			break;
+		}
+	}
+}
+PopIndent();
+#>
+			return isValid && base.Validate();
+		}
+
+		#endregion
+	}
+	
+	public static partial class <#= type.Name #>Extensions
+	{
+		/// <summary>
+		/// Retrieves the validation summary for this type
+		/// and all it's child properties
+		/// </summary>
+		public static ValidationResults ValidationSummary(this <#= type.Name #> item)
+		{
+			var results = new ValidationResults();
+			item.ValidationSummary(results);
+			return results;
+		}
+	
+		/// <summary>
+		/// Retrieves the validation summary for this type
+		/// and all it's child properties
+		/// </summary>
+		public static ValidationResults ValidationSummary(this <#= type.Name #> item, ValidationResults results)
+		{
+			results.Append(item.ValidationResults);
+			
+<#
+if (!IsExcludedFromValidation(type))
+{
+	foreach (PropertyInfo property in type.GetProperties())
+	{
+		if(IsExcluded(property))
+			continue;
+		if(IsExcludedFromValidation(property))
+			continue;
+		
+		if (IsDataTransferObject(property.PropertyType.BaseType.FullName))
+		{
+#>
+			if(item.<#= property.Name #> != null)
+			{
+				item.<#= property.Name #>.ValidationSummary(results);
+			}
+<#
+		}
+		if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+		{
+			if (IsDataTransferObject(property.PropertyType.GetGenericArguments()[0].BaseType.FullName))
+			{
+#>
+			if(item.<#= property.Name #> != null)
+			{
+				item.<#= property.Name #>.ForEach(x => 
+				{
+					x.ValidationSummary(results);
+				});
+			}
+<#		
+			}
+		}
+	}
+}
+#>
+			ValidationSummaryAdditional(results);
+			return results;
+		}
+		
+		/// <summary>
+		/// Allows custom addition to the results using the partial class
+		/// </summary>
+		static partial void ValidationSummaryAdditional(ValidationResults results);
+	}
+}
+<#
+		manager.EndBlock();
+	}
+	manager.Process(true);
+#>
+
+<#+
+	/// <summary>
+	/// Gets the name of the business object
+	/// from the name of the DTO
+	/// </summary>
+	private string GetBusinessObjectName(string dtoTypeName)
+	{
+		return dtoTypeName.Replace("DTO", string.Empty);
+	}
+	
+	private string GetObservableItemName(string dtoTypeName)
+	{
+		return string.Format("Observable{0}", dtoTypeName.Replace("DTO", string.Empty));
+	}
+	
+	private static string GetPropertyTypeName(PropertyInfo property)
+	{
+		if (property.PropertyType.IsGenericType)
+		{
+			return property.PropertyType.GetGenericArguments()[0].FullName + "?";
+		}
+		else
+		{
+			return property.PropertyType.FullName;
+		}
+	}
+	
+	/// <summary>
+	/// Checks whether the property should
+	/// be excluded based on use of [ValidationExclude]
+	/// </summary>
+	/// <param name="propertyName"></param>
+	/// <returns></returns>
+	private bool IsExcludedFromValidation(PropertyInfo property)
+	{
+		object[] attributes = property.GetCustomAttributes(false);
+		foreach(Attribute attribute in attributes)
+		{
+			if(attribute.GetType().Name == "ValidationExcludeAttribute")
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/// <summary>
+	/// Checks whether the property should
+	/// be excluded based on use of [ValidationExclude]
+	/// </summary>
+	/// <param name="propertyName"></param>
+	/// <returns></returns>
+	private bool IsExcluded(PropertyInfo property)
+	{
+		object[] attributes = property.GetCustomAttributes(false);
+		foreach(Attribute attribute in attributes)
+		{
+			if(attribute.GetType().Name == "ObservableExcludeAttribute")
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/// <summary>
+	/// Checks whether the property should
+	/// be excluded based on use of [ValidationExclude]
+	/// </summary>
+	/// <param name="propertyName"></param>
+	/// <returns></returns>
+	private bool IsExcluded(Type type)
+	{
+		object[] attributes = type.GetCustomAttributes(false);
+		foreach(Attribute attribute in attributes)
+		{
+			if(attribute.GetType().Name == "ObservableExcludeAttribute")
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/// <summary>
+	/// Checks whether the property should
+	/// be excluded based on use of [ObservableExclude]
+	/// </summary>
+	/// <param name="propertyName"></param>
+	/// <returns></returns>
+	private bool IsExcludedFromComparison(PropertyInfo property)
+	{
+		object[] attributes = property.GetCustomAttributes(false);
+		foreach(Attribute attribute in attributes)
+		{
+			if(attribute.GetType().Name == "ObservableCompareExcludeAttribute")
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/// <summary>
+	/// Checks whether the DTO should
+	/// be excluded based on the regex in
+	/// the PropertyExcludes list
+	/// </summary>
+	/// <param name="propertyName"></param>
+	/// <returns></returns>
+	private bool IsExcludedFromValidation(Type type)
+	{
+		object[] attributes = type.GetCustomAttributes(false);
+		foreach(object attribute in attributes)
+		{
+			if(attribute.GetType().Name == "ValidationExcludeAttribute")
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private bool IsDataTransferObject(string fullName)
+	{
+		if (fullName == "Iris.ServiceNG.DistributedServices.DataTransfer.Core.DataTransferObject")
+			return true;
+		if (fullName == "Iris.ServiceNG.DistributedServices.DataTransfer.Core.IdDescriptionDTO")
+			return true;
+		return false;
+	}
+	
+	private bool HasProperty(Type type, string propertyName)
+	{
+		foreach (PropertyInfo property in type.GetProperties())
+		{
+			if(property.Name == propertyName)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private string GetPropertyType(string originalPropertyType, PropertyInfo property)
+	{
+		string propertyType = originalPropertyType;
+		if (propertyType.IndexOf("[") > 0)
+		{
+			propertyType = propertyType.Substring(propertyType.IndexOf("["));
+		}
+		propertyType = propertyType.Replace("[", String.Empty);
+		propertyType = propertyType.Replace("System.", String.Empty);
+		propertyType = propertyType.Replace("]", String.Empty);
+		propertyType = propertyType.Replace("Iris.ServiceNG.Validation.", String.Empty);
+		if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+		{
+			if (IsDataTransferObject(property.PropertyType.GetGenericArguments()[0].BaseType.FullName))
+			{
+				propertyType = propertyType.Replace("Iris.ServiceNG.DistributedServices.DataTransfer.Core.", String.Empty);
+				propertyType = propertyType.Replace("Iris.ServiceNG.DistributedServices.MainModule.DataTransfer.", String.Empty);
+				propertyType = propertyType.Replace("DTO", String.Empty);
+				propertyType = String.Format("ObservableNotifiableCollection<Observable{0}>", propertyType);
+			}
+			else
+			{
+				string cSharpTypeName = ConvertToCSharpType(property.PropertyType.GetGenericArguments()[0].Name);
+				propertyType = string.Format("ObservableCollection<{0}>", cSharpTypeName);
+			}
+		}
+
+		propertyType = ConvertToCSharpType(propertyType);
+		
+		return propertyType;
+	}
+	
+	/// <summary>
+	/// Converts the specified simple type to the appropriate
+	/// C# type, eg Boolean to bool and String to string
+	/// </summary>
+	/// <param name="type"></param>
+	/// <returns></returns>
+	private static string ConvertToCSharpType(string type)
+	{
+		string propertyType = type;
+		propertyType = (string.Compare(propertyType, "int32", true) == 0) ? "int" : propertyType;
+		propertyType = (string.Compare(propertyType, "int16", true) == 0) ? "short" : propertyType;
+		propertyType = (string.Compare(propertyType, "datetime", true) == 0) ? "DateTime" : propertyType;
+		propertyType = (string.Compare(propertyType, "boolean", true) == 0) ? "bool" : propertyType;
+		propertyType = (string.Compare(propertyType, "string", true) == 0) ? "string" : propertyType;
+		return propertyType;
+	}
+	
+	private List<string> Include = new List<string>() 
+		{ 
+			"AreaDTO",
+			"AreaEngineerDTO",
+			"PostcodeRangeDTO",
+			"RoleDTO",
+			"CoverDTO",
+			"CoverTimeBandDTO",
+			"SystemUserDTO",
+			"PersonDTO",
+			"TypeOfWorkDTO",			
+			"ServicePriorityDTO",
+			"MakeDTO",
+			"ServiceTermDTO",
+			"CalendarDTO",
+			"CalendarRangeDTO",
+			"VisitDTO",
+			"WorkItemDTO",
+			"ProductDTO",
+			"ServiceDetailDTO",
+			"ProductComponentDTO",
+			"ProductGroupDTO",
+			"ProductPriceDTO",
+			"EquipmentDTO",
+			"CustomerDTO",
+			"CustomerContactDTO",
+			"CustomerTypeDTO",
+			"ContractDTO",
+			"ContractPeriodDTO",
+			"ContractEquipmentPeriodDTO",
+			"SecurityGroupDTO",
+			"AlertDTO",
+			"AlertRuleDTO",
+			"IdDescriptionDTO",
+			"CallDTO",
+			"CallContactDTO",
+			"QuickViewEquipmentDTO",
+			"ScheduleDTO",
+			"RemedialActionDTO",
+			"CauseDTO",
+			"SymptomDTO",
+			"ActivityTypeDTO",
+			"ActivityDTO",
+			"VisitIncompleteReasonDTO",
+			"OnHoldReasonDTO",
+			"SlotDTO",
+			"VisitPartsUsageDTO",
+			"CallHistoryDTO",
+			"CommentDTO",
+			"SlotGroupDTO",
+			"CommentDTO",
+			"PartDTO",
+			"TaskDTO",
+			"CallCancelDTO",
+			"PMSystemSettingsDTO",
+			"CallCancelReasonDTO",
+			"AccountsDBSettingsDTO",
+			"MaskDTO",
+			"VisitBreakdownDTO",
+			"VisitBreakDTO",
+			"MobileAPISettingsDTO"
+		};
+#>

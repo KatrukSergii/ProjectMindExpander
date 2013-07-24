@@ -1,10 +1,10 @@
 ﻿using System;
-using System.IO;
 using Autofac;
 using Communication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
+using Model;
 using Shared;
-using Shared.Interfaces;
 
 namespace Tests
 {
@@ -73,6 +73,12 @@ namespace Tests
             Assert.AreEqual("60621", timesheet.TimesheetId);
             TestHelper.PrettyPrintTimesheet(timesheet);
 
+        }
+
+        [TestMethod]
+        public void test()
+        {
+            Console.WriteLine(StringExtensions.ToCamelCase("abcDef"));
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using Communication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shared;
@@ -39,6 +40,10 @@ namespace Tests
             var scraper = new WebScraper(timesheetParser);
             var timesheet = scraper.LoginAndGetTimesheet();
             TestHelper.PrettyPrintTimesheet(timesheet);
+            
+            // project 1 monday
+            timesheet.ProjectTimeItems[0].TimeEntries[0].LoggedTime = new TimeSpan(1,0,0);
+
             var updatedTimesheet = scraper.UpdateTimeSheet(timesheet);
             TestHelper.PrettyPrintTimesheet(updatedTimesheet);
         }  

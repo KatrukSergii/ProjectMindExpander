@@ -1,0 +1,73 @@
+﻿<#@ template  debug="true" language="C#" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ include file="TemplateFileManagerV2.1.ttinclude" #>
+<#@ Assembly Name="System.Core" #>
+<#@ Assembly Name="System.Windows.Forms" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#@ import namespace="Model" #> 
+<#@ import namespace="Shared" #> 
+<#@ assembly name="$(ProjectDir)..\bin\Debug\Model.dll" #>
+<#@ assembly name="$(ProjectDir)..\bin\Debug\Shared.dll" #>
+<#@ import namespace="System.Reflection" #>
+<#@ assembly name="EnvDte" #>
+<#@ newAppDomain processor="tangibleT4Editor" #>
+
+
+<#
+	manager = TemplateFileManager.Create(this);
+
+	var trackableType = typeof(ITrackable);
+
+	// Get a list of Types that implement ITrackable
+	var types = AppDomain.CurrentDomain.GetAssemblies().ToList().SelectMany(s => s.GetTypes()).Where(p => p != trackableType && trackableType.IsAssignableFrom(p));
+
+	foreach(var type in types)
+	{
+		CreateTrackableObject(type);
+	}
+
+	// outfile to files
+	manager.Process();
+#>
+
+<#+
+	public TemplateFileManager manager;
+
+	private void WriteUsingStatements()
+	{
+		WriteLine("using Model;");
+		WriteLine("using Shared;");
+		WriteLine("using System;");
+		WriteLine("using System.Collections.Generic;");
+	}
+
+	public void CreateTrackableObject(Type type)
+	{
+		manager.StartNewFile("Trackable" + type.Name + ".cs");
+		WriteUsingStatements();
+		WriteLine("namespace Model");
+		WriteLine("{");
+			PushIndent("\t");
+				WriteLine("public class " + "Trackable" + type.Name);
+				WriteLine("{");
+					PushIndent("\t");
+						foreach (PropertyInfo property in type.GetProperties())
+						{
+							CreateProperty(property);
+						}
+					PopIndent();
+				WriteLine("}");
+			PopIndent();
+		WriteLine("}");
+	}
+
+	public void CreateProperty(PropertyInfo property)
+	{
+		WriteLine("private " + StringExtensions.GetFriendlyName(property.PropertyType) + " _" + StringExtensions.ToCamelCase(property.Name) + ";");
+	}
+#>
