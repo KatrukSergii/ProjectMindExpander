@@ -19,6 +19,7 @@
 
 
 <#
+	// required to output to multiple files
 	manager = TemplateFileManager.Create(this);
 
 	var trackableType = typeof(ITrackable);
@@ -28,7 +29,7 @@
 
 	foreach(var type in types)
 	{
-		CreateTrackableObject(type);
+		CreateTrackableObjectClass(type);
 	}
 
 	// outfile to files
@@ -46,7 +47,7 @@
 		WriteLine("using System.Collections.Generic;");
 	}
 
-	public void CreateTrackableObject(Type type)
+	public void CreateTrackableObjectClass(Type type)
 	{
 		manager.StartNewFile("Trackable" + type.Name + ".cs");
 		WriteUsingStatements();
@@ -56,18 +57,47 @@
 				WriteLine("public class " + "Trackable" + type.Name);
 				WriteLine("{");
 					PushIndent("\t");
+
+						CreateConstructor(type);
+
 						foreach (PropertyInfo property in type.GetProperties())
 						{
 							CreateProperty(property);
 						}
+
 					PopIndent();
 				WriteLine("}");
 			PopIndent();
 		WriteLine("}");
 	}
 
+	public void CreateConstructor(Type type)
+	{
+
+	}
+
 	public void CreateProperty(PropertyInfo property)
 	{
+		// private backing field
 		WriteLine("private " + StringExtensions.GetFriendlyName(property.PropertyType) + " _" + StringExtensions.ToCamelCase(property.Name) + ";");
+		// public property
+		WriteLine("public " + StringExtensions.GetFriendlyName(property.PropertyType) + " " + property.Name);
+		WriteLine("{");
+			PushIndent("\t");
+				WriteLine("get");
+				WriteLine("{");
+					PushIndent("\t");
+						WriteLine("return _" + StringExtensions.ToCamelCase(property.Name) + ";");
+					PopIndent();
+				WriteLine("}");
+				WriteLine("set");
+				WriteLine("{");
+					PushIndent("\t");
+						WriteLine("_" + StringExtensions.ToCamelCase(property.Name) + " = value;");
+					PopIndent();
+				WriteLine("}");
+			PopIndent();
+		WriteLine("}" + Environment.NewLine);
+
 	}
 #>
