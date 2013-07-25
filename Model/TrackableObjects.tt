@@ -1,6 +1,7 @@
 ﻿<#@ template  debug="true" language="C#" hostSpecific="true" #>
 <#@ output extension=".cs" #>
 <#@ include file="TemplateFileManagerV2.1.ttinclude" #>
+<#@ include file="brace.ttinclude" #>
 <#@ Assembly Name="System.Core" #>
 <#@ Assembly Name="System.Windows.Forms" #>
 <#@ import namespace="System" #>
@@ -38,6 +39,8 @@
 
 <#+
 	public TemplateFileManager manager;
+	public const string prefix = "Trackable"; // change this to alter the output class names 
+	public const string namespaceName = "Model";
 
 	private void WriteUsingStatements()
 	{
@@ -45,18 +48,17 @@
 		WriteLine("using Shared;");
 		WriteLine("using System;");
 		WriteLine("using System.Collections.Generic;");
+		WriteLine(Environment.NewLine);
 	}
 
 	public void CreateTrackableObjectClass(Type type)
 	{
-		manager.StartNewFile("Trackable" + type.Name + ".cs");
+		manager.StartNewFile(prefix + type.Name + ".cs");
 		WriteUsingStatements();
-		WriteLine("namespace Model");
-		WriteLine("{");
-			PushIndent("\t");
-				WriteLine("public class " + "Trackable" + type.Name);
-				WriteLine("{");
-					PushIndent("\t");
+
+		using(new Brace("namespace " + namespaceName, this)){
+		
+				using(new Brace("public class " + "Trackable" + type.Name, this)){
 
 						CreateConstructor(type);
 
@@ -64,16 +66,12 @@
 						{
 							CreateProperty(property);
 						}
-
-					PopIndent();
-				WriteLine("}");
-			PopIndent();
-		WriteLine("}");
+				}
+		 }
 	}
 
 	public void CreateConstructor(Type type)
 	{
-
 	}
 
 	public void CreateProperty(PropertyInfo property)
@@ -81,23 +79,19 @@
 		// private backing field
 		WriteLine("private " + StringExtensions.GetFriendlyName(property.PropertyType) + " _" + StringExtensions.ToCamelCase(property.Name) + ";");
 		// public property
-		WriteLine("public " + StringExtensions.GetFriendlyName(property.PropertyType) + " " + property.Name);
-		WriteLine("{");
-			PushIndent("\t");
-				WriteLine("get");
-				WriteLine("{");
-					PushIndent("\t");
-						WriteLine("return _" + StringExtensions.ToCamelCase(property.Name) + ";");
-					PopIndent();
-				WriteLine("}");
-				WriteLine("set");
-				WriteLine("{");
-					PushIndent("\t");
-						WriteLine("_" + StringExtensions.ToCamelCase(property.Name) + " = value;");
-					PopIndent();
-				WriteLine("}");
-			PopIndent();
-		WriteLine("}" + Environment.NewLine);
+		using(new Brace("public " + StringExtensions.GetFriendlyName(property.PropertyType) + " " + property.Name,this))
+        {
+				using(new Brace("get",this))
+                {
+					WriteLine("return _" + StringExtensions.ToCamelCase(property.Name) + ";");
+                }
+				
+				using(new Brace("set",this))
+                {
+					WriteLine("_" + StringExtensions.ToCamelCase(property.Name) + " = value;");
+                }
+        }
 
+		WriteLine(Environment.NewLine);
 	}
 #>

@@ -1,0 +1,33 @@
+﻿<#@ template  debug="true" language="C#" hostSpecific="true" #>
+<#@ import namespace="System" #>
+<#@ newAppDomain processor="tangibleT4Editor" #>
+<#+ 
+
+///
+/// Helper class to output braces with a "using" statement
+///
+public class Brace : IDisposable
+{
+	TextTransformation _tt;
+
+	public Brace(string braceCondition, TextTransformation tt)
+	{
+		_tt = tt;
+		
+		if (!string.IsNullOrWhiteSpace(braceCondition))
+		{
+			_tt.WriteLine(braceCondition);
+		}
+
+		_tt.WriteLine("{");
+		_tt.PushIndent("\t");
+	}
+
+	public void Dispose()
+	{
+		_tt.PopIndent();
+		_tt.WriteLine("}");
+		_tt = null;
+	}	
+}
+#>

@@ -2,6 +2,8 @@
 using Shared;
 using System;
 using System.Collections.Generic;
+
+
 namespace Model
 {
 	public class TrackableTimesheet
@@ -18,6 +20,7 @@ namespace Model
 				_title = value;
 			}
 		}
+		
 
 		private string _timesheetId;
 		public string TimesheetId
@@ -31,6 +34,7 @@ namespace Model
 				_timesheetId = value;
 			}
 		}
+		
 
 		private List<ProjectTaskTimesheetItem> _projectTimeItems;
 		public List<ProjectTaskTimesheetItem> ProjectTimeItems
@@ -44,6 +48,7 @@ namespace Model
 				_projectTimeItems = value;
 			}
 		}
+		
 
 		private List<ProjectTaskTimesheetItem> _nonProjectActivityItems;
 		public List<ProjectTaskTimesheetItem> NonProjectActivityItems
@@ -57,6 +62,7 @@ namespace Model
 				_nonProjectActivityItems = value;
 			}
 		}
+		
 
 		private List<TimeSpan> _requiredHours;
 		public List<TimeSpan> RequiredHours
@@ -70,6 +76,7 @@ namespace Model
 				_requiredHours = value;
 			}
 		}
+		
 
 		private TimeSpan _totalRequiredHours;
 		public TimeSpan TotalRequiredHours
@@ -83,6 +90,7 @@ namespace Model
 				_totalRequiredHours = value;
 			}
 		}
+		
 
 		private bool _isChanged;
 		public bool IsChanged
@@ -96,6 +104,7 @@ namespace Model
 				_isChanged = value;
 			}
 		}
+		
 
 	}
 }

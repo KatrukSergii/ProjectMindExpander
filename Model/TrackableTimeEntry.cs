@@ -2,6 +2,8 @@
 using Shared;
 using System;
 using System.Collections.Generic;
+
+
 namespace Model
 {
 	public class TrackableTimeEntry
@@ -18,6 +20,7 @@ namespace Model
 				_loggedTime = value;
 			}
 		}
+		
 
 		private System.TimeSpan? _extraTime;
 		public System.TimeSpan? ExtraTime
@@ -31,6 +34,7 @@ namespace Model
 				_extraTime = value;
 			}
 		}
+		
 
 		private string _notes;
 		public string Notes
@@ -44,6 +48,7 @@ namespace Model
 				_notes = value;
 			}
 		}
+		
 
 		private System.Int32? _workDetailId;
 		public System.Int32? WorkDetailId
@@ -57,6 +62,7 @@ namespace Model
 				_workDetailId = value;
 			}
 		}
+		
 
 	}
 }

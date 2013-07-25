@@ -2,6 +2,8 @@
 using Shared;
 using System;
 using System.Collections.Generic;
+
+
 namespace Model
 {
 	public class TrackableProjectTaskTimesheetItem
@@ -18,6 +20,7 @@ namespace Model
 				_projectCode = value;
 			}
 		}
+		
 
 		private PickListItem _taskCode;
 		public PickListItem TaskCode
@@ -31,6 +34,7 @@ namespace Model
 				_taskCode = value;
 			}
 		}
+		
 
 		private List<TimeEntry> _timeEntries;
 		public List<TimeEntry> TimeEntries
@@ -44,6 +48,7 @@ namespace Model
 				_timeEntries = value;
 			}
 		}
+		
 
 	}
 }
