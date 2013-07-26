@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using Autofac;
 using Communication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -78,7 +79,15 @@ namespace Tests
         [TestMethod]
         public void test()
         {
-            Console.WriteLine(StringExtensions.ToCamelCase("abcDef"));
+            var input = "List<sometime>";
+            var regex = new Regex(@"\<(?<name>\S+)\>");
+            foreach (Match m in regex.Matches(input))
+            {
+                Console.WriteLine(m.Groups["name"]);
+            }
+
+            var x = regex.Matches(input)[0].Groups["name"].Captures[0];
+            Console.WriteLine(x);
         }
     }
 }

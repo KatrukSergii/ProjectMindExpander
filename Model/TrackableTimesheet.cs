@@ -21,6 +21,17 @@ namespace Model
 		}
 		
 
+		public TrackableTimesheet(Timesheet timesheet)
+		{
+			_originalTitle = timesheet.Title;
+			_originalTimesheetId = timesheet.TimesheetId;
+			_originalProjectTimeItems = timesheet.ProjectTimeItems;
+			_originalNonProjectActivityItems = timesheet.NonProjectActivityItems;
+			_originalRequiredHours = timesheet.RequiredHours;
+			_originalTotalRequiredHours = timesheet.TotalRequiredHours;
+		}
+		
+
 		private string _title;
 		private string _originalTitle;
 		public string Title
@@ -148,22 +159,36 @@ namespace Model
 		
 		#endregion
 
-		
 		#region IChangeTracking
-		        
+
 		public void AcceptChanges()
 		{
-			
+			_originalTitle = _title;
+			_originalTimesheetId = _timesheetId;
+			_originalProjectTimeItems = _projectTimeItems;
+			_originalNonProjectActivityItems = _nonProjectActivityItems;
+			_originalRequiredHours = _requiredHours;
+			_originalTotalRequiredHours = _totalRequiredHours;
 		}
 		
+		
+		private bool _isChanged;
 		public bool IsChanged
 		{
 			get 
-		    { 
-				throw new NotImplementedException(); 
+			{ 
+				return _isChanged;
+			}
+			set
+			{
+				if (_isChanged != value)
+				{
+					_isChanged = value;
+					OnPropertyChanged("IsChanged");
+				}
 			}
 		}
-		        
+				
 		#endregion
 	}
 }

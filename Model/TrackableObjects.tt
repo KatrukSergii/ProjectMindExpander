@@ -27,10 +27,11 @@
 
 	// Get a list of Types that implement ITrackable
 	var types = AppDomain.CurrentDomain.GetAssemblies().ToList().SelectMany(s => s.GetTypes()).Where(p => p != trackableType && trackableType.IsAssignableFrom(p));
+	var typeNames  = types.Select(x => x.Name);
 
 	foreach(var type in types)
 	{
-		CreateTrackableObjectClass(type);
+		CreateTrackableObjectClass(type,typeNames);
 	}
 
 	// outfile to files
@@ -41,43 +42,40 @@
 	private TemplateFileManager manager;
 	private const string _prefix = "Trackable"; // change this to alter the output class names 
 	private const string _namespaceName = "Model";
-	private Dictionary<string,string> _properties = new Dictionary<string,string>();
-
-	private void CreateTrackableObjectClass(Type type)
+	
+	private void CreateTrackableObjectClass(Type type, IEnumerable<string> typeNames)
 	{
 		manager.StartNewFile(_prefix + type.Name + ".cs");
 		CreateUsingStatements();
-		_properties = GetPublicPropertyDetails(type);
+		var properties = GetPublicPropertyDetails(type);
 
 		using(new Brace("namespace " + _namespaceName, this)){
 		
 				using(new Brace("public class " + "Trackable" + type.Name + " : INotifyPropertyChanged, IChangeTracking", this)){
 
-						CreateConstructor(type, _properties);
+						CreateConstructor(type, properties, typeNames);
 
-						foreach (var property in _properties)
-						{
-							CreateProperty(property.Key,property.Value);
-						}
+						CreateProperties(properties);
 
 						CreateINotifyPropertyChangedRegion();
-						CreateIChangeTrackingRegion();
+
+						CreateIChangeTrackingRegion(properties);
 				}
 		 }
 	}
 
 	private Dictionary<string, string> GetPublicPropertyDetails(Type type)
-    {
+	{
 		var properties = new Dictionary<string,string>();
 
 		foreach (PropertyInfo property in type.GetProperties())
-        {
+		{
 			var typeName = StringExtensions.GetFriendlyName(property.PropertyType);
 			properties.Add(property.Name,typeName);
 		}
 
 		return properties;
-    }
+	}
 
 	private void CreateUsingStatements()
 	{
@@ -91,13 +89,27 @@
 		WriteLine(Environment.NewLine);
 	}
 
-	private void CreateConstructor(Type type, Dictionary<string,string> properties)
+	private void CreateConstructor(Type type, Dictionary<string,string> properties, IEnumerable<string> typeNames)
 	{
+		var camelCaseName = StringExtensions.ToCamelCase(type.Name);
+
+		// parameterless constructor
 		using(new Brace("public " + _prefix + type.Name + "()", this)){
 			
 			foreach (var kvp in properties)
 			{
-				CreatePropertyInitializer(kvp.Key,kvp.Value);
+				var isTrackable = IsTypeTrackable(kvp.Value,typeNames);
+				CreatePropertyInitializer(kvp.Key,kvp.Value, isTrackable);
+			}
+		}
+
+		WriteLine(Environment.NewLine);
+
+		using(new Brace("public " + _prefix + type.Name + "(" + type.Name + " " + camelCaseName + ")", this)){
+			
+			foreach (var kvp in properties)
+			{
+				WriteLine("_original" + kvp.Key + " = " + camelCaseName +  "." + kvp.Key + ";");
 			}
 		}
 		
@@ -105,38 +117,81 @@
 	}
 
 	/// Used to initialize variables inside of the class constructor
-	private void CreatePropertyInitializer(string propertyName, string propertyType)
-    {
+	private void CreatePropertyInitializer(string propertyName, string propertyType, bool isTypeTrackable)
+	{
 		Write(propertyName + " = ");
 		
 		switch(propertyType)
-        {
+		{
 			 
-                case "int":
-                case "short":
-                case "byte":
-                case "bool":
-                case "long":
-                case "float":
-                case "double":
-                case "decimal":
-                case "string":
+				case "int":
+				case "short":
+				case "byte":
+				case "bool":
+				case "long":
+				case "float":
+				case "double":
+				case "decimal":
+				case "string":
 					WriteLine("default(" + propertyType + ");");
 					break;
 				default:
 					
 					if (propertyType.EndsWith("?"))
-                    {
+					{
 						WriteLine("null;");
-                    }
+					}
 					else
 					{
 						WriteLine("new " + propertyType + "();");
-                    }
+					}
 
 					break;
-        }
+		}
+	}
+
+	private void GetGenericTypeParameter(string genericTypeName)
+    {
+	
+			string typeParameter;
+
+            //var regex = new Regex(@"\<(?<name>\S+)\>");
+           
+			// Assume only one type parameter at the moment
+			// TODO handle dictionaries and other stuff
+			//if (regex.IsMatch(genericTypeName))
+           // {
+			//	typeParameter = regex.Matches(genericTypeName)[0].Groups["name"];
+            //}
+
+			return typeParameter;
     }
+
+	// e.g. return "List" from "List<SomeType>" or "Dictionary" from "Dictionary<string,string>"
+	private void GetGenericType(string genericTypeName)
+    {
+	
+			string typeName;
+
+            //var regex = new Regex(@"(?<name>\S+)\<\S+\>");
+           
+			// Assume only one type at the moment
+			// TODO handle nested lists/dictionaries and other stuff
+			//if (regex.IsMatch(genericTypeName))
+           // {
+			//	typeName = regex.Matches(genericTypeName)[0].Groups["name"];
+           // }
+
+			return typeName;
+    }
+
+	private void CreateProperties(Dictionary<string,string> properties)
+	{
+		foreach (var property in properties)
+		{
+			CreateProperty(property.Key,property.Value);
+		}
+	}
 
 	private void CreateProperty(string propertyName, string propertyType)
 	{
@@ -148,27 +203,34 @@
 
 		// public property
 		using(new Brace("public " + propertyType + " " + propertyName,this))
-        {
+		{
 				using(new Brace("get",this))
-                {
+				{
 					WriteLine("return " + privateFieldName + ";");
-                }
+				}
 				
 				using(new Brace("set",this))
-                {
+				{
 					using(new Brace("if (" + privateFieldName + " != value)", this))
-                    {
+					{
 						WriteLine(privateFieldName + " = value;");
 						WriteLine(@"OnPropertyChanged(""" + propertyName + @""");");
-                    }
-                }
-        }
+					}
+				}
+		}
 
 		WriteLine(Environment.NewLine);
 	}
 
-	private void CreateINotifyPropertyChangedRegion()
+	
+	// return true if this type is going to have a trackable object class generated by the T4 template
+	private bool IsTypeTrackable(string typeName, IEnumerable<string> typeNames)
     {
+		return typeNames.Any(x => x == typeName);
+    }
+
+	private void CreateINotifyPropertyChangedRegion()
+	{
 		WriteLine(@"
 #region INotifyPropertyChanged
 
@@ -184,25 +246,37 @@ protected virtual void OnPropertyChanged([CallerMemberName] string propertyName 
 ");
 	}
 
-	private void CreateIChangeTrackingRegion()
-    {
-		WriteLine(@"
-#region IChangeTracking
-        
-public void AcceptChanges()
-{
+	private void CreateIChangeTrackingRegion(Dictionary<string,string> properties)
+	{
+		WriteLine(@"#region IChangeTracking" + Environment.NewLine);
+		using(new Brace("public void AcceptChanges()",this))
+		{
+			foreach(var property in properties)
+			{
+				WriteLine("_original" + property.Key + " = _" + StringExtensions.ToCamelCase(property.Key) + ";");
+			}
+		}
 	
-}
+		WriteLine(@"
 
+private bool _isChanged;
 public bool IsChanged
 {
 	get 
-    { 
-		throw new NotImplementedException(); 
+	{ 
+		return _isChanged;
+	}
+	set
+	{
+		if (_isChanged != value)
+		{
+			_isChanged = value;
+			OnPropertyChanged(""IsChanged"");
+		}
 	}
 }
-        
+		
 #endregion"
-);
-    }
+		);
+	}
 #>

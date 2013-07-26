@@ -18,6 +18,14 @@ namespace Model
 		}
 		
 
+		public TrackableProjectTaskTimesheetItem(ProjectTaskTimesheetItem projectTaskTimesheetItem)
+		{
+			_originalProjectCode = projectTaskTimesheetItem.ProjectCode;
+			_originalTaskCode = projectTaskTimesheetItem.TaskCode;
+			_originalTimeEntries = projectTaskTimesheetItem.TimeEntries;
+		}
+		
+
 		private PickListItem _projectCode;
 		private PickListItem _originalProjectCode;
 		public PickListItem ProjectCode
@@ -88,22 +96,33 @@ namespace Model
 		
 		#endregion
 
-		
 		#region IChangeTracking
-		        
+
 		public void AcceptChanges()
 		{
-			
+			_originalProjectCode = _projectCode;
+			_originalTaskCode = _taskCode;
+			_originalTimeEntries = _timeEntries;
 		}
 		
+		
+		private bool _isChanged;
 		public bool IsChanged
 		{
 			get 
-		    { 
-				throw new NotImplementedException(); 
+			{ 
+				return _isChanged;
+			}
+			set
+			{
+				if (_isChanged != value)
+				{
+					_isChanged = value;
+					OnPropertyChanged("IsChanged");
+				}
 			}
 		}
-		        
+				
 		#endregion
 	}
 }

@@ -19,6 +19,15 @@ namespace Model
 		}
 		
 
+		public TrackableTimeEntry(TimeEntry timeEntry)
+		{
+			_originalLoggedTime = timeEntry.LoggedTime;
+			_originalExtraTime = timeEntry.ExtraTime;
+			_originalNotes = timeEntry.Notes;
+			_originalWorkDetailId = timeEntry.WorkDetailId;
+		}
+		
+
 		private TimeSpan? _loggedTime;
 		private TimeSpan? _originalLoggedTime;
 		public TimeSpan? LoggedTime
@@ -108,22 +117,34 @@ namespace Model
 		
 		#endregion
 
-		
 		#region IChangeTracking
-		        
+
 		public void AcceptChanges()
 		{
-			
+			_originalLoggedTime = _loggedTime;
+			_originalExtraTime = _extraTime;
+			_originalNotes = _notes;
+			_originalWorkDetailId = _workDetailId;
 		}
 		
+		
+		private bool _isChanged;
 		public bool IsChanged
 		{
 			get 
-		    { 
-				throw new NotImplementedException(); 
+			{ 
+				return _isChanged;
+			}
+			set
+			{
+				if (_isChanged != value)
+				{
+					_isChanged = value;
+					OnPropertyChanged("IsChanged");
+				}
 			}
 		}
-		        
+				
 		#endregion
 	}
 }
