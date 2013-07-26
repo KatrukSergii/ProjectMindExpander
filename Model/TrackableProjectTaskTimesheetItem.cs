@@ -2,13 +2,24 @@
 using Shared;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 
 namespace Model
 {
-	public class TrackableProjectTaskTimesheetItem
+	public class TrackableProjectTaskTimesheetItem : INotifyPropertyChanged, IChangeTracking
 	{
+		public TrackableProjectTaskTimesheetItem()
+		{
+			ProjectCode = new PickListItem();
+			TaskCode = new PickListItem();
+			TimeEntries = new List<TimeEntry>();
+		}
+		
+
 		private PickListItem _projectCode;
+		private PickListItem _originalProjectCode;
 		public PickListItem ProjectCode
 		{
 			get
@@ -17,12 +28,17 @@ namespace Model
 			}
 			set
 			{
-				_projectCode = value;
+				if (_projectCode != value)
+				{
+					_projectCode = value;
+					OnPropertyChanged("ProjectCode");
+				}
 			}
 		}
 		
 
 		private PickListItem _taskCode;
+		private PickListItem _originalTaskCode;
 		public PickListItem TaskCode
 		{
 			get
@@ -31,12 +47,17 @@ namespace Model
 			}
 			set
 			{
-				_taskCode = value;
+				if (_taskCode != value)
+				{
+					_taskCode = value;
+					OnPropertyChanged("TaskCode");
+				}
 			}
 		}
 		
 
 		private List<TimeEntry> _timeEntries;
+		private List<TimeEntry> _originalTimeEntries;
 		public List<TimeEntry> TimeEntries
 		{
 			get
@@ -45,10 +66,44 @@ namespace Model
 			}
 			set
 			{
-				_timeEntries = value;
+				if (_timeEntries != value)
+				{
+					_timeEntries = value;
+					OnPropertyChanged("TimeEntries");
+				}
 			}
 		}
 		
 
+		
+		#region INotifyPropertyChanged
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			PropertyChangedEventHandler handler = PropertyChanged;
+			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+		}
+		
+		#endregion
+
+		
+		#region IChangeTracking
+		        
+		public void AcceptChanges()
+		{
+			
+		}
+		
+		public bool IsChanged
+		{
+			get 
+		    { 
+				throw new NotImplementedException(); 
+			}
+		}
+		        
+		#endregion
 	}
 }

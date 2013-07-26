@@ -49,21 +49,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeEntry.cs" />
     <Compile Include="Timesheet.cs" />
-    <Compile Include="Timesheet.Model.cs" />
-    <Compile Include="TrackableObjects.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TrackableObjects.tt</DependentUpon>
-    </Compile>
-    <Compile Include="TrackableProjectTaskTimesheetItem.cs">
-      <DependentUpon>TrackableObjects.tt</DependentUpon>
-    </Compile>
-    <Compile Include="TrackableTimeEntry.cs">
-      <DependentUpon>TrackableObjects.tt</DependentUpon>
-    </Compile>
-    <Compile Include="TrackableTimesheet.cs">
-      <DependentUpon>TrackableObjects.tt</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.csproj">

@@ -2,13 +2,27 @@
 using Shared;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 
 namespace Model
 {
-	public class TrackableTimesheet
+	public class TrackableTimesheet : INotifyPropertyChanged, IChangeTracking
 	{
+		public TrackableTimesheet()
+		{
+			Title = default(string);
+			TimesheetId = default(string);
+			ProjectTimeItems = new List<ProjectTaskTimesheetItem>();
+			NonProjectActivityItems = new List<ProjectTaskTimesheetItem>();
+			RequiredHours = new List<TimeSpan>();
+			TotalRequiredHours = new TimeSpan();
+		}
+		
+
 		private string _title;
+		private string _originalTitle;
 		public string Title
 		{
 			get
@@ -17,12 +31,17 @@ namespace Model
 			}
 			set
 			{
-				_title = value;
+				if (_title != value)
+				{
+					_title = value;
+					OnPropertyChanged("Title");
+				}
 			}
 		}
 		
 
 		private string _timesheetId;
+		private string _originalTimesheetId;
 		public string TimesheetId
 		{
 			get
@@ -31,12 +50,17 @@ namespace Model
 			}
 			set
 			{
-				_timesheetId = value;
+				if (_timesheetId != value)
+				{
+					_timesheetId = value;
+					OnPropertyChanged("TimesheetId");
+				}
 			}
 		}
 		
 
 		private List<ProjectTaskTimesheetItem> _projectTimeItems;
+		private List<ProjectTaskTimesheetItem> _originalProjectTimeItems;
 		public List<ProjectTaskTimesheetItem> ProjectTimeItems
 		{
 			get
@@ -45,12 +69,17 @@ namespace Model
 			}
 			set
 			{
-				_projectTimeItems = value;
+				if (_projectTimeItems != value)
+				{
+					_projectTimeItems = value;
+					OnPropertyChanged("ProjectTimeItems");
+				}
 			}
 		}
 		
 
 		private List<ProjectTaskTimesheetItem> _nonProjectActivityItems;
+		private List<ProjectTaskTimesheetItem> _originalNonProjectActivityItems;
 		public List<ProjectTaskTimesheetItem> NonProjectActivityItems
 		{
 			get
@@ -59,12 +88,17 @@ namespace Model
 			}
 			set
 			{
-				_nonProjectActivityItems = value;
+				if (_nonProjectActivityItems != value)
+				{
+					_nonProjectActivityItems = value;
+					OnPropertyChanged("NonProjectActivityItems");
+				}
 			}
 		}
 		
 
 		private List<TimeSpan> _requiredHours;
+		private List<TimeSpan> _originalRequiredHours;
 		public List<TimeSpan> RequiredHours
 		{
 			get
@@ -73,12 +107,17 @@ namespace Model
 			}
 			set
 			{
-				_requiredHours = value;
+				if (_requiredHours != value)
+				{
+					_requiredHours = value;
+					OnPropertyChanged("RequiredHours");
+				}
 			}
 		}
 		
 
 		private TimeSpan _totalRequiredHours;
+		private TimeSpan _originalTotalRequiredHours;
 		public TimeSpan TotalRequiredHours
 		{
 			get
@@ -87,24 +126,44 @@ namespace Model
 			}
 			set
 			{
-				_totalRequiredHours = value;
+				if (_totalRequiredHours != value)
+				{
+					_totalRequiredHours = value;
+					OnPropertyChanged("TotalRequiredHours");
+				}
 			}
 		}
 		
 
-		private bool _isChanged;
+		
+		#region INotifyPropertyChanged
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			PropertyChangedEventHandler handler = PropertyChanged;
+			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+		}
+		
+		#endregion
+
+		
+		#region IChangeTracking
+		        
+		public void AcceptChanges()
+		{
+			
+		}
+		
 		public bool IsChanged
 		{
-			get
-			{
-				return _isChanged;
-			}
-			set
-			{
-				_isChanged = value;
+			get 
+		    { 
+				throw new NotImplementedException(); 
 			}
 		}
-		
-
+		        
+		#endregion
 	}
 }

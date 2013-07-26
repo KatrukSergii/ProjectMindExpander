@@ -8,7 +8,7 @@ namespace Shared
     public static class StringExtensions
     {
         /// <summary>
-        /// Converts the phrase to specified convention.
+        /// Converts the first character to lowercase
         /// </summary>
         /// <param name="phrase"></param>
         /// <returns>string</returns>
@@ -20,6 +20,18 @@ namespace Shared
             return firstCharacter + otherCharacters;
         }
 
+        /// <summary>
+        /// Converts the first character to uppercase
+        /// </summary>
+        /// <param name="phrase"></param>
+        /// <returns>string</returns>
+        public static string ToPascalCase(string phrase)
+        {
+            var characters = phrase.ToCharArray();
+            var firstCharacter = characters[0].ToString(CultureInfo.InvariantCulture).ToUpper();
+            var otherCharacters = new string(characters).Remove(0, 1);
+            return firstCharacter + otherCharacters;
+        }
 
         public static string GetFriendlyName(Type type)
         {
@@ -56,7 +68,7 @@ namespace Shared
 
                 if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 {
-                    genericType = type.GetGenericArguments()[0] + "?";
+                    genericType = GetFriendlyName(type.GetGenericArguments()[0]) + "?";
                 }
 
                 return genericType;

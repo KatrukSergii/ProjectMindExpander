@@ -94,22 +94,6 @@ namespace Model
 
         #endregion
 
-        #region IChangeTracking
-        
-        public void AcceptChanges()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsChanged
-        {
-            get 
-            { 
-                throw new NotImplementedException(); 
-            }
-        }
-        
-        #endregion
     }
 }
 

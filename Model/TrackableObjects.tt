@@ -38,60 +38,171 @@
 #>
 
 <#+
-	public TemplateFileManager manager;
-	public const string prefix = "Trackable"; // change this to alter the output class names 
-	public const string namespaceName = "Model";
+	private TemplateFileManager manager;
+	private const string _prefix = "Trackable"; // change this to alter the output class names 
+	private const string _namespaceName = "Model";
+	private Dictionary<string,string> _properties = new Dictionary<string,string>();
 
-	private void WriteUsingStatements()
+	private void CreateTrackableObjectClass(Type type)
 	{
-		WriteLine("using Model;");
-		WriteLine("using Shared;");
-		WriteLine("using System;");
-		WriteLine("using System.Collections.Generic;");
-		WriteLine(Environment.NewLine);
-	}
+		manager.StartNewFile(_prefix + type.Name + ".cs");
+		CreateUsingStatements();
+		_properties = GetPublicPropertyDetails(type);
 
-	public void CreateTrackableObjectClass(Type type)
-	{
-		manager.StartNewFile(prefix + type.Name + ".cs");
-		WriteUsingStatements();
-
-		using(new Brace("namespace " + namespaceName, this)){
+		using(new Brace("namespace " + _namespaceName, this)){
 		
-				using(new Brace("public class " + "Trackable" + type.Name, this)){
+				using(new Brace("public class " + "Trackable" + type.Name + " : INotifyPropertyChanged, IChangeTracking", this)){
 
-						CreateConstructor(type);
+						CreateConstructor(type, _properties);
 
-						foreach (PropertyInfo property in type.GetProperties())
+						foreach (var property in _properties)
 						{
-							CreateProperty(property);
+							CreateProperty(property.Key,property.Value);
 						}
+
+						CreateINotifyPropertyChangedRegion();
+						CreateIChangeTrackingRegion();
 				}
 		 }
 	}
 
-	public void CreateConstructor(Type type)
+	private Dictionary<string, string> GetPublicPropertyDetails(Type type)
+    {
+		var properties = new Dictionary<string,string>();
+
+		foreach (PropertyInfo property in type.GetProperties())
+        {
+			var typeName = StringExtensions.GetFriendlyName(property.PropertyType);
+			properties.Add(property.Name,typeName);
+		}
+
+		return properties;
+    }
+
+	private void CreateUsingStatements()
 	{
+		WriteLine(@"using Model;");
+		WriteLine("using Shared;");
+		WriteLine("using System;");
+		WriteLine("using System.Collections.Generic;");
+		WriteLine("using System.ComponentModel;");
+		WriteLine("using System.Runtime.CompilerServices;");
+
+		WriteLine(Environment.NewLine);
 	}
 
-	public void CreateProperty(PropertyInfo property)
+	private void CreateConstructor(Type type, Dictionary<string,string> properties)
 	{
+		using(new Brace("public " + _prefix + type.Name + "()", this)){
+			
+			foreach (var kvp in properties)
+			{
+				CreatePropertyInitializer(kvp.Key,kvp.Value);
+			}
+		}
+		
+		WriteLine(Environment.NewLine);
+	}
+
+	/// Used to initialize variables inside of the class constructor
+	private void CreatePropertyInitializer(string propertyName, string propertyType)
+    {
+		Write(propertyName + " = ");
+		
+		switch(propertyType)
+        {
+			 
+                case "int":
+                case "short":
+                case "byte":
+                case "bool":
+                case "long":
+                case "float":
+                case "double":
+                case "decimal":
+                case "string":
+					WriteLine("default(" + propertyType + ");");
+					break;
+				default:
+					
+					if (propertyType.EndsWith("?"))
+                    {
+						WriteLine("null;");
+                    }
+					else
+					{
+						WriteLine("new " + propertyType + "();");
+                    }
+
+					break;
+        }
+    }
+
+	private void CreateProperty(string propertyName, string propertyType)
+	{
+		var privateFieldName = "_" + StringExtensions.ToCamelCase(propertyName);
 		// private backing field
-		WriteLine("private " + StringExtensions.GetFriendlyName(property.PropertyType) + " _" + StringExtensions.ToCamelCase(property.Name) + ";");
+		WriteLine("private " + propertyType + " " + privateFieldName + ";");
+		// original value field
+		WriteLine("private " + propertyType + " _original" + propertyName + ";");
+
 		// public property
-		using(new Brace("public " + StringExtensions.GetFriendlyName(property.PropertyType) + " " + property.Name,this))
+		using(new Brace("public " + propertyType + " " + propertyName,this))
         {
 				using(new Brace("get",this))
                 {
-					WriteLine("return _" + StringExtensions.ToCamelCase(property.Name) + ";");
+					WriteLine("return " + privateFieldName + ";");
                 }
 				
 				using(new Brace("set",this))
                 {
-					WriteLine("_" + StringExtensions.ToCamelCase(property.Name) + " = value;");
+					using(new Brace("if (" + privateFieldName + " != value)", this))
+                    {
+						WriteLine(privateFieldName + " = value;");
+						WriteLine(@"OnPropertyChanged(""" + propertyName + @""");");
+                    }
                 }
         }
 
 		WriteLine(Environment.NewLine);
 	}
+
+	private void CreateINotifyPropertyChangedRegion()
+    {
+		WriteLine(@"
+#region INotifyPropertyChanged
+
+public event PropertyChangedEventHandler PropertyChanged;
+
+protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+{
+	PropertyChangedEventHandler handler = PropertyChanged;
+	if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+}
+
+#endregion
+");
+	}
+
+	private void CreateIChangeTrackingRegion()
+    {
+		WriteLine(@"
+#region IChangeTracking
+        
+public void AcceptChanges()
+{
+	
+}
+
+public bool IsChanged
+{
+	get 
+    { 
+		throw new NotImplementedException(); 
+	}
+}
+        
+#endregion"
+);
+    }
 #>
