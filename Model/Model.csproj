@@ -73,7 +73,6 @@
   <ItemGroup>
     <None Include="brace.ttinclude" />
     <None Include="MainObservableItem.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>MainObservableItem.cs</LastGenOutput>
     </None>
     <None Include="packages.config" />

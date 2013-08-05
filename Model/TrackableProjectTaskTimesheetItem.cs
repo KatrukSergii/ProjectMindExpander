@@ -40,6 +40,10 @@ namespace Model
 				{
 					_projectCode = value;
 					OnPropertyChanged("ProjectCode");
+					if (_originalProjectCode != _projectCode)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -59,6 +63,10 @@ namespace Model
 				{
 					_taskCode = value;
 					OnPropertyChanged("TaskCode");
+					if (_originalTaskCode != _taskCode)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -78,6 +86,10 @@ namespace Model
 				{
 					_timeEntries = value;
 					OnPropertyChanged("TimeEntries");
+					if (_originalTimeEntries != _timeEntries)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -103,6 +115,7 @@ namespace Model
 			_originalProjectCode = _projectCode;
 			_originalTaskCode = _taskCode;
 			_originalTimeEntries = _timeEntries;
+			IsChanged = false;
 		}
 		
 		

@@ -46,6 +46,10 @@ namespace Model
 				{
 					_title = value;
 					OnPropertyChanged("Title");
+					if (_originalTitle != _title)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -65,6 +69,10 @@ namespace Model
 				{
 					_timesheetId = value;
 					OnPropertyChanged("TimesheetId");
+					if (_originalTimesheetId != _timesheetId)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -84,6 +92,10 @@ namespace Model
 				{
 					_projectTimeItems = value;
 					OnPropertyChanged("ProjectTimeItems");
+					if (_originalProjectTimeItems != _projectTimeItems)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -103,6 +115,10 @@ namespace Model
 				{
 					_nonProjectActivityItems = value;
 					OnPropertyChanged("NonProjectActivityItems");
+					if (_originalNonProjectActivityItems != _nonProjectActivityItems)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -122,6 +138,10 @@ namespace Model
 				{
 					_requiredHours = value;
 					OnPropertyChanged("RequiredHours");
+					if (_originalRequiredHours != _requiredHours)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -141,6 +161,10 @@ namespace Model
 				{
 					_totalRequiredHours = value;
 					OnPropertyChanged("TotalRequiredHours");
+					if (_originalTotalRequiredHours != _totalRequiredHours)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -169,6 +193,7 @@ namespace Model
 			_originalNonProjectActivityItems = _nonProjectActivityItems;
 			_originalRequiredHours = _requiredHours;
 			_originalTotalRequiredHours = _totalRequiredHours;
+			IsChanged = false;
 		}
 		
 		

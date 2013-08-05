@@ -42,6 +42,10 @@ namespace Model
 				{
 					_loggedTime = value;
 					OnPropertyChanged("LoggedTime");
+					if (_originalLoggedTime != _loggedTime)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -61,6 +65,10 @@ namespace Model
 				{
 					_extraTime = value;
 					OnPropertyChanged("ExtraTime");
+					if (_originalExtraTime != _extraTime)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -80,6 +88,10 @@ namespace Model
 				{
 					_notes = value;
 					OnPropertyChanged("Notes");
+					if (_originalNotes != _notes)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -99,6 +111,10 @@ namespace Model
 				{
 					_workDetailId = value;
 					OnPropertyChanged("WorkDetailId");
+					if (_originalWorkDetailId != _workDetailId)
+					{
+						IsChanged = true;
+					}
 				}
 			}
 		}
@@ -125,6 +141,7 @@ namespace Model
 			_originalExtraTime = _extraTime;
 			_originalNotes = _notes;
 			_originalWorkDetailId = _workDetailId;
+			IsChanged = false;
 		}
 		
 		

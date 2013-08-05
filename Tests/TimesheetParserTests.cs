@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Autofac;
 using Communication;
@@ -79,15 +80,9 @@ namespace Tests
         [TestMethod]
         public void test()
         {
-            var input = "List<sometime>";
-            var regex = new Regex(@"\<(?<name>\S+)\>");
-            foreach (Match m in regex.Matches(input))
-            {
-                Console.WriteLine(m.Groups["name"]);
-            }
-
-            var x = regex.Matches(input)[0].Groups["name"].Captures[0];
-            Console.WriteLine(x);
+            var list1 = new List<string> {"a", "b", "c"};
+            var list2 = new List<string> { "a", "b", "c" };
+            Console.WriteLine(list1.Equals(list2));
         }
     }
 }
