@@ -7,7 +7,7 @@ using Model.Annotations;
 
 namespace Model
 {
-    public class Timesheet : ITrackable
+    public class Timesheet : IObservable
     {  
         public Timesheet()
         {

@@ -4,25 +4,31 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Linq;
 
 
 namespace Model
 {
-	public class TrackableProjectTaskTimesheetItem : INotifyPropertyChanged, IChangeTracking
+	public class ObservableProjectTaskTimesheetItem : INotifyPropertyChanged, IChangeTracking
 	{
-		public TrackableProjectTaskTimesheetItem()
+		private Dictionary<string,bool> _changeTracker;
+		
+
+		public ObservableProjectTaskTimesheetItem()
 		{
 			ProjectCode = new PickListItem();
 			TaskCode = new PickListItem();
 			TimeEntries = new List<TimeEntry>();
+			InitializeChangeTracker();
 		}
 		
 
-		public TrackableProjectTaskTimesheetItem(ProjectTaskTimesheetItem projectTaskTimesheetItem)
+		public ObservableProjectTaskTimesheetItem(ProjectTaskTimesheetItem projectTaskTimesheetItem)
 		{
 			_originalProjectCode = projectTaskTimesheetItem.ProjectCode;
 			_originalTaskCode = projectTaskTimesheetItem.TaskCode;
 			_originalTimeEntries = projectTaskTimesheetItem.TimeEntries;
+			InitializeChangeTracker();
 		}
 		
 
@@ -42,7 +48,12 @@ namespace Model
 					OnPropertyChanged("ProjectCode");
 					if (_originalProjectCode != _projectCode)
 					{
-						IsChanged = true;
+						_changeTracker["ProjectCode"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["ProjectCode"] = false;
 					}
 				}
 			}
@@ -65,7 +76,12 @@ namespace Model
 					OnPropertyChanged("TaskCode");
 					if (_originalTaskCode != _taskCode)
 					{
-						IsChanged = true;
+						_changeTracker["TaskCode"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["TaskCode"] = false;
 					}
 				}
 			}
@@ -88,7 +104,12 @@ namespace Model
 					OnPropertyChanged("TimeEntries");
 					if (_originalTimeEntries != _timeEntries)
 					{
-						IsChanged = true;
+						_changeTracker["TimeEntries"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["TimeEntries"] = false;
 					}
 				}
 			}
@@ -115,24 +136,36 @@ namespace Model
 			_originalProjectCode = _projectCode;
 			_originalTaskCode = _taskCode;
 			_originalTimeEntries = _timeEntries;
-			IsChanged = false;
+			ResetChangeTracking();
+		}
+		
+
+		private void InitializeChangeTracker()
+		{
+			_changeTracker = new Dictionary<string,bool>();
+			_changeTracker["ProjectCode"] = false;
+			_changeTracker["TaskCode"] = false;
+			_changeTracker["TimeEntries"] = false;
 		}
 		
 		
-		private bool _isChanged;
+		private void ResetChangeTracking()
+		{
+			foreach (string key in _changeTracker.Keys.ToList())
+			{
+				_changeTracker[key] = false;
+			}
+		}
+		
 		public bool IsChanged
 		{
 			get 
 			{ 
-				return _isChanged;
+				return _changeTracker.All(x => x.Value == false);
 			}
-			set
+			private set
 			{
-				if (_isChanged != value)
-				{
-					_isChanged = value;
-					OnPropertyChanged("IsChanged");
-				}
+				throw new InvalidOperationException("Cannot set IsChanged property");
 			}
 		}
 				

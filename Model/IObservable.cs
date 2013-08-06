@@ -1,7 +1,7 @@
 ﻿
 namespace Model
 {
-    public interface ITrackable
+    public interface IObservable
     {
     }
 }

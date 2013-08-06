@@ -2,7 +2,7 @@
 
 namespace Model
 {
-    public class TimeEntry : ITrackable
+    public class TimeEntry : IObservable
     {
         public TimeSpan? LoggedTime { get; set; }
         public TimeSpan? ExtraTime { get; set; }

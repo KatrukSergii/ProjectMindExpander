@@ -3,24 +3,54 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using Shared.Extensions;
 
 namespace Shared.DataStructures
 {
-    public class TrackableList<T> : List<T>, INotifyPropertyChanged
+    /// <summary>
+    /// Change tracking and INotifyPropertyChanged implementation
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class ObservableList<T> : List<T>, INotifyPropertyChanged, IChangeTracking
     {
 
-        private List<T> _originalList;
+        private readonly List<T> _originalList;
+        private readonly List<bool> _changeTracker;
 
-        public TrackableList(List<T> originalList)
+        public ObservableList(List<T> originalList)
         {
-            _originalList = originalList;
-            if (typeof (T).IsValueType)
+            _originalList = GenericCopier<List<T>>.DeepCopy(originalList);
+            _changeTracker = new List<bool>(_originalList.Count);
+        }
+
+        public void SetItem(int index, T item)
+        {
+            base[index] = item;
+
+            if (!this[index].Equals(_originalList[index]))
             {
-               
+                OnPropertyChanged();
+                _changeTracker[index] = true;
+            }
+            else
+            {
+                _changeTracker[index] = false;
             }
         }
+
+        public new T this[int index]
+        {
+            get
+            {
+                return base[index];
+            }
+            set
+            {
+                throw new InvalidOperationException("Cannot use indexer - use SetItem");
+            } 
+        }
+
+        // TODO:
 
         //public new void Add(T item)
         //{
@@ -79,6 +109,26 @@ namespace Shared.DataStructures
         {
             PropertyChangedEventHandler handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
+        #region IChangeTracking
+        
+        public void AcceptChanges()
+        {
+            throw new InvalidOperationException("AcceptChanges is not applicable to ObservableList<T>");
+        }
+
+        public bool IsChanged { 
+            get
+            {
+                return _changeTracker.Any(x => x == true);
+            }
+            private set
+            {
+                throw new InvalidOperationException("Cannot set the IsChanged property - _changeTracker object is used to maintain change status");
+            }   
         }
 
         #endregion

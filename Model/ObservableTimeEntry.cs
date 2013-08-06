@@ -4,27 +4,33 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Linq;
 
 
 namespace Model
 {
-	public class TrackableTimeEntry : INotifyPropertyChanged, IChangeTracking
+	public class ObservableTimeEntry : INotifyPropertyChanged, IChangeTracking
 	{
-		public TrackableTimeEntry()
+		private Dictionary<string,bool> _changeTracker;
+		
+
+		public ObservableTimeEntry()
 		{
 			LoggedTime = null;
 			ExtraTime = null;
 			Notes = default(string);
 			WorkDetailId = null;
+			InitializeChangeTracker();
 		}
 		
 
-		public TrackableTimeEntry(TimeEntry timeEntry)
+		public ObservableTimeEntry(TimeEntry timeEntry)
 		{
 			_originalLoggedTime = timeEntry.LoggedTime;
 			_originalExtraTime = timeEntry.ExtraTime;
 			_originalNotes = timeEntry.Notes;
 			_originalWorkDetailId = timeEntry.WorkDetailId;
+			InitializeChangeTracker();
 		}
 		
 
@@ -44,7 +50,12 @@ namespace Model
 					OnPropertyChanged("LoggedTime");
 					if (_originalLoggedTime != _loggedTime)
 					{
-						IsChanged = true;
+						_changeTracker["LoggedTime"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["LoggedTime"] = false;
 					}
 				}
 			}
@@ -67,7 +78,12 @@ namespace Model
 					OnPropertyChanged("ExtraTime");
 					if (_originalExtraTime != _extraTime)
 					{
-						IsChanged = true;
+						_changeTracker["ExtraTime"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["ExtraTime"] = false;
 					}
 				}
 			}
@@ -90,7 +106,12 @@ namespace Model
 					OnPropertyChanged("Notes");
 					if (_originalNotes != _notes)
 					{
-						IsChanged = true;
+						_changeTracker["Notes"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["Notes"] = false;
 					}
 				}
 			}
@@ -113,7 +134,12 @@ namespace Model
 					OnPropertyChanged("WorkDetailId");
 					if (_originalWorkDetailId != _workDetailId)
 					{
-						IsChanged = true;
+						_changeTracker["WorkDetailId"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["WorkDetailId"] = false;
 					}
 				}
 			}
@@ -141,24 +167,37 @@ namespace Model
 			_originalExtraTime = _extraTime;
 			_originalNotes = _notes;
 			_originalWorkDetailId = _workDetailId;
-			IsChanged = false;
+			ResetChangeTracking();
+		}
+		
+
+		private void InitializeChangeTracker()
+		{
+			_changeTracker = new Dictionary<string,bool>();
+			_changeTracker["LoggedTime"] = false;
+			_changeTracker["ExtraTime"] = false;
+			_changeTracker["Notes"] = false;
+			_changeTracker["WorkDetailId"] = false;
 		}
 		
 		
-		private bool _isChanged;
+		private void ResetChangeTracking()
+		{
+			foreach (string key in _changeTracker.Keys.ToList())
+			{
+				_changeTracker[key] = false;
+			}
+		}
+		
 		public bool IsChanged
 		{
 			get 
 			{ 
-				return _isChanged;
+				return _changeTracker.All(x => x.Value == false);
 			}
-			set
+			private set
 			{
-				if (_isChanged != value)
-				{
-					_isChanged = value;
-					OnPropertyChanged("IsChanged");
-				}
+				throw new InvalidOperationException("Cannot set IsChanged property");
 			}
 		}
 				

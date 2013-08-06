@@ -4,13 +4,17 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Linq;
 
 
 namespace Model
 {
-	public class TrackableTimesheet : INotifyPropertyChanged, IChangeTracking
+	public class ObservableTimesheet : INotifyPropertyChanged, IChangeTracking
 	{
-		public TrackableTimesheet()
+		private Dictionary<string,bool> _changeTracker;
+		
+
+		public ObservableTimesheet()
 		{
 			Title = default(string);
 			TimesheetId = default(string);
@@ -18,10 +22,11 @@ namespace Model
 			NonProjectActivityItems = new List<ProjectTaskTimesheetItem>();
 			RequiredHours = new List<TimeSpan>();
 			TotalRequiredHours = new TimeSpan();
+			InitializeChangeTracker();
 		}
 		
 
-		public TrackableTimesheet(Timesheet timesheet)
+		public ObservableTimesheet(Timesheet timesheet)
 		{
 			_originalTitle = timesheet.Title;
 			_originalTimesheetId = timesheet.TimesheetId;
@@ -29,6 +34,7 @@ namespace Model
 			_originalNonProjectActivityItems = timesheet.NonProjectActivityItems;
 			_originalRequiredHours = timesheet.RequiredHours;
 			_originalTotalRequiredHours = timesheet.TotalRequiredHours;
+			InitializeChangeTracker();
 		}
 		
 
@@ -48,7 +54,12 @@ namespace Model
 					OnPropertyChanged("Title");
 					if (_originalTitle != _title)
 					{
-						IsChanged = true;
+						_changeTracker["Title"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["Title"] = false;
 					}
 				}
 			}
@@ -71,7 +82,12 @@ namespace Model
 					OnPropertyChanged("TimesheetId");
 					if (_originalTimesheetId != _timesheetId)
 					{
-						IsChanged = true;
+						_changeTracker["TimesheetId"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["TimesheetId"] = false;
 					}
 				}
 			}
@@ -94,7 +110,12 @@ namespace Model
 					OnPropertyChanged("ProjectTimeItems");
 					if (_originalProjectTimeItems != _projectTimeItems)
 					{
-						IsChanged = true;
+						_changeTracker["ProjectTimeItems"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["ProjectTimeItems"] = false;
 					}
 				}
 			}
@@ -117,7 +138,12 @@ namespace Model
 					OnPropertyChanged("NonProjectActivityItems");
 					if (_originalNonProjectActivityItems != _nonProjectActivityItems)
 					{
-						IsChanged = true;
+						_changeTracker["NonProjectActivityItems"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["NonProjectActivityItems"] = false;
 					}
 				}
 			}
@@ -140,7 +166,12 @@ namespace Model
 					OnPropertyChanged("RequiredHours");
 					if (_originalRequiredHours != _requiredHours)
 					{
-						IsChanged = true;
+						_changeTracker["RequiredHours"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["RequiredHours"] = false;
 					}
 				}
 			}
@@ -163,7 +194,12 @@ namespace Model
 					OnPropertyChanged("TotalRequiredHours");
 					if (_originalTotalRequiredHours != _totalRequiredHours)
 					{
-						IsChanged = true;
+						_changeTracker["TotalRequiredHours"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["TotalRequiredHours"] = false;
 					}
 				}
 			}
@@ -193,24 +229,39 @@ namespace Model
 			_originalNonProjectActivityItems = _nonProjectActivityItems;
 			_originalRequiredHours = _requiredHours;
 			_originalTotalRequiredHours = _totalRequiredHours;
-			IsChanged = false;
+			ResetChangeTracking();
+		}
+		
+
+		private void InitializeChangeTracker()
+		{
+			_changeTracker = new Dictionary<string,bool>();
+			_changeTracker["Title"] = false;
+			_changeTracker["TimesheetId"] = false;
+			_changeTracker["ProjectTimeItems"] = false;
+			_changeTracker["NonProjectActivityItems"] = false;
+			_changeTracker["RequiredHours"] = false;
+			_changeTracker["TotalRequiredHours"] = false;
 		}
 		
 		
-		private bool _isChanged;
+		private void ResetChangeTracking()
+		{
+			foreach (string key in _changeTracker.Keys.ToList())
+			{
+				_changeTracker[key] = false;
+			}
+		}
+		
 		public bool IsChanged
 		{
 			get 
 			{ 
-				return _isChanged;
+				return _changeTracker.All(x => x.Value == false);
 			}
-			set
+			private set
 			{
-				if (_isChanged != value)
-				{
-					_isChanged = value;
-					OnPropertyChanged("IsChanged");
-				}
+				throw new InvalidOperationException("Cannot set IsChanged property");
 			}
 		}
 				

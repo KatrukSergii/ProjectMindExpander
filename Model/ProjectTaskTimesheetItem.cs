@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Model
 {
-    public class ProjectTaskTimesheetItem : ITrackable
+    public class ProjectTaskTimesheetItem : IObservable
     {
         public ProjectTaskTimesheetItem(PickListItem projectCode, PickListItem taskCode)
         {

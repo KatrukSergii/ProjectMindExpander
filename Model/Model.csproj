@@ -42,27 +42,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ITrackable.cs" />
+    <Compile Include="IObservable.cs" />
+    <Compile Include="ObservableObjects.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ObservableObjects.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ObservableProjectTaskTimesheetItem.cs">
+      <DependentUpon>ObservableObjects.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ObservableTimeEntry.cs">
+      <DependentUpon>ObservableObjects.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ObservableTimesheet.cs">
+      <DependentUpon>ObservableObjects.tt</DependentUpon>
+    </Compile>
     <Compile Include="PickListItem.cs" />
     <Compile Include="ProjectTaskTimesheetItem.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeEntry.cs" />
     <Compile Include="Timesheet.cs" />
-    <Compile Include="TrackableObjects.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TrackableObjects.tt</DependentUpon>
-    </Compile>
-    <Compile Include="TrackableProjectTaskTimesheetItem.cs">
-      <DependentUpon>TrackableObjects.tt</DependentUpon>
-    </Compile>
-    <Compile Include="TrackableTimeEntry.cs">
-      <DependentUpon>TrackableObjects.tt</DependentUpon>
-    </Compile>
-    <Compile Include="TrackableTimesheet.cs">
-      <DependentUpon>TrackableObjects.tt</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.csproj">
@@ -76,9 +76,9 @@
       <LastGenOutput>MainObservableItem.cs</LastGenOutput>
     </None>
     <None Include="packages.config" />
-    <None Include="TrackableObjects.tt">
+    <None Include="ObservableObjects.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TrackableObjects.cs</LastGenOutput>
+      <LastGenOutput>ObservableObjects.cs</LastGenOutput>
     </None>
     <None Include="TemplateFileManagerV2.1.ttinclude" />
   </ItemGroup>

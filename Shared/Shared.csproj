@@ -39,9 +39,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataStructures\TrackableList.cs" />
+    <Compile Include="DataStructures\ObservableList.cs" />
     <Compile Include="Enum\ProjectTimeType.cs" />
     <Compile Include="Enum\TimeEntryFieldType.cs" />
+    <Compile Include="Extensions\GenericCopier.cs" />
     <Compile Include="Extensions\ListUtilities.cs" />
     <Compile Include="Extensions\TimeSpanExtensions.cs" />
     <Compile Include="ObjectState.cs" />
