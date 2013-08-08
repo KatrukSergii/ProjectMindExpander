@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using Shared.DataStructures;
 
 
 namespace Model
@@ -18,23 +19,22 @@ namespace Model
 		{
 			Title = default(string);
 			TimesheetId = default(string);
-			ProjectTimeItems = new List<ProjectTaskTimesheetItem>();
-			NonProjectActivityItems = new List<ProjectTaskTimesheetItem>();
-			RequiredHours = new List<TimeSpan>();
+			ProjectTimeItems = null;
+			NonProjectActivityItems = null;
+			RequiredHours = null;
 			TotalRequiredHours = new TimeSpan();
 			InitializeChangeTracker();
 		}
 		
 
-		public ObservableTimesheet(Timesheet timesheet)
+		public ObservableTimesheet(Timesheet timesheet) : this()
 		{
 			_originalTitle = timesheet.Title;
 			_originalTimesheetId = timesheet.TimesheetId;
-			_originalProjectTimeItems = timesheet.ProjectTimeItems;
-			_originalNonProjectActivityItems = timesheet.NonProjectActivityItems;
-			_originalRequiredHours = timesheet.RequiredHours;
+			_originalProjectTimeItems = new ObservableList<ObservableProjectTaskTimesheetItem>(timesheet.ProjectTimeItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
+			_originalNonProjectActivityItems = new ObservableList<ObservableProjectTaskTimesheetItem>(timesheet.NonProjectActivityItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
+			_originalRequiredHours = new ObservableList<TimeSpan>(timesheet.RequiredHours);
 			_originalTotalRequiredHours = timesheet.TotalRequiredHours;
-			InitializeChangeTracker();
 		}
 		
 
@@ -94,9 +94,9 @@ namespace Model
 		}
 		
 
-		private List<ProjectTaskTimesheetItem> _projectTimeItems;
-		private List<ProjectTaskTimesheetItem> _originalProjectTimeItems;
-		public List<ProjectTaskTimesheetItem> ProjectTimeItems
+		private ObservableList<ObservableProjectTaskTimesheetItem> _projectTimeItems;
+		private ObservableList<ObservableProjectTaskTimesheetItem> _originalProjectTimeItems;
+		public ObservableList<ObservableProjectTaskTimesheetItem> ProjectTimeItems
 		{
 			get
 			{
@@ -122,9 +122,9 @@ namespace Model
 		}
 		
 
-		private List<ProjectTaskTimesheetItem> _nonProjectActivityItems;
-		private List<ProjectTaskTimesheetItem> _originalNonProjectActivityItems;
-		public List<ProjectTaskTimesheetItem> NonProjectActivityItems
+		private ObservableList<ObservableProjectTaskTimesheetItem> _nonProjectActivityItems;
+		private ObservableList<ObservableProjectTaskTimesheetItem> _originalNonProjectActivityItems;
+		public ObservableList<ObservableProjectTaskTimesheetItem> NonProjectActivityItems
 		{
 			get
 			{
@@ -150,9 +150,9 @@ namespace Model
 		}
 		
 
-		private List<TimeSpan> _requiredHours;
-		private List<TimeSpan> _originalRequiredHours;
-		public List<TimeSpan> RequiredHours
+		private ObservableList<TimeSpan> _requiredHours;
+		private ObservableList<TimeSpan> _originalRequiredHours;
+		public ObservableList<TimeSpan> RequiredHours
 		{
 			get
 			{

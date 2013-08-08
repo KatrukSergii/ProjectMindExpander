@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using Shared.DataStructures;
 
 
 namespace Model
@@ -18,17 +19,16 @@ namespace Model
 		{
 			ProjectCode = new PickListItem();
 			TaskCode = new PickListItem();
-			TimeEntries = new List<TimeEntry>();
+			TimeEntries = null;
 			InitializeChangeTracker();
 		}
 		
 
-		public ObservableProjectTaskTimesheetItem(ProjectTaskTimesheetItem projectTaskTimesheetItem)
+		public ObservableProjectTaskTimesheetItem(ProjectTaskTimesheetItem projectTaskTimesheetItem) : this()
 		{
 			_originalProjectCode = projectTaskTimesheetItem.ProjectCode;
 			_originalTaskCode = projectTaskTimesheetItem.TaskCode;
-			_originalTimeEntries = projectTaskTimesheetItem.TimeEntries;
-			InitializeChangeTracker();
+			_originalTimeEntries = new ObservableList<ObservableTimeEntry>(projectTaskTimesheetItem.TimeEntries.Select(x => new ObservableTimeEntry(x)).ToList());
 		}
 		
 
@@ -88,9 +88,9 @@ namespace Model
 		}
 		
 
-		private List<TimeEntry> _timeEntries;
-		private List<TimeEntry> _originalTimeEntries;
-		public List<TimeEntry> TimeEntries
+		private ObservableList<ObservableTimeEntry> _timeEntries;
+		private ObservableList<ObservableTimeEntry> _originalTimeEntries;
+		public ObservableList<ObservableTimeEntry> TimeEntries
 		{
 			get
 			{

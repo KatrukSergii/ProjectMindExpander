@@ -20,6 +20,12 @@
 
 
 <#
+// NB: 
+//	+ Only handles List<T> at the moment (no HashSets, Collections etc) 
+//  + Only generic type tested is List<T>
+// 	+ Assumes that reference types implement IEqualityComparer 
+// 
+
 	// required to output to multiple files
 	manager = TemplateFileManager.Create(this);
 
@@ -57,7 +63,7 @@
 
 						CreateConstructor(type, properties, typeNames);
 
-						CreateProperties(properties);
+						CreateProperties(properties, typeNames);
 
 						CreateINotifyPropertyChangedRegion();
 
@@ -94,6 +100,7 @@
 		WriteLine("using System.ComponentModel;");
 		WriteLine("using System.Runtime.CompilerServices;");
 		WriteLine("using System.Linq;");
+		WriteLine("using Shared.DataStructures;");
 		WriteLine(Environment.NewLine);
 	}
 
@@ -115,20 +122,35 @@
 
 		WriteLine(Environment.NewLine);
 
-		using(new Brace("public " + _prefix + type.Name + "(" + type.Name + " " + camelCaseName + ")", this)){
+		using(new Brace("public " + _prefix + type.Name + "(" + type.Name + " " + camelCaseName + ") : this()", this)){
 			
 			foreach (var kvp in properties)
 			{
-				WriteLine("_original" + kvp.Key + " = " + camelCaseName +  "." + kvp.Key + ";");
+				var genericType  = GetGenericType(kvp.Value);
+				if (genericType.Equals("List"))
+                {
+					//e.g.  new ObservableList<ObservableProjectTaskTimesheetItem>(timesheet.ProjectTimeItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
+					var genericParam = GetGenericTypeParameter(kvp.Value);
+					var constructorParam = camelCaseName +  "." + kvp.Key;
+					if (IsTypeObservable(genericParam, typeNames))
+                    {
+						genericParam = _prefix + genericParam;
+						constructorParam = constructorParam + ".Select(x => new " + genericParam + "(x)).ToList()";
+                    }
+
+					WriteLine("_original" + kvp.Key + " = new " + _prefix + genericType + "<" + genericParam + ">" + "(" + constructorParam + ");");
+				}
+				else
+				{
+					WriteLine("_original" + kvp.Key + " = " + camelCaseName +  "." + kvp.Key + ";");
+                }
 			}
-		
-			WriteLine("InitializeChangeTracker();");
 		}
 		
 		WriteLine(Environment.NewLine);
 	}
 
-	/// Used to initialize variables inside of the class constructor
+	/// Used to initialize variables inside of the parameterless class constructor
 	private void CreatePropertyInitializer(string propertyName, string propertyType, bool isTypeObservable)
 	{
 		Write(propertyName + " = ");
@@ -149,7 +171,8 @@
 					break;
 				default:
 					
-					if (propertyType.EndsWith("?"))
+					// if type is nullable or a list then just set to null
+					if (propertyType.EndsWith("?") || propertyType.Contains("List<"))
 					{
 						WriteLine("null;");
 					}
@@ -199,17 +222,36 @@
 	}
 
 	// Loop through all the public properties
-	private void CreateProperties(Dictionary<string,string> properties)
+	private void CreateProperties(Dictionary<string,string> properties, IEnumerable<string> typeNames)
 	{
 		foreach (var property in properties)
 		{
-			CreateProperty(property.Key,property.Value);
+			string type = property.Value;
+
+			var genericType = GetGenericType(type);
+			if(genericType.Equals("List"))
+            {
+				// strip off any generic type, get 'Foobar' from 'List<Foobar>'
+				var typeParameter = GetGenericTypeParameter(type);
+				if(IsTypeObservable(typeParameter,typeNames))
+                {
+					// we can change the type to an Observable type (to be notified of changes etc)
+					typeParameter = _prefix + typeParameter;
+                }
+
+				type = _prefix + "List<" + typeParameter + ">";
+            }
+
+			CreateProperty(property.Key,type);
 		}
 	}
 
 	// Create public property with propertychanged, can tracking etc
 	private void CreateProperty(string propertyName, string propertyType)
 	{
+		//// change List<T> to ObservableList<T>
+		//propertyType = propertyType.Replace("List<","ObservableList<");
+
 		var privateFieldName = "_" + StringExtensions.ToCamelCase(propertyName);
 		// private backing field
 		WriteLine("private " + propertyType + " " + privateFieldName + ";");

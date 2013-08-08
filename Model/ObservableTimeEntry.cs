@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using Shared.DataStructures;
 
 
 namespace Model
@@ -24,13 +25,12 @@ namespace Model
 		}
 		
 
-		public ObservableTimeEntry(TimeEntry timeEntry)
+		public ObservableTimeEntry(TimeEntry timeEntry) : this()
 		{
 			_originalLoggedTime = timeEntry.LoggedTime;
 			_originalExtraTime = timeEntry.ExtraTime;
 			_originalNotes = timeEntry.Notes;
 			_originalWorkDetailId = timeEntry.WorkDetailId;
-			InitializeChangeTracker();
 		}
 		
 

@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using Model.Annotations;
 
 namespace Model
 {
@@ -14,87 +10,17 @@ namespace Model
             ProjectTimeItems = new List<ProjectTaskTimesheetItem>();
             NonProjectActivityItems = new List<ProjectTaskTimesheetItem>();
             RequiredHours = new List<TimeSpan>();
+            DummyTimeEntry = new TimeEntry();
         }
 
-        private string _title;
-        public string Title
-        {
-            get { return _title; }
-            set
-            {
-                _title = value;
-                OnPropertyChanged("Title");
-            }
-        }
-
-        private string _timesheetId;
-        public string TimesheetId
-        {
-            get { return _timesheetId; }
-            set
-            {
-                _timesheetId = value;
-                OnPropertyChanged("TimesheetId");
-            }
-        }
-
-        private List<ProjectTaskTimesheetItem> _projectTimeItems;
-        public List<ProjectTaskTimesheetItem> ProjectTimeItems
-        {
-            get { return _projectTimeItems; }
-            set
-            {
-                _projectTimeItems = value;
-                OnPropertyChanged("ProjectTimeItems");
-            }
-        }
-
-        private List<ProjectTaskTimesheetItem> _nonProjectTaskTimesheetItems;
-        public List<ProjectTaskTimesheetItem> NonProjectActivityItems
-        {
-            get { return _nonProjectTaskTimesheetItems; }
-            set
-            {
-                _nonProjectTaskTimesheetItems = value;
-                OnPropertyChanged("NonProjectActivityItems");
-            }
-        }
-
-        private List<TimeSpan> _requiredHours;
-        public List<TimeSpan> RequiredHours
-        {
-            get { return _requiredHours; }
-            set
-            {
-                _requiredHours = value;
-                OnPropertyChanged("RequiredHours");
-            }
-        }
-
-        private TimeSpan _totalRequiredHours;
-        public TimeSpan TotalRequiredHours
-        {
-            get { return _totalRequiredHours; }
-            set
-            {
-                _totalRequiredHours = value;
-                OnPropertyChanged("TotalRequiredHours");
-            }
-        }
-
-        #region INotifyPropertyChanged
-        
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        #endregion
-
+        public string Title { get; set; }
+        public TimeEntry DummyTimeEntryx { get; set; }
+        public string TimesheetId { get; set; }
+        public List<ProjectTaskTimesheetItem> ProjectTimeItems { get; set; }
+        public List<ProjectTaskTimesheetItem> NonProjectActivityItems { get; set; }
+        public List<TimeSpan> RequiredHours { get; set; }
+        public TimeSpan TotalRequiredHours { get; set; }
+        public TimeEntry DummyTimeEntry { get; set; }
     }
 }
 

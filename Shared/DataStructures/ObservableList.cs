@@ -8,7 +8,7 @@ using Shared.Extensions;
 namespace Shared.DataStructures
 {
     /// <summary>
-    /// Change tracking and INotifyPropertyChanged implementation
+    /// Change tracking and INotifyPropertyChanged implementation for List
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class ObservableList<T> : List<T>, INotifyPropertyChanged, IChangeTracking
@@ -20,13 +20,48 @@ namespace Shared.DataStructures
         public ObservableList(List<T> originalList)
         {
             _originalList = GenericCopier<List<T>>.DeepCopy(originalList);
+
+            foreach (var item in _originalList)
+            {
+                var copiedItem = GenericCopier<T>.DeepCopy(item);
+
+                var notifyingItem = (INotifyPropertyChanged)copiedItem;
+
+                if (notifyingItem != null)
+                {
+                    notifyingItem.PropertyChanged += NotifyingItem_PropertyChanged;
+                }
+
+                base.Add(copiedItem);
+            }
+            
             _changeTracker = new List<bool>(_originalList.Count);
+        }
+
+        private void NotifyingItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var changedItem = this.SingleOrDefault(x => x.Equals((T)sender));
+            
+            if (changedItem == null)
+            {
+                throw new InvalidOperationException("unable to find the changed item in the ObservableList");
+            }
+
+            var originalItem = _originalList.SingleOrDefault(x => x.Equals((T) sender));
+            if (!changedItem.Equals(originalItem))
+            {
+                var index = this.FindIndex(x => x.Equals((T)sender));
+                _changeTracker[index] = true;
+                OnPropertyChanged("IsChanged");
+            }
         }
 
         public void SetItem(int index, T item)
         {
             base[index] = item;
 
+            // assume reference types implement IEqualityComparer so that Equals() checks the property values
+            // instead of the references of the objects
             if (!this[index].Equals(_originalList[index]))
             {
                 OnPropertyChanged();
@@ -46,26 +81,30 @@ namespace Shared.DataStructures
             }
             set
             {
-                throw new InvalidOperationException("Cannot use indexer - use SetItem");
+                throw new InvalidOperationException("Cannot use indexer - use SetItem instead");
             } 
         }
 
-        // TODO:
+        public new void Add(T item)
+        {
+            _changeTracker.Add(false);
+            this.Add(item);
+            OnPropertyChanged("IsChanged");
+        }
 
-        //public new void Add(T item)
-        //{
-            
-        //}
+        public new void AddRange(IEnumerable<T> collection)
+        {
+            _changeTracker.AddRange(collection.Select(x => false));
+            this.AddRange(collection);
+            OnPropertyChanged("IsChanged");
+        }
 
-        //public new void AddRange(IEnumerable<T> collection)
-        //{
-
-        //}
-
-        //public new void Clear()
-        //{
-            
-        //}
+        public new void Clear()
+        {
+            _changeTracker.Clear();
+            this.Clear();
+            OnPropertyChanged("IsChanged");
+        }
 
         //public new void Insert(int index, T item)
         //{
@@ -123,7 +162,7 @@ namespace Shared.DataStructures
         public bool IsChanged { 
             get
             {
-                return _changeTracker.Any(x => x == true);
+                return (this.Count != _originalList.Count) || _changeTracker.Any(x => x == true);
             }
             private set
             {

@@ -7,7 +7,7 @@ namespace Shared.Extensions
     public static class ListUtilities<T>
     {
         /// <summary>
-        /// Allows comparison of List<[ValueType]> or List<[IComparableType]>
+        /// Allows comparison of List<[ValueType]> or List<[IEqualityComparer]>
         /// </summary>
         /// <param name="list"></param>
         /// <param name="otherList"></param>

@@ -43,20 +43,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IObservable.cs" />
-    <Compile Include="ObservableObjects.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ObservableObjects.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ObservableProjectTaskTimesheetItem.cs">
-      <DependentUpon>ObservableObjects.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ObservableTimeEntry.cs">
-      <DependentUpon>ObservableObjects.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ObservableTimesheet.cs">
-      <DependentUpon>ObservableObjects.tt</DependentUpon>
-    </Compile>
     <Compile Include="PickListItem.cs" />
     <Compile Include="ProjectTaskTimesheetItem.cs" />
     <Compile Include="Properties\Annotations.cs" />
