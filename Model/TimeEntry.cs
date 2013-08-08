@@ -2,6 +2,7 @@
 
 namespace Model
 {
+    [Serializable]
     public class TimeEntry : IObservable
     {
         public TimeEntry()

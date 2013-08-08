@@ -122,12 +122,5 @@ namespace Tests
             var returnType = TypeUtility.ConvertTypeNameToObservableTypeName(type, types, _prefix);
             Assert.AreEqual("PREFIX_List<PREFIX_Foo<PREFIX_Bar<Collection<string>>>", returnType);
         }
-
-        [TestMethod]
-        public void Test()
-        {
-            var t = new Timesheet();
-           // var x = new ObservableTimesheet(t);
-        }
     }
 }

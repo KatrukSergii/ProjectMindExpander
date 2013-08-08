@@ -5,6 +5,7 @@ using System.Reflection;
 
 namespace Model
 {
+    [Serializable]
     public class ProjectTaskTimesheetItem : IObservable
     {
         public ProjectTaskTimesheetItem(PickListItem projectCode, PickListItem taskCode)

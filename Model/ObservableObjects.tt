@@ -23,6 +23,7 @@
 // NB: 
 //	+ Only handles List<T> at the moment (no HashSets, Collections etc) 
 //  + Only generic type tested is List<T>
+//  + Probably needs to change List<T> to Collection<T> to get notification of items added/removed
 // 	+ Assumes that reference types implement IEqualityComparer 
 //	+ Assumes that reference types have parameterless constructors
 //  + Assumes c# type aliases are used (e.g. string, int, bool)
@@ -57,8 +58,9 @@
 		var properties = GetPublicPropertyDetails(type);
 
 		using(new Brace("namespace " + _namespaceName, this)){
-		
-				using(new Brace("public class " + "Observable" + type.Name + " : INotifyPropertyChanged, IChangeTracking", this)){
+
+				WriteLine("[Serializable]");		
+				using(new Brace("public partial class " + "Observable" + type.Name + " : INotifyPropertyChanged, IChangeTracking", this)){
 
 						CreatePrivateMembers();
 
@@ -66,6 +68,7 @@
 
 						CreateProperties(properties, typeNames);
 
+						CreateResetPropertiesMethod(properties, typeNames);
 						CreateINotifyPropertyChangedRegion();
 
 						CreateIChangeTrackingRegion(properties);
@@ -76,6 +79,7 @@
 	private void CreatePrivateMembers()
 	{
 		WriteLine("private Dictionary<string,bool> _changeTracker;");
+		WriteLine("private bool _isTrackingEnabled;");
 		WriteLine(Environment.NewLine);
 	}
 
@@ -158,25 +162,9 @@
 
 			WriteLine(Environment.NewLine);
 
-			// Assign the Properties
-			foreach (var kvp in properties)
-			{
-				Write(kvp.Key + " = ");
-				
-				if (TypeUtility.IsValueType(kvp.Value))
-				{
-					WriteLine(camelCaseName + "." + kvp.Key + ";");
-				}
-				else
-				{
-					// Reference Types need to be deep copied
-					var observableTypeName = TypeUtility.ConvertTypeNameToObservableTypeName(kvp.Value, typeNames, _prefix);
-					WriteLine("GenericCopier<" + observableTypeName + ">.DeepCopy(" + camelCaseName + "." + kvp.Key + ");" );
-				}
-			}
-
-			WriteLine(Environment.NewLine);
+			WriteLine("ResetProperties();");
 			WriteLine("ResetChangeTracking();");
+			WriteLine("_isTrackingEnabled = true;");
 		}
 		
 		WriteLine(Environment.NewLine);
@@ -252,7 +240,7 @@
 						WriteLine(privateFieldName + " = value;");
 						WriteLine(@"OnPropertyChanged(""" + propertyName + @""");");
 
-						using(new Brace("if (_original" + propertyName + " != null && !_original" + propertyName + ".Equals(" + privateFieldName + "))",this))
+						using(new Brace("if (_original" + propertyName + " == null || !_original" + propertyName + ".Equals(" + privateFieldName + "))",this))
 						{
 							WriteLine(@"_changeTracker[""" + propertyName + @"""] = true;");
 							WriteLine(@"OnPropertyChanged(""IsChanged"");");
@@ -268,18 +256,55 @@
 		WriteLine(Environment.NewLine);
 	}
 
+	private void CreateResetPropertiesMethod(Dictionary<string,string> properties, IEnumerable<string> typeNames)
+    {
+		using(new Brace("private void ResetProperties()",this))
+        {
+			// Assign the Properties
+			foreach (var kvp in properties)
+			{
+				Write(kvp.Key + " = ");
+				
+				if (TypeUtility.IsValueType(kvp.Value))
+				{
+					WriteLine("_original" + kvp.Key + ";");
+				}
+				else
+				{
+					// Reference Types need to be deep copied
+					var observableTypeName = TypeUtility.ConvertTypeNameToObservableTypeName(kvp.Value, typeNames, _prefix);
+
+					Write("_original" + kvp.Key + " == null ? null : ");
+					
+					if(observableTypeName.StartsWith(_prefix + "List"))
+					{
+						WriteLine("_original" + kvp.Key + ".DeepCopy();" );  // ObservableList has a method to deep copy all the items and return a new list
+					}
+					else
+					{
+							WriteLine("GenericCopier<" + observableTypeName + ">.DeepCopy(_original" + kvp.Key + ");" );
+					}
+				}
+			}
+        }
+		WriteLine(Environment.NewLine);
+    }
 
 	private void CreateINotifyPropertyChangedRegion()
 	{
 		WriteLine(@"
 #region INotifyPropertyChanged
 
+[field:NonSerializedAttribute()]
 public event PropertyChangedEventHandler PropertyChanged;
 
 protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
 {
-	PropertyChangedEventHandler handler = PropertyChanged;
-	if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+	if (_isTrackingEnabled)
+	{
+		PropertyChangedEventHandler handler = PropertyChanged;
+		if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+	}
 }
 
 #endregion
@@ -296,7 +321,17 @@ protected virtual void OnPropertyChanged([CallerMemberName] string propertyName 
 				WriteLine("_original" + property.Key + " = _" + StringHelper.ToCamelCase(property.Key) + ";");
 			}
 
-				WriteLine("ResetChangeTracking();");
+			WriteLine("ResetChangeTracking();");
+		}
+	
+		WriteLine(Environment.NewLine);
+
+		using(new Brace("public void AbandonChanges()",this))
+		{
+			WriteLine("_isTrackingEnabled = false;");
+			WriteLine("ResetProperties();");
+			WriteLine("_isTrackingEnabled = true;");
+			WriteLine("ResetChangeTracking();");
 		}
 	
 		WriteLine(Environment.NewLine);

@@ -11,6 +11,7 @@ namespace Shared.DataStructures
     /// Change tracking and INotifyPropertyChanged implementation for List
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    [Serializable]
     public class ObservableList<T> : List<T>, INotifyPropertyChanged, IChangeTracking
     {
 
@@ -25,7 +26,7 @@ namespace Shared.DataStructures
             {
                 var copiedItem = GenericCopier<T>.DeepCopy(item);
 
-                var notifyingItem = (INotifyPropertyChanged)copiedItem;
+                var notifyingItem = copiedItem as INotifyPropertyChanged;
 
                 if (notifyingItem != null)
                 {
@@ -36,6 +37,7 @@ namespace Shared.DataStructures
             }
             
             _changeTracker = new List<bool>(_originalList.Count);
+            _originalList.ForEach(x => _changeTracker.Add(false));
         }
 
         private void NotifyingItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -48,11 +50,23 @@ namespace Shared.DataStructures
             }
 
             var originalItem = _originalList.SingleOrDefault(x => x.Equals((T) sender));
+            
+            var index = this.FindIndex(x => x.Equals((T) sender));
             if (!changedItem.Equals(originalItem))
             {
-                var index = this.FindIndex(x => x.Equals((T)sender));
-                _changeTracker[index] = true;
-                OnPropertyChanged("IsChanged");
+                if (_changeTracker[index] == false)
+                {
+                    _changeTracker[index] = true;
+                    OnPropertyChanged("IsChanged");
+                }
+            }
+            else
+            {
+                if (_changeTracker[index] == true)
+                {
+                    _changeTracker[index] = false;
+                    OnPropertyChanged("IsChanged");
+                }
             }
         }
 
@@ -106,6 +120,12 @@ namespace Shared.DataStructures
             OnPropertyChanged("IsChanged");
         }
 
+        public ObservableList<T> DeepCopy()
+        {
+            var copy =  new ObservableList<T>(GenericCopier<T>.DeepCopyList(this));
+            return copy;
+        }
+
         //public new void Insert(int index, T item)
         //{
            
@@ -142,6 +162,7 @@ namespace Shared.DataStructures
 
         #region INotifyPropertyChanged
 
+        [field: NonSerializedAttribute()]
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

@@ -112,6 +112,7 @@ namespace Shared.Utility
                 case "double":
                 case "decimal":
                 case "string": // treat string as a value type
+                case "timespan":
                     return true;
                 default:
                     return false;

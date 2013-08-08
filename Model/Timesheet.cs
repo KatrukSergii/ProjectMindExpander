@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Model
 {
+    [Serializable]
     public class Timesheet : IObservable
     {  
         public Timesheet()
@@ -14,7 +15,6 @@ namespace Model
         }
 
         public string Title { get; set; }
-        public TimeEntry DummyTimeEntryx { get; set; }
         public string TimesheetId { get; set; }
         public List<ProjectTaskTimesheetItem> ProjectTimeItems { get; set; }
         public List<ProjectTaskTimesheetItem> NonProjectActivityItems { get; set; }

@@ -11,9 +11,11 @@ using Shared.DataStructures;
 
 namespace Model
 {
-	public class ObservableTimeEntry : INotifyPropertyChanged, IChangeTracking
+	[Serializable]
+	public partial class ObservableTimeEntry : INotifyPropertyChanged, IChangeTracking
 	{
 		private Dictionary<string,bool> _changeTracker;
+		private bool _isTrackingEnabled;
 		
 
 		public ObservableTimeEntry()
@@ -34,13 +36,9 @@ namespace Model
 			_originalWorkDetailId = timeEntry.WorkDetailId;
 			
 
-			LoggedTime = GenericCopier<TimeSpan?>.DeepCopy(timeEntry.LoggedTime);
-			ExtraTime = GenericCopier<TimeSpan?>.DeepCopy(timeEntry.ExtraTime);
-			Notes = timeEntry.Notes;
-			WorkDetailId = GenericCopier<int?>.DeepCopy(timeEntry.WorkDetailId);
-			
-
+			ResetProperties();
 			ResetChangeTracking();
+			_isTrackingEnabled = true;
 		}
 		
 
@@ -58,7 +56,7 @@ namespace Model
 				{
 					_loggedTime = value;
 					OnPropertyChanged("LoggedTime");
-					if (_originalLoggedTime != null && !_originalLoggedTime.Equals(_loggedTime))
+					if (_originalLoggedTime == null || !_originalLoggedTime.Equals(_loggedTime))
 					{
 						_changeTracker["LoggedTime"] = true;
 						OnPropertyChanged("IsChanged");
@@ -86,7 +84,7 @@ namespace Model
 				{
 					_extraTime = value;
 					OnPropertyChanged("ExtraTime");
-					if (_originalExtraTime != null && !_originalExtraTime.Equals(_extraTime))
+					if (_originalExtraTime == null || !_originalExtraTime.Equals(_extraTime))
 					{
 						_changeTracker["ExtraTime"] = true;
 						OnPropertyChanged("IsChanged");
@@ -114,7 +112,7 @@ namespace Model
 				{
 					_notes = value;
 					OnPropertyChanged("Notes");
-					if (_originalNotes != null && !_originalNotes.Equals(_notes))
+					if (_originalNotes == null || !_originalNotes.Equals(_notes))
 					{
 						_changeTracker["Notes"] = true;
 						OnPropertyChanged("IsChanged");
@@ -142,7 +140,7 @@ namespace Model
 				{
 					_workDetailId = value;
 					OnPropertyChanged("WorkDetailId");
-					if (_originalWorkDetailId != null && !_originalWorkDetailId.Equals(_workDetailId))
+					if (_originalWorkDetailId == null || !_originalWorkDetailId.Equals(_workDetailId))
 					{
 						_changeTracker["WorkDetailId"] = true;
 						OnPropertyChanged("IsChanged");
@@ -156,15 +154,28 @@ namespace Model
 		}
 		
 
+		private void ResetProperties()
+		{
+			LoggedTime = _originalLoggedTime == null ? null : GenericCopier<TimeSpan?>.DeepCopy(_originalLoggedTime);
+			ExtraTime = _originalExtraTime == null ? null : GenericCopier<TimeSpan?>.DeepCopy(_originalExtraTime);
+			Notes = _originalNotes;
+			WorkDetailId = _originalWorkDetailId == null ? null : GenericCopier<int?>.DeepCopy(_originalWorkDetailId);
+		}
+		
+
 		
 		#region INotifyPropertyChanged
 		
+		[field:NonSerializedAttribute()]
 		public event PropertyChangedEventHandler PropertyChanged;
 		
 		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+			if (_isTrackingEnabled)
+			{
+				PropertyChangedEventHandler handler = PropertyChanged;
+				if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+			}
 		}
 		
 		#endregion
@@ -177,6 +188,15 @@ namespace Model
 			_originalExtraTime = _extraTime;
 			_originalNotes = _notes;
 			_originalWorkDetailId = _workDetailId;
+			ResetChangeTracking();
+		}
+		
+
+		public void AbandonChanges()
+		{
+			_isTrackingEnabled = false;
+			ResetProperties();
+			_isTrackingEnabled = true;
 			ResetChangeTracking();
 		}
 		

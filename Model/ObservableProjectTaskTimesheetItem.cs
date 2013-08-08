@@ -11,9 +11,11 @@ using Shared.DataStructures;
 
 namespace Model
 {
-	public class ObservableProjectTaskTimesheetItem : INotifyPropertyChanged, IChangeTracking
+	[Serializable]
+	public partial class ObservableProjectTaskTimesheetItem : INotifyPropertyChanged, IChangeTracking
 	{
 		private Dictionary<string,bool> _changeTracker;
+		private bool _isTrackingEnabled;
 		
 
 		public ObservableProjectTaskTimesheetItem()
@@ -32,12 +34,9 @@ namespace Model
 			_originalTimeEntries = new ObservableList<ObservableTimeEntry>(projectTaskTimesheetItem.TimeEntries.Select(x => new ObservableTimeEntry(x)).ToList());
 			
 
-			ProjectCode = GenericCopier<PickListItem>.DeepCopy(projectTaskTimesheetItem.ProjectCode);
-			TaskCode = GenericCopier<PickListItem>.DeepCopy(projectTaskTimesheetItem.TaskCode);
-			TimeEntries = GenericCopier<ObservableList<ObservableTimeEntry>>.DeepCopy(projectTaskTimesheetItem.TimeEntries);
-			
-
+			ResetProperties();
 			ResetChangeTracking();
+			_isTrackingEnabled = true;
 		}
 		
 
@@ -55,7 +54,7 @@ namespace Model
 				{
 					_projectCode = value;
 					OnPropertyChanged("ProjectCode");
-					if (_originalProjectCode != null && !_originalProjectCode.Equals(_projectCode))
+					if (_originalProjectCode == null || !_originalProjectCode.Equals(_projectCode))
 					{
 						_changeTracker["ProjectCode"] = true;
 						OnPropertyChanged("IsChanged");
@@ -83,7 +82,7 @@ namespace Model
 				{
 					_taskCode = value;
 					OnPropertyChanged("TaskCode");
-					if (_originalTaskCode != null && !_originalTaskCode.Equals(_taskCode))
+					if (_originalTaskCode == null || !_originalTaskCode.Equals(_taskCode))
 					{
 						_changeTracker["TaskCode"] = true;
 						OnPropertyChanged("IsChanged");
@@ -111,7 +110,7 @@ namespace Model
 				{
 					_timeEntries = value;
 					OnPropertyChanged("TimeEntries");
-					if (_originalTimeEntries != null && !_originalTimeEntries.Equals(_timeEntries))
+					if (_originalTimeEntries == null || !_originalTimeEntries.Equals(_timeEntries))
 					{
 						_changeTracker["TimeEntries"] = true;
 						OnPropertyChanged("IsChanged");
@@ -125,15 +124,27 @@ namespace Model
 		}
 		
 
+		private void ResetProperties()
+		{
+			ProjectCode = _originalProjectCode == null ? null : GenericCopier<PickListItem>.DeepCopy(_originalProjectCode);
+			TaskCode = _originalTaskCode == null ? null : GenericCopier<PickListItem>.DeepCopy(_originalTaskCode);
+			TimeEntries = _originalTimeEntries == null ? null : _originalTimeEntries.DeepCopy();
+		}
+		
+
 		
 		#region INotifyPropertyChanged
 		
+		[field:NonSerializedAttribute()]
 		public event PropertyChangedEventHandler PropertyChanged;
 		
 		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+			if (_isTrackingEnabled)
+			{
+				PropertyChangedEventHandler handler = PropertyChanged;
+				if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+			}
 		}
 		
 		#endregion
@@ -145,6 +156,15 @@ namespace Model
 			_originalProjectCode = _projectCode;
 			_originalTaskCode = _taskCode;
 			_originalTimeEntries = _timeEntries;
+			ResetChangeTracking();
+		}
+		
+
+		public void AbandonChanges()
+		{
+			_isTrackingEnabled = false;
+			ResetProperties();
+			_isTrackingEnabled = true;
 			ResetChangeTracking();
 		}
 		

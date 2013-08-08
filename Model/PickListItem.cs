@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace Model
 {
+    [Serializable]
     public class PickListItem
     {
         public PickListItem()
