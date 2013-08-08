@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared.Extensions
+namespace Shared.Utility
 {
     public static class IEnumerableExtensions
     {

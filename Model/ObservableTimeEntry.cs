@@ -1,5 +1,6 @@
 ﻿using Model;
 using Shared;
+using Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,11 +18,11 @@ namespace Model
 
 		public ObservableTimeEntry()
 		{
+			InitializeChangeTracker();
 			LoggedTime = null;
 			ExtraTime = null;
 			Notes = default(string);
 			WorkDetailId = null;
-			InitializeChangeTracker();
 		}
 		
 
@@ -31,6 +32,15 @@ namespace Model
 			_originalExtraTime = timeEntry.ExtraTime;
 			_originalNotes = timeEntry.Notes;
 			_originalWorkDetailId = timeEntry.WorkDetailId;
+			
+
+			LoggedTime = GenericCopier<TimeSpan?>.DeepCopy(timeEntry.LoggedTime);
+			ExtraTime = GenericCopier<TimeSpan?>.DeepCopy(timeEntry.ExtraTime);
+			Notes = timeEntry.Notes;
+			WorkDetailId = GenericCopier<int?>.DeepCopy(timeEntry.WorkDetailId);
+			
+
+			ResetChangeTracking();
 		}
 		
 
@@ -48,7 +58,7 @@ namespace Model
 				{
 					_loggedTime = value;
 					OnPropertyChanged("LoggedTime");
-					if (_originalLoggedTime != _loggedTime)
+					if (_originalLoggedTime != null && !_originalLoggedTime.Equals(_loggedTime))
 					{
 						_changeTracker["LoggedTime"] = true;
 						OnPropertyChanged("IsChanged");
@@ -76,7 +86,7 @@ namespace Model
 				{
 					_extraTime = value;
 					OnPropertyChanged("ExtraTime");
-					if (_originalExtraTime != _extraTime)
+					if (_originalExtraTime != null && !_originalExtraTime.Equals(_extraTime))
 					{
 						_changeTracker["ExtraTime"] = true;
 						OnPropertyChanged("IsChanged");
@@ -104,7 +114,7 @@ namespace Model
 				{
 					_notes = value;
 					OnPropertyChanged("Notes");
-					if (_originalNotes != _notes)
+					if (_originalNotes != null && !_originalNotes.Equals(_notes))
 					{
 						_changeTracker["Notes"] = true;
 						OnPropertyChanged("IsChanged");
@@ -132,7 +142,7 @@ namespace Model
 				{
 					_workDetailId = value;
 					OnPropertyChanged("WorkDetailId");
-					if (_originalWorkDetailId != _workDetailId)
+					if (_originalWorkDetailId != null && !_originalWorkDetailId.Equals(_workDetailId))
 					{
 						_changeTracker["WorkDetailId"] = true;
 						OnPropertyChanged("IsChanged");

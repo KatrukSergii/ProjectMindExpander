@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Shared.Extensions
+namespace Shared.Utility
 {
     public static class ListUtilities<T>
     {
@@ -25,10 +25,10 @@ namespace Shared.Extensions
             var isIComparable = typeof(IEqualityComparer<T>).IsAssignableFrom(typeof(T));
 
             // assume each list is in same order
-            for (var i= 0; i < otherList.Count; i++)
+            for (var i = 0; i < otherList.Count; i++)
             {
                 var item = otherList[i];
-                
+
                 if (isValueType)
                 {
                     if (!list[i].Equals(otherList[i]))
@@ -38,7 +38,7 @@ namespace Shared.Extensions
                 }
                 else if (isIComparable)
                 {
-                    if (!((IEqualityComparer<T>) list[i]).Equals(otherList[i]))
+                    if (!((IEqualityComparer<T>)list[i]).Equals(otherList[i]))
                     {
                         return false;
                     }
@@ -48,7 +48,7 @@ namespace Shared.Extensions
                     throw new ArgumentException("Can only compare equality for lists of value types or IEqualityComparer<T> objects");
                 }
             }
-            
+
             return true;
         }
     }

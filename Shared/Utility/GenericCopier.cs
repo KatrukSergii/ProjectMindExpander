@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared.Extensions
+namespace Shared.Utility
 {
     /// <summary>
     /// Copied from http://stackoverflow.com/questions/519461/cloning-listt

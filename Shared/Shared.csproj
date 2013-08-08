@@ -42,13 +42,14 @@
     <Compile Include="DataStructures\ObservableList.cs" />
     <Compile Include="Enum\ProjectTimeType.cs" />
     <Compile Include="Enum\TimeEntryFieldType.cs" />
-    <Compile Include="Extensions\GenericCopier.cs" />
-    <Compile Include="Extensions\IEnumerableExtensions.cs" />
-    <Compile Include="Extensions\ListUtilities.cs" />
-    <Compile Include="Extensions\TimeSpanExtensions.cs" />
+    <Compile Include="Utility\GenericCopier.cs" />
+    <Compile Include="Utility\IEnumerableExtensions.cs" />
+    <Compile Include="Utility\ListUtilities.cs" />
+    <Compile Include="Utility\TimeSpanExtensions.cs" />
     <Compile Include="ObjectState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Utility\StringHelper.cs" />
+    <Compile Include="Utility\TypeUtility.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

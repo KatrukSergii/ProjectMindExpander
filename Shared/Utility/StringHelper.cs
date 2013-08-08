@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 
-namespace Shared.Extensions
+namespace Shared.Utility
 {
-    public static class StringExtensions
+    public static class StringHelper
     {
         /// <summary>
         /// Converts the first character to lowercase

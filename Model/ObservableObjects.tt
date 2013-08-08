@@ -11,7 +11,7 @@
 <#@ import namespace="System.Collections" #>
 <#@ import namespace="System.Collections.Generic" #> 
 <#@ import namespace="Model" #> 
-<#@ import namespace="Shared.Extensions" #> 
+<#@ import namespace="Shared.Utility" #> 
 <#@ assembly name="$(ProjectDir)..\bin\Debug\Model.dll" #>
 <#@ assembly name="$(ProjectDir)..\bin\Debug\Shared.dll" #>
 <#@ import namespace="System.Reflection" #>
@@ -24,7 +24,8 @@
 //	+ Only handles List<T> at the moment (no HashSets, Collections etc) 
 //  + Only generic type tested is List<T>
 // 	+ Assumes that reference types implement IEqualityComparer 
-// 
+//	+ Assumes that reference types have parameterless constructors
+//  + Assumes c# type aliases are used (e.g. string, int, bool)
 
 	// required to output to multiple files
 	manager = TemplateFileManager.Create(this);
@@ -84,7 +85,8 @@
 
 		foreach (PropertyInfo property in type.GetProperties())
 		{
-			var typeName = StringExtensions.GetFriendlyName(property.PropertyType);
+			// removes any rubbish from the generic type name 
+			var typeName = StringHelper.GetFriendlyName(property.PropertyType);
 			properties.Add(property.Name,typeName);
 		}
 
@@ -95,6 +97,7 @@
 	{
 		WriteLine(@"using Model;");
 		WriteLine("using Shared;");
+		WriteLine("using Shared.Utility;");
 		WriteLine("using System;");
 		WriteLine("using System.Collections.Generic;");
 		WriteLine("using System.ComponentModel;");
@@ -106,45 +109,74 @@
 
 	private void CreateConstructor(Type type, Dictionary<string,string> properties, IEnumerable<string> typeNames)
 	{
-		var camelCaseName = StringExtensions.ToCamelCase(type.Name);
+		var camelCaseName = StringHelper.ToCamelCase(type.Name);
 
-		// parameterless constructor
+		// parameterless constructor, e.g. ObservableFoo()
 		using(new Brace("public " + _prefix + type.Name + "()", this)){
 			
+			WriteLine("InitializeChangeTracker();");
+
 			foreach (var kvp in properties)
 			{
-				var isObservable = IsTypeObservable(kvp.Value,typeNames);
+				var isObservable = TypeUtility.IsTypeObservable(kvp.Value,typeNames);
 				CreatePropertyInitializer(kvp.Key,kvp.Value, isObservable);
 			}
-
-			WriteLine("InitializeChangeTracker();");
 		}
 
 		WriteLine(Environment.NewLine);
 
+		// e.g.  ObservableFoo(Foo foo)
 		using(new Brace("public " + _prefix + type.Name + "(" + type.Name + " " + camelCaseName + ") : this()", this)){
 			
+			// Assign the _originalX properties
 			foreach (var kvp in properties)
 			{
-				var genericType  = GetGenericType(kvp.Value);
-				if (genericType.Equals("List"))
-                {
-					//e.g.  new ObservableList<ObservableProjectTaskTimesheetItem>(timesheet.ProjectTimeItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
-					var genericParam = GetGenericTypeParameter(kvp.Value);
-					var constructorParam = camelCaseName +  "." + kvp.Key;
-					if (IsTypeObservable(genericParam, typeNames))
-                    {
-						genericParam = _prefix + genericParam;
-						constructorParam = constructorParam + ".Select(x => new " + genericParam + "(x)).ToList()";
-                    }
+				var genericType = TypeUtility.ConvertTypeNameToObservableTypeName(kvp.Value,typeNames,_prefix);
 
-					WriteLine("_original" + kvp.Key + " = new " + _prefix + genericType + "<" + genericParam + ">" + "(" + constructorParam + ");");
+				Write("_original" + kvp.Key + " = ");
+
+				// if the type starts with 'Observable' we need to new up the object in the constructor, e.g _originalX = new ObservableFoo();
+				if (genericType.StartsWith(_prefix))
+				{
+					//e.g. _originalFoos = new ObservableList<ObservableFoo>(myObject.Foos.Select(x => new ObservableFoo(x)).ToList());
+
+					var genericParam = TypeUtility.GetGenericTypeParameter(kvp.Value);
+					var constructorParam = camelCaseName +  "." + kvp.Key;
+					if (TypeUtility.IsTypeObservable(genericParam, typeNames))
+					{
+						genericParam = TypeUtility.ConvertTypeNameToObservableTypeName(genericParam,typeNames,_prefix);
+						constructorParam = constructorParam + ".Select(x => new " + genericParam + "(x)).ToList()";
+					}
+
+					WriteLine("new " + genericType + "(" + constructorParam + ");");
 				}
 				else
 				{
-					WriteLine("_original" + kvp.Key + " = " + camelCaseName +  "." + kvp.Key + ";");
-                }
+					WriteLine(camelCaseName +  "." + kvp.Key + ";");
+				}
 			}
+
+			WriteLine(Environment.NewLine);
+
+			// Assign the Properties
+			foreach (var kvp in properties)
+			{
+				Write(kvp.Key + " = ");
+				
+				if (TypeUtility.IsValueType(kvp.Value))
+				{
+					WriteLine(camelCaseName + "." + kvp.Key + ";");
+				}
+				else
+				{
+					// Reference Types need to be deep copied
+					var observableTypeName = TypeUtility.ConvertTypeNameToObservableTypeName(kvp.Value, typeNames, _prefix);
+					WriteLine("GenericCopier<" + observableTypeName + ">.DeepCopy(" + camelCaseName + "." + kvp.Key + ");" );
+				}
+			}
+
+			WriteLine(Environment.NewLine);
+			WriteLine("ResetChangeTracking();");
 		}
 		
 		WriteLine(Environment.NewLine);
@@ -172,76 +204,26 @@
 				default:
 					
 					// if type is nullable or a list then just set to null
-					if (propertyType.EndsWith("?") || propertyType.Contains("List<"))
+					if (propertyType.EndsWith("?") || TypeUtility.GetGenericType(propertyType).Equals("List"))
 					{
 						WriteLine("null;");
 					}
 					else
 					{
-						WriteLine("new " + propertyType + "();");
+						WriteLine("new " + (isTypeObservable ? _prefix + propertyType : propertyType) + "();");
 					}
 
 					break;
 		}
 	}
 
-	// e.g. List<string> returns "string"
-	private string GetGenericTypeParameter(string genericTypeName)
-	{
 	
-			string typeParameter = string.Empty;
-
-			var regex = new Regex(@"\<(?<name>\S+)\>");
-		   
-			// Assume only one type parameter at the moment
-			// TODO handle dictionaries and other stuff, e.g. Dicionary<string,List<string>>
-			if (regex.IsMatch(genericTypeName))
-			{
-				typeParameter = regex.Matches(genericTypeName)[0].Groups["name"].Value;
-			}
-
-			return typeParameter;
-	}
-
-	// e.g. return "List" from "List<SomeType>" or "Dictionary" from "Dictionary<string,string>"
-	private string GetGenericType(string genericTypeName)
-	{
-	
-			string typeName = string.Empty;
-
-			var regex = new Regex(@"(?<name>\S+)\<\S+\>");
-		   
-			// Assume only one type at the moment
-			// TODO handle nested lists/dictionaries and other stuff
-			if (regex.IsMatch(genericTypeName))
-			{
-				typeName = regex.Matches(genericTypeName)[0].Groups["name"].Value;
-			}
-
-			return typeName;
-	}
-
 	// Loop through all the public properties
 	private void CreateProperties(Dictionary<string,string> properties, IEnumerable<string> typeNames)
 	{
 		foreach (var property in properties)
 		{
-			string type = property.Value;
-
-			var genericType = GetGenericType(type);
-			if(genericType.Equals("List"))
-            {
-				// strip off any generic type, get 'Foobar' from 'List<Foobar>'
-				var typeParameter = GetGenericTypeParameter(type);
-				if(IsTypeObservable(typeParameter,typeNames))
-                {
-					// we can change the type to an Observable type (to be notified of changes etc)
-					typeParameter = _prefix + typeParameter;
-                }
-
-				type = _prefix + "List<" + typeParameter + ">";
-            }
-
+			string type = TypeUtility.ConvertTypeNameToObservableTypeName(property.Value,typeNames,_prefix);
 			CreateProperty(property.Key,type);
 		}
 	}
@@ -249,10 +231,7 @@
 	// Create public property with propertychanged, can tracking etc
 	private void CreateProperty(string propertyName, string propertyType)
 	{
-		//// change List<T> to ObservableList<T>
-		//propertyType = propertyType.Replace("List<","ObservableList<");
-
-		var privateFieldName = "_" + StringExtensions.ToCamelCase(propertyName);
+		var privateFieldName = "_" + StringHelper.ToCamelCase(propertyName);
 		// private backing field
 		WriteLine("private " + propertyType + " " + privateFieldName + ";");
 		// original value field
@@ -273,7 +252,7 @@
 						WriteLine(privateFieldName + " = value;");
 						WriteLine(@"OnPropertyChanged(""" + propertyName + @""");");
 
-						using(new Brace("if (_original" + propertyName + " != " + privateFieldName + ")",this))
+						using(new Brace("if (_original" + propertyName + " != null && !_original" + propertyName + ".Equals(" + privateFieldName + "))",this))
 						{
 							WriteLine(@"_changeTracker[""" + propertyName + @"""] = true;");
 							WriteLine(@"OnPropertyChanged(""IsChanged"");");
@@ -289,12 +268,6 @@
 		WriteLine(Environment.NewLine);
 	}
 
-	
-	// return true if this type is going to have a Observable object class generated by the T4 template
-	private bool IsTypeObservable(string typeName, IEnumerable<string> typeNames)
-	{
-		return typeNames.Any(x => x == typeName);
-	}
 
 	private void CreateINotifyPropertyChangedRegion()
 	{
@@ -320,7 +293,7 @@ protected virtual void OnPropertyChanged([CallerMemberName] string propertyName 
 		{
 			foreach(var property in properties)
 			{
-				WriteLine("_original" + property.Key + " = _" + StringExtensions.ToCamelCase(property.Key) + ";");
+				WriteLine("_original" + property.Key + " = _" + StringHelper.ToCamelCase(property.Key) + ";");
 			}
 
 				WriteLine("ResetChangeTracking();");

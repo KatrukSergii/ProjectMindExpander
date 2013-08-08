@@ -64,6 +64,7 @@
     <Compile Include="TimesheetParserTests.cs" />
     <Compile Include="ListUtilitiesTest.cs" />
     <Compile Include="ObservableTimesheetTests.cs" />
+    <Compile Include="TypeUtilityTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Communication\Communication.csproj">

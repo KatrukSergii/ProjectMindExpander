@@ -62,10 +62,6 @@
       <LastGenOutput>MainObservableItem.cs</LastGenOutput>
     </None>
     <None Include="packages.config" />
-    <None Include="ObservableObjects.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ObservableObjects.cs</LastGenOutput>
-    </None>
     <None Include="TemplateFileManagerV2.1.ttinclude" />
   </ItemGroup>
   <ItemGroup>

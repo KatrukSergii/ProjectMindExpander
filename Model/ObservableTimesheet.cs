@@ -1,5 +1,6 @@
 ﻿using Model;
 using Shared;
+using Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,24 +18,41 @@ namespace Model
 
 		public ObservableTimesheet()
 		{
+			InitializeChangeTracker();
 			Title = default(string);
+			DummyTimeEntryx = new ObservableTimeEntry();
 			TimesheetId = default(string);
 			ProjectTimeItems = null;
 			NonProjectActivityItems = null;
 			RequiredHours = null;
 			TotalRequiredHours = new TimeSpan();
-			InitializeChangeTracker();
+			DummyTimeEntry = new ObservableTimeEntry();
 		}
 		
 
 		public ObservableTimesheet(Timesheet timesheet) : this()
 		{
 			_originalTitle = timesheet.Title;
+			_originalDummyTimeEntryx = new ObservableTimeEntry(timesheet.DummyTimeEntryx);
 			_originalTimesheetId = timesheet.TimesheetId;
 			_originalProjectTimeItems = new ObservableList<ObservableProjectTaskTimesheetItem>(timesheet.ProjectTimeItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
 			_originalNonProjectActivityItems = new ObservableList<ObservableProjectTaskTimesheetItem>(timesheet.NonProjectActivityItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
 			_originalRequiredHours = new ObservableList<TimeSpan>(timesheet.RequiredHours);
 			_originalTotalRequiredHours = timesheet.TotalRequiredHours;
+			_originalDummyTimeEntry = new ObservableTimeEntry(timesheet.DummyTimeEntry);
+			
+
+			Title = timesheet.Title;
+			DummyTimeEntryx = GenericCopier<ObservableTimeEntry>.DeepCopy(timesheet.DummyTimeEntryx);
+			TimesheetId = timesheet.TimesheetId;
+			ProjectTimeItems = GenericCopier<ObservableList<ObservableProjectTaskTimesheetItem>>.DeepCopy(timesheet.ProjectTimeItems);
+			NonProjectActivityItems = GenericCopier<ObservableList<ObservableProjectTaskTimesheetItem>>.DeepCopy(timesheet.NonProjectActivityItems);
+			RequiredHours = GenericCopier<ObservableList<TimeSpan>>.DeepCopy(timesheet.RequiredHours);
+			TotalRequiredHours = GenericCopier<TimeSpan>.DeepCopy(timesheet.TotalRequiredHours);
+			DummyTimeEntry = GenericCopier<ObservableTimeEntry>.DeepCopy(timesheet.DummyTimeEntry);
+			
+
+			ResetChangeTracking();
 		}
 		
 
@@ -52,7 +70,7 @@ namespace Model
 				{
 					_title = value;
 					OnPropertyChanged("Title");
-					if (_originalTitle != _title)
+					if (_originalTitle != null && !_originalTitle.Equals(_title))
 					{
 						_changeTracker["Title"] = true;
 						OnPropertyChanged("IsChanged");
@@ -60,6 +78,34 @@ namespace Model
 					else
 					{
 						_changeTracker["Title"] = false;
+					}
+				}
+			}
+		}
+		
+
+		private ObservableTimeEntry _dummyTimeEntryx;
+		private ObservableTimeEntry _originalDummyTimeEntryx;
+		public ObservableTimeEntry DummyTimeEntryx
+		{
+			get
+			{
+				return _dummyTimeEntryx;
+			}
+			set
+			{
+				if (_dummyTimeEntryx != value)
+				{
+					_dummyTimeEntryx = value;
+					OnPropertyChanged("DummyTimeEntryx");
+					if (_originalDummyTimeEntryx != null && !_originalDummyTimeEntryx.Equals(_dummyTimeEntryx))
+					{
+						_changeTracker["DummyTimeEntryx"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["DummyTimeEntryx"] = false;
 					}
 				}
 			}
@@ -80,7 +126,7 @@ namespace Model
 				{
 					_timesheetId = value;
 					OnPropertyChanged("TimesheetId");
-					if (_originalTimesheetId != _timesheetId)
+					if (_originalTimesheetId != null && !_originalTimesheetId.Equals(_timesheetId))
 					{
 						_changeTracker["TimesheetId"] = true;
 						OnPropertyChanged("IsChanged");
@@ -108,7 +154,7 @@ namespace Model
 				{
 					_projectTimeItems = value;
 					OnPropertyChanged("ProjectTimeItems");
-					if (_originalProjectTimeItems != _projectTimeItems)
+					if (_originalProjectTimeItems != null && !_originalProjectTimeItems.Equals(_projectTimeItems))
 					{
 						_changeTracker["ProjectTimeItems"] = true;
 						OnPropertyChanged("IsChanged");
@@ -136,7 +182,7 @@ namespace Model
 				{
 					_nonProjectActivityItems = value;
 					OnPropertyChanged("NonProjectActivityItems");
-					if (_originalNonProjectActivityItems != _nonProjectActivityItems)
+					if (_originalNonProjectActivityItems != null && !_originalNonProjectActivityItems.Equals(_nonProjectActivityItems))
 					{
 						_changeTracker["NonProjectActivityItems"] = true;
 						OnPropertyChanged("IsChanged");
@@ -164,7 +210,7 @@ namespace Model
 				{
 					_requiredHours = value;
 					OnPropertyChanged("RequiredHours");
-					if (_originalRequiredHours != _requiredHours)
+					if (_originalRequiredHours != null && !_originalRequiredHours.Equals(_requiredHours))
 					{
 						_changeTracker["RequiredHours"] = true;
 						OnPropertyChanged("IsChanged");
@@ -192,7 +238,7 @@ namespace Model
 				{
 					_totalRequiredHours = value;
 					OnPropertyChanged("TotalRequiredHours");
-					if (_originalTotalRequiredHours != _totalRequiredHours)
+					if (_originalTotalRequiredHours != null && !_originalTotalRequiredHours.Equals(_totalRequiredHours))
 					{
 						_changeTracker["TotalRequiredHours"] = true;
 						OnPropertyChanged("IsChanged");
@@ -200,6 +246,34 @@ namespace Model
 					else
 					{
 						_changeTracker["TotalRequiredHours"] = false;
+					}
+				}
+			}
+		}
+		
+
+		private ObservableTimeEntry _dummyTimeEntry;
+		private ObservableTimeEntry _originalDummyTimeEntry;
+		public ObservableTimeEntry DummyTimeEntry
+		{
+			get
+			{
+				return _dummyTimeEntry;
+			}
+			set
+			{
+				if (_dummyTimeEntry != value)
+				{
+					_dummyTimeEntry = value;
+					OnPropertyChanged("DummyTimeEntry");
+					if (_originalDummyTimeEntry != null && !_originalDummyTimeEntry.Equals(_dummyTimeEntry))
+					{
+						_changeTracker["DummyTimeEntry"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["DummyTimeEntry"] = false;
 					}
 				}
 			}
@@ -224,11 +298,13 @@ namespace Model
 		public void AcceptChanges()
 		{
 			_originalTitle = _title;
+			_originalDummyTimeEntryx = _dummyTimeEntryx;
 			_originalTimesheetId = _timesheetId;
 			_originalProjectTimeItems = _projectTimeItems;
 			_originalNonProjectActivityItems = _nonProjectActivityItems;
 			_originalRequiredHours = _requiredHours;
 			_originalTotalRequiredHours = _totalRequiredHours;
+			_originalDummyTimeEntry = _dummyTimeEntry;
 			ResetChangeTracking();
 		}
 		
@@ -237,11 +313,13 @@ namespace Model
 		{
 			_changeTracker = new Dictionary<string,bool>();
 			_changeTracker["Title"] = false;
+			_changeTracker["DummyTimeEntryx"] = false;
 			_changeTracker["TimesheetId"] = false;
 			_changeTracker["ProjectTimeItems"] = false;
 			_changeTracker["NonProjectActivityItems"] = false;
 			_changeTracker["RequiredHours"] = false;
 			_changeTracker["TotalRequiredHours"] = false;
+			_changeTracker["DummyTimeEntry"] = false;
 		}
 		
 		

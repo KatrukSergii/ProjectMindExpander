@@ -1,5 +1,6 @@
 ﻿using Model;
 using Shared;
+using Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,10 +18,10 @@ namespace Model
 
 		public ObservableProjectTaskTimesheetItem()
 		{
+			InitializeChangeTracker();
 			ProjectCode = new PickListItem();
 			TaskCode = new PickListItem();
 			TimeEntries = null;
-			InitializeChangeTracker();
 		}
 		
 
@@ -29,6 +30,14 @@ namespace Model
 			_originalProjectCode = projectTaskTimesheetItem.ProjectCode;
 			_originalTaskCode = projectTaskTimesheetItem.TaskCode;
 			_originalTimeEntries = new ObservableList<ObservableTimeEntry>(projectTaskTimesheetItem.TimeEntries.Select(x => new ObservableTimeEntry(x)).ToList());
+			
+
+			ProjectCode = GenericCopier<PickListItem>.DeepCopy(projectTaskTimesheetItem.ProjectCode);
+			TaskCode = GenericCopier<PickListItem>.DeepCopy(projectTaskTimesheetItem.TaskCode);
+			TimeEntries = GenericCopier<ObservableList<ObservableTimeEntry>>.DeepCopy(projectTaskTimesheetItem.TimeEntries);
+			
+
+			ResetChangeTracking();
 		}
 		
 
@@ -46,7 +55,7 @@ namespace Model
 				{
 					_projectCode = value;
 					OnPropertyChanged("ProjectCode");
-					if (_originalProjectCode != _projectCode)
+					if (_originalProjectCode != null && !_originalProjectCode.Equals(_projectCode))
 					{
 						_changeTracker["ProjectCode"] = true;
 						OnPropertyChanged("IsChanged");
@@ -74,7 +83,7 @@ namespace Model
 				{
 					_taskCode = value;
 					OnPropertyChanged("TaskCode");
-					if (_originalTaskCode != _taskCode)
+					if (_originalTaskCode != null && !_originalTaskCode.Equals(_taskCode))
 					{
 						_changeTracker["TaskCode"] = true;
 						OnPropertyChanged("IsChanged");
@@ -102,7 +111,7 @@ namespace Model
 				{
 					_timeEntries = value;
 					OnPropertyChanged("TimeEntries");
-					if (_originalTimeEntries != _timeEntries)
+					if (_originalTimeEntries != null && !_originalTimeEntries.Equals(_timeEntries))
 					{
 						_changeTracker["TimeEntries"] = true;
 						OnPropertyChanged("IsChanged");

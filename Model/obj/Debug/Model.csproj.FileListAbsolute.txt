@@ -1,8 +1,8 @@
-D:\repos\Stuff\ProjectMindExpander\Model\obj\Debug\Model.csprojResolveAssemblyReference.cache
 D:\repos\Stuff\ProjectMindExpander\Model\bin\Debug\Model.dll
 D:\repos\Stuff\ProjectMindExpander\Model\bin\Debug\Model.pdb
+D:\repos\Stuff\ProjectMindExpander\Model\bin\Debug\ReflectionMagic.dll
 D:\repos\Stuff\ProjectMindExpander\Model\bin\Debug\Shared.dll
 D:\repos\Stuff\ProjectMindExpander\Model\bin\Debug\Shared.pdb
+D:\repos\Stuff\ProjectMindExpander\Model\obj\Debug\Model.csprojResolveAssemblyReference.cache
 D:\repos\Stuff\ProjectMindExpander\Model\obj\Debug\Model.dll
 D:\repos\Stuff\ProjectMindExpander\Model\obj\Debug\Model.pdb
-D:\repos\Stuff\ProjectMindExpander\Model\bin\Debug\ReflectionMagic.dll
