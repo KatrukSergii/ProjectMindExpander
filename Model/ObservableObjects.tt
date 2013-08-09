@@ -20,12 +20,14 @@
 
 
 <#
+// TODO remove INotifyPropertyChanged and IChangeTracking casts - should know this type information at generation so it is redundant
+// TODO REFACTOR!
+
 // NB: 
 //	+ Only handles List<T> at the moment (no HashSets, Collections etc) 
 //  + Only generic type tested is List<T>. List<T> is converted to ObservableCollection<T> by the template
-//  + TODO remove INotifyPropertyChanged and IChangeTracking casts - should know this type information at generation so it is redundant
 // 	+ Assumes that reference types implement IEqualityComparer
-//	+ Assumes that reference types have parameterless constructors
+//	+ Assumes that reference types have parameterless constructors and are made into ObservableXXX objects (i.e. support INotifyPropertyChanged and IChangeTracking)
 //  + Assumes c# type aliases are used (e.g. string, int, bool not Int32  etc)
 
 	// required to output to multiple files
@@ -69,9 +71,13 @@
 						CreateProperties(properties, typeNames);
 
 						CreateResetPropertiesMethod(properties, typeNames);
+
+						var observableProperties = properties.Where(x => TypeUtility.IsTypeObservable(x.Value,typeNames)).Select(x => x.Key);	
+						CreatePropertyChangedMethods(observableProperties);
+
 						CreateINotifyPropertyChangedRegion();
 
-						CreateIChangeTrackingRegion(properties);
+						CreateIChangeTrackingRegion(properties, typeNames);
 				}
 		 }
 	}
@@ -130,9 +136,9 @@
 			}
 		}
 
-		WriteLine(Environment.NewLine);
 
 		var collectionPropertyNames = new Dictionary<string,string>();
+		var observablePropertyNames = new List<string>();
 
 		// e.g.  ObservableFoo(Foo foo)
 		using(new Brace("public " + _prefix + type.Name + "(" + type.Name + " " + camelCaseName + ") : this()", this)){
@@ -153,6 +159,10 @@
 					{
 						collectionPropertyNames.Add(kvp.Key, TypeUtility.ConvertTypeNameToObservableTypeName(genericParam,typeNames,_prefix));
 					}
+					else
+					{
+						observablePropertyNames.Add(kvp.Key);
+                    }
 
 					//e.g. _originalFoos = new ObservableCollection<ObservableFoo>(myObject.Foos.Select(x => new ObservableFoo(x)).ToList());
 
@@ -178,12 +188,11 @@
 			{
 				WriteLine(prop.Key + ".CollectionChanged += " + prop.Key + "_CollectionChanged;");
 			}
-			WriteLine("//TODO hook up  all of the property changed events for non-collection reference types");
 
 			foreach(var prop in collectionPropertyNames)
-            {
+			{
 				if (!TypeUtility.IsValueType(prop.Value))
-                {
+				{
 					using(new Brace("foreach(var item in " + prop.Key + ")",this))
 					{
 						WriteLine("var propertyChangedItem = item as INotifyPropertyChanged;");
@@ -193,7 +202,12 @@
 						}
 					}
 					WriteLine(Environment.NewLine);
-                }
+				}
+			}
+
+			foreach(var prop in observablePropertyNames)
+            {
+				WriteLine(prop + ".PropertyChanged += " + prop + "_PropertyChanged;");
             }
 
 			WriteLine("ResetChangeTracking();");
@@ -205,78 +219,80 @@
 		// Create the collection changed and property changed event handlers
 		foreach(var prop in collectionPropertyNames)
 		{
-			CreateCollectionChangedEventHandler(prop.Key, prop.Value);
-			CreateCollectionItemChangedEventHandler(prop.Key, prop.Value);
+			CreateCollectionChangedEventHandler(prop.Key);
+			CreateCollectionItemChangedEventHandler(prop.Key);
 		}
 	}
 
-	private void CreateCollectionChangedEventHandler(string propertyName, string collectionType)
-    {
+	private void CreateCollectionChangedEventHandler(string propertyName)
+	{
 		using(new Brace("private void " + propertyName + "_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)",this))
-        {
-			WriteLine(@"_changeTracker[""" + propertyName + @"""] = true;");
+		{
 			WriteLine(Environment.NewLine);
 			using(new Brace("switch(e.Action)",this))
-            {
+			{
 				WriteLine("case NotifyCollectionChangedAction.Remove:");
 				WriteLine("case NotifyCollectionChangedAction.Replace:");
 				PushIndent("\t");
 				using(new Brace("foreach(var item in e.OldItems)",this))
-                {
+				{
 					WriteLine("var propertyChangedItem = item as INotifyPropertyChanged;");
 					using(new Brace("if (propertyChangedItem != null)",this))
-                    {
+					{
 						WriteLine("propertyChangedItem.PropertyChanged -= " + propertyName + "_Item_PropertyChanged;");
-                    }
+						WriteLine("// always treat a remove or replace on a reference type as a change");
+						WriteLine(@"_changeTracker[""ProjectTimeItems""] = true;");
+					}
 					WriteLine("else");
 					using(new Brace("",this))
-                    {
-						WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtilities<" + collectionType + ">.EqualTo(_original" + propertyName + "," + propertyName + ");");
-						WriteLine(@"OnPropertyChanged(""IsChanged"");");
-                    }
-                }
+					{
+						WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtility.EqualTo(_original" + propertyName + "," + propertyName + ");");
+					}
+					WriteLine(@"OnPropertyChanged(""IsChanged"");");
+				}
 
 				WriteLine("break;");
 				PopIndent();
 				WriteLine("case NotifyCollectionChangedAction.Add:");
 				PushIndent("\t");
 				using(new Brace("foreach(var item in e.NewItems)",this))
-                {
+				{
 					WriteLine("var propertyChangedItem = item as INotifyPropertyChanged;");
 					using(new Brace("if (propertyChangedItem != null)",this))
-                    {
+					{
 						WriteLine("propertyChangedItem.PropertyChanged +=" + propertyName + "_Item_PropertyChanged;");
-                    }
-                }
-				WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtilities<" + collectionType + ">.EqualTo(_original" + propertyName + "," + propertyName + ");");
+					}
+				}
+				WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtility.EqualTo(_original" + propertyName + "," + propertyName + ");");
 				WriteLine(@"OnPropertyChanged(""IsChanged"");");
 				WriteLine("break;");
 				PopIndent();
-            }
+			}
 		}
 		WriteLine(Environment.NewLine);
-    }
+	}
 
-	private void CreateCollectionItemChangedEventHandler(string propertyName, string collectionType)
-    {
+	private void CreateCollectionItemChangedEventHandler(string propertyName)
+	{
 		using(new Brace("private void " + propertyName + "_Item_PropertyChanged(object sender, PropertyChangedEventArgs e)",this))
-        {
+		{
 			WriteLine("var trackingItem = sender as IChangeTracking;");
 			using(new Brace("if (trackingItem != null)",this))
-            {
+			{
 				WriteLine(@"_changeTracker[""" + propertyName + @"""] = trackingItem.IsChanged;");
 				WriteLine(@"OnPropertyChanged(""IsChanged"");");
 			}
 			WriteLine("else");
 			using(new Brace("",this))
-            {
-						WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtilities<" + collectionType + ">.EqualTo(_original" + propertyName + "," + propertyName + ");");
-						WriteLine(@"OnPropertyChanged(""IsChanged"");");
-            }
-        }
+			{
+				WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtility.EqualTo(_original" + propertyName + "," + propertyName + ");");
+				WriteLine(@"OnPropertyChanged(""IsChanged"");");
+			}
+		}
 
 		WriteLine(Environment.NewLine);
-    }
+	}
+
 
 	/// Used to initialize variables inside of the parameterless class constructor
 	private void CreatePropertyInitializer(string propertyName, string propertyType, bool isTypeObservable)
@@ -364,8 +380,10 @@
 		WriteLine(Environment.NewLine);
 	}
 
+	// Set public properties to have the same values as the _original properties ( and un-hook then hook-up propertychanged event handlers)
 	private void CreateResetPropertiesMethod(Dictionary<string,string> properties, IEnumerable<string> typeNames)
 	{
+
 		using(new Brace("private void ResetProperties()",this))
 		{
 			
@@ -375,64 +393,89 @@
 				if (TypeUtility.IsValueType(kvp.Value))
 				{
 					WriteLine(kvp.Key + " = _original" + kvp.Key + ";");
+					WriteLine(Environment.NewLine);
 				}
 				else
 				{
 					// Reference Types need to be deep copied
 					var observableTypeName = TypeUtility.ConvertTypeNameToObservableTypeName(kvp.Value, typeNames, _prefix);
-					if (observableTypeName.StartsWith("ObservableCollection"))
+
+					// Unhook eventhandlers
+					if (observableTypeName.StartsWith("Observable"))
 					{
 						var collectionIsValueType = TypeUtility.IsValueType(TypeUtility.GetGenericTypeParameter(observableTypeName));
 						if (!collectionIsValueType)
-                        {
+						{
 							WriteLine("// Unhook propertyChanged eventhandlers for " + kvp.Key);
-							using(new Brace("if (" + kvp.Key + " != null)", this))
+							
+							Write("if (" + kvp.Key + " != null) ");
+
+							if(observableTypeName.StartsWith("ObservableCollection"))
 							{
-								using (new Brace("foreach(var item in " + kvp.Key + ")", this))
-								{
-									WriteLine("var propertyChangedItem = item as INotifyPropertyChanged;");
-									using(new Brace("if(propertyChangedItem != null)",this))
-									{
-										WriteLine("propertyChangedItem.PropertyChanged -= " + kvp.Key + "_Item_PropertyChanged;");
-									}
-								}
+								WriteLine("ListUtility.AttachPropertyChangedEventHandlers(" + kvp.Key + "," + kvp.Key + "_Item_PropertyChanged, attach:false);");
 							}
-                        }
+							else
+							{
+								WriteLine(kvp.Key + ".PropertyChanged -= " + kvp.Key + "_PropertyChanged;");
+							}
+						}
 					}
 
 					Write(kvp.Key + " = _original" + kvp.Key + " == null ? null : ");
 					
-					if(observableTypeName.StartsWith(_prefix + "List"))
-					{
-						WriteLine("_original" + kvp.Key + ".DeepCopy();" );  // ObservableList has a method to deep copy all the items and return a new list
-					}
-					else
-					{
+					//if(observableTypeName.StartsWith(_prefix + "List"))
+					//{
+					//	WriteLine("_original" + kvp.Key + ".DeepCopy();" );  // ObservableList has a method to deep copy all the items and return a new list
+					//}
+					//else
+					//{
 							WriteLine("GenericCopier<" + observableTypeName + ">.DeepCopy(_original" + kvp.Key + ");" );
-					}
+					//}
 
-					if (observableTypeName.StartsWith("ObservableCollection"))
+					// Hook up event handlers
+					if (observableTypeName.StartsWith("Observable"))
 					{
 						var collectionIsValueType = TypeUtility.IsValueType(TypeUtility.GetGenericTypeParameter(observableTypeName));
 						if (!collectionIsValueType)
-                        {
-							WriteLine("// Hook-up propertyChanged eventhandlers for " + kvp.Key);
-							using(new Brace("if (" + kvp.Key + " != null)", this))
+						{
+							WriteLine("// Hookup propertyChanged eventhandlers for " + kvp.Key);
+							
+							Write("if (" + kvp.Key + " != null) ");
+
+							if(observableTypeName.StartsWith("ObservableCollection"))
 							{
-								using (new Brace("foreach(var item in " + kvp.Key + ")", this))
-								{
-									WriteLine("var propertyChangedItem = item as INotifyPropertyChanged;");
-									using(new Brace("if(propertyChangedItem != null)",this))
-									{
-										WriteLine("propertyChangedItem.PropertyChanged += " + kvp.Key + "_Item_PropertyChanged;");
-									}
-								}
+								WriteLine("ListUtility.AttachPropertyChangedEventHandlers(" + kvp.Key + "," + kvp.Key + "_Item_PropertyChanged, attach:true);");
 							}
-                        }
+							else
+							{
+								WriteLine(kvp.Key + ".PropertyChanged += " + kvp.Key + "_PropertyChanged;");
+							}
+						}
 					}
+					WriteLine(Environment.NewLine);
 				}
 			}
 		}
+		WriteLine(Environment.NewLine);
+
+
+	}
+
+	// only for observable types at the moment (could be expanded to IChangeTracking or INotifyPropertyChanged properties)
+	private void CreatePropertyChangedMethods(IEnumerable<string> propertyNames)
+	{
+		foreach(var propertyName in propertyNames)
+		{
+			using(new Brace("private void " + propertyName + "_PropertyChanged(object sender, PropertyChangedEventArgs e)",this))
+			{
+				using(new Brace(@"if (_changeTracker[""" + propertyName + @"""] != " + propertyName + ".IsChanged)",this))
+                {
+					WriteLine(@"_changeTracker[""" + propertyName + @"""] = " + propertyName + ".IsChanged;");
+					WriteLine(@"OnPropertyChanged(""IsChanged"");");
+                }
+			}
+		}
+
 		WriteLine(Environment.NewLine);
 	}
 
@@ -457,14 +500,44 @@ protected virtual void OnPropertyChanged([CallerMemberName] string propertyName 
 ");
 	}
 
-	private void CreateIChangeTrackingRegion(Dictionary<string,string> properties)
+	private void CreateIChangeTrackingRegion(Dictionary<string,string> properties, IEnumerable<string> typeNames)
 	{
 		WriteLine(@"#region IChangeTracking" + Environment.NewLine);
 		using(new Brace("public void AcceptChanges()",this))
 		{
 			foreach(var property in properties)
 			{
-				WriteLine("_original" + property.Key + " = _" + StringHelper.ToCamelCase(property.Key) + ";");
+				var camelCaseName = StringHelper.ToCamelCase(property.Key);
+
+				// for ObservableCollections of Observable items we must AcceptChanges() for each of the items in the list	
+				var observableType = TypeUtility.ConvertTypeNameToObservableTypeName(property.Value,typeNames, _prefix);
+			
+				if (observableType.StartsWith(_prefix))
+                {
+					if (observableType.StartsWith("ObservableCollection"))
+                    {
+						if (TypeUtility.GetGenericTypeParameter(observableType).StartsWith(_prefix))
+                        {
+							using(new Brace("foreach(var item in _" + camelCaseName + ")", this))
+							{
+								WriteLine("item.AcceptChanges();");
+							}
+                        }
+                    }
+					else
+					{
+						WriteLine("_" + camelCaseName + ".AcceptChanges();");
+                    }
+
+					WriteLine("_original" + property.Key + " = GenericCopier<" + observableType + ">.DeepCopy(_" + camelCaseName + ");");
+					WriteLine(Environment.NewLine);
+                }
+				else
+				{
+					// Value type - safe to assign
+					WriteLine("_original" + property.Key + " = _" + camelCaseName + ";");
+					WriteLine(Environment.NewLine);
+                }
 			}
 
 			WriteLine("ResetChangeTracking();");

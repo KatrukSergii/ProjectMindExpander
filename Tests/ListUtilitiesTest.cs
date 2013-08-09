@@ -7,14 +7,14 @@ using Shared.Utility;
 namespace Tests
 {
     [TestClass]
-    public class ListUtilitiesTest
+    public class ListUtilityTest
     {
         [TestMethod]
         public void EqualTo_2StringLists_True()
         {
             var list1 = new List<string> {"a", "b", "c"};
             var list2 = new List<string> {"a", "b", "c"};
-            var isEqual = ListUtilities<string>.EqualTo(list1, list2);
+            var isEqual = ListUtility.EqualTo(list1, list2);
             Assert.IsTrue(isEqual);
         }
 
@@ -23,7 +23,7 @@ namespace Tests
         {
             var list1 = new List<string> { "a", "b", "c" };
             var list2 = new List<string> { "a", "b" };
-            var isEqual = ListUtilities<string>.EqualTo(list1, list2);
+            var isEqual = ListUtility.EqualTo(list1, list2);
             Assert.IsFalse(isEqual);
         }
 
@@ -32,7 +32,7 @@ namespace Tests
         {
             var list1 = new List<int> { 0, 1, 2 };
             var list2 = new List<int> { 0, 1, 2};
-            var isEqual = ListUtilities<int>.EqualTo(list1, list2);
+            var isEqual = ListUtility.EqualTo(list1, list2);
             Assert.IsTrue(isEqual);
         }
 
@@ -41,7 +41,7 @@ namespace Tests
         {
             var list1 = new List<int> { 0, 1, 2 };
             var list2 = new List<int> { 0, 1, 100 };
-            var isEqual = ListUtilities<int>.EqualTo(list1, list2);
+            var isEqual = ListUtility.EqualTo(list1, list2);
             Assert.IsFalse(isEqual);
         }
 
@@ -50,7 +50,7 @@ namespace Tests
         {
             var list1 = new List<DummyObject> { new DummyObject { Field1 = "a", Field2 = 0 }, new DummyObject { Field1 = "b", Field2 = 1 } };
             var list2 = new List<DummyObject> { new DummyObject { Field1 = "a", Field2 = 0 }, new DummyObject { Field1 = "b", Field2 = 1 } };
-            var isEqual = ListUtilities<DummyObject>.EqualTo(list1, list2);
+            var isEqual = ListUtility.EqualTo(list1, list2);
             Assert.IsTrue(isEqual);
         }
 
@@ -59,7 +59,7 @@ namespace Tests
         {
             var list1 = new List<DummyObject> { new DummyObject { Field1 = "a", Field2 = 0 }, new DummyObject { Field1 = "b", Field2 = 1 } };
             var list2 = new List<DummyObject> { new DummyObject { Field1 = "a", Field2 = 0 }, new DummyObject { Field1 = "b", Field2 = 100 } };
-            var isEqual = ListUtilities<DummyObject>.EqualTo(list1, list2);
+            var isEqual = ListUtility.EqualTo(list1, list2);
             Assert.IsFalse(isEqual);
         }
 

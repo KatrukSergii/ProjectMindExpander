@@ -25,8 +25,6 @@ namespace Model
 			Notes = default(string);
 			WorkDetailId = null;
 		}
-		
-
 		public ObservableTimeEntry(TimeEntry timeEntry) : this()
 		{
 			_originalLoggedTime = timeEntry.LoggedTime;
@@ -37,7 +35,6 @@ namespace Model
 
 			// Set the properties to the _original property values
 			ResetProperties();
-			//TODO hook up  all of the property changed events for non-collection reference types
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
 		}
@@ -158,10 +155,20 @@ namespace Model
 		private void ResetProperties()
 		{
 			LoggedTime = _originalLoggedTime == null ? null : GenericCopier<TimeSpan?>.DeepCopy(_originalLoggedTime);
+			
+
 			ExtraTime = _originalExtraTime == null ? null : GenericCopier<TimeSpan?>.DeepCopy(_originalExtraTime);
+			
+
 			Notes = _originalNotes;
+			
+
 			WorkDetailId = _originalWorkDetailId == null ? null : GenericCopier<int?>.DeepCopy(_originalWorkDetailId);
+			
+
 		}
+		
+
 		
 
 		
@@ -186,9 +193,17 @@ namespace Model
 		public void AcceptChanges()
 		{
 			_originalLoggedTime = _loggedTime;
+			
+
 			_originalExtraTime = _extraTime;
+			
+
 			_originalNotes = _notes;
+			
+
 			_originalWorkDetailId = _workDetailId;
+			
+
 			ResetChangeTracking();
 		}
 		

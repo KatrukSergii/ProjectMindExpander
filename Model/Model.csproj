@@ -42,10 +42,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DummyTestObject.cs" />
     <Compile Include="IObservable.cs" />
+    <Compile Include="ObservableDummyTestObject.cs">
+      <DependentUpon>ObservableObjects.tt</DependentUpon>
+    </Compile>
     <Compile Include="ObservableObjects.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
+      <DependentUpon>ObservableObjects.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ObservablePickListItem.cs">
       <DependentUpon>ObservableObjects.tt</DependentUpon>
     </Compile>
     <Compile Include="ObservableProjectTaskTimesheetItem.cs">

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Shared.Utility
 {
-    public static class ListUtilities<T>
+    public static class ListUtility
     {
         /// <summary>
         /// Allows comparison of List<[ValueType]> or List<[IEqualityComparer]>
@@ -12,7 +14,7 @@ namespace Shared.Utility
         /// <param name="list"></param>
         /// <param name="otherList"></param>
         /// <returns></returns>
-        public static bool EqualTo(IList<T> list, IList<T> otherList)
+        public static bool EqualTo<T>(IList<T> list, IList<T> otherList)
         {
             if (list.Count != otherList.Count)
             {
@@ -50,6 +52,27 @@ namespace Shared.Utility
             }
 
             return true;
+        }
+
+
+        public static void AttachPropertyChangedEventHandlers(IList list, PropertyChangedEventHandler handler,
+                                                       bool attach = true)
+        {
+            foreach (var item in list)
+            {
+                var propertyChangedItem = item as INotifyPropertyChanged;
+                if (propertyChangedItem != null)
+                {
+                    if (attach)
+                    {
+                        propertyChangedItem.PropertyChanged += handler;
+                    }
+                    else
+                    {
+                        propertyChangedItem.PropertyChanged -= handler;
+                    }
+                }
+            }
         }
     }
 }

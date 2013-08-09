@@ -11,13 +11,13 @@ using System.Runtime.CompilerServices;
 namespace Model
 {
 	[Serializable]
-	public partial class ObservableTimesheet : INotifyPropertyChanged, IChangeTracking
+	public partial class ObservableDummyTestObject : INotifyPropertyChanged, IChangeTracking
 	{
 		private Dictionary<string,bool> _changeTracker;
 		private bool _isTrackingEnabled;
 		
 
-		public ObservableTimesheet()
+		public ObservableDummyTestObject()
 		{
 			InitializeChangeTracker();
 			Title = default(string);
@@ -26,15 +26,19 @@ namespace Model
 			NonProjectActivityItems = null;
 			RequiredHours = null;
 			TotalRequiredHours = new TimeSpan();
+			DummyTimeEntry = new ObservableTimeEntry();
+			DummyValueTypeCollection = null;
 		}
-		public ObservableTimesheet(Timesheet timesheet) : this()
+		public ObservableDummyTestObject(DummyTestObject dummyTestObject) : this()
 		{
-			_originalTitle = timesheet.Title;
-			_originalTimesheetId = timesheet.TimesheetId;
-			_originalProjectTimeItems = new ObservableCollection<ObservableProjectTaskTimesheetItem>(timesheet.ProjectTimeItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
-			_originalNonProjectActivityItems = new ObservableCollection<ObservableProjectTaskTimesheetItem>(timesheet.NonProjectActivityItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
-			_originalRequiredHours = new ObservableCollection<TimeSpan>(timesheet.RequiredHours);
-			_originalTotalRequiredHours = timesheet.TotalRequiredHours;
+			_originalTitle = dummyTestObject.Title;
+			_originalTimesheetId = dummyTestObject.TimesheetId;
+			_originalProjectTimeItems = new ObservableCollection<ObservableProjectTaskTimesheetItem>(dummyTestObject.ProjectTimeItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
+			_originalNonProjectActivityItems = new ObservableCollection<ObservableProjectTaskTimesheetItem>(dummyTestObject.NonProjectActivityItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
+			_originalRequiredHours = new ObservableCollection<TimeSpan>(dummyTestObject.RequiredHours);
+			_originalTotalRequiredHours = dummyTestObject.TotalRequiredHours;
+			_originalDummyTimeEntry = new ObservableTimeEntry(dummyTestObject.DummyTimeEntry);
+			_originalDummyValueTypeCollection = new ObservableCollection<int>(dummyTestObject.DummyValueTypeCollection);
 			
 
 			// Set the properties to the _original property values
@@ -42,6 +46,7 @@ namespace Model
 			ProjectTimeItems.CollectionChanged += ProjectTimeItems_CollectionChanged;
 			NonProjectActivityItems.CollectionChanged += NonProjectActivityItems_CollectionChanged;
 			RequiredHours.CollectionChanged += RequiredHours_CollectionChanged;
+			DummyValueTypeCollection.CollectionChanged += DummyValueTypeCollection_CollectionChanged;
 			foreach(var item in ProjectTimeItems)
 			{
 				var propertyChangedItem = item as INotifyPropertyChanged;
@@ -62,6 +67,7 @@ namespace Model
 			}
 			
 
+			DummyTimeEntry.PropertyChanged += DummyTimeEntry_PropertyChanged;
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
 		}
@@ -235,6 +241,62 @@ namespace Model
 		}
 		
 
+		private void DummyValueTypeCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			
+
+			switch(e.Action)
+			{
+				case NotifyCollectionChangedAction.Remove:
+				case NotifyCollectionChangedAction.Replace:
+					foreach(var item in e.OldItems)
+					{
+						var propertyChangedItem = item as INotifyPropertyChanged;
+						if (propertyChangedItem != null)
+						{
+							propertyChangedItem.PropertyChanged -= DummyValueTypeCollection_Item_PropertyChanged;
+							// always treat a remove or replace on a reference type as a change
+							_changeTracker["ProjectTimeItems"] = true;
+						}
+						else
+						{
+							_changeTracker["DummyValueTypeCollection"] = !ListUtility.EqualTo(_originalDummyValueTypeCollection,DummyValueTypeCollection);
+						}
+						OnPropertyChanged("IsChanged");
+					}
+					break;
+				case NotifyCollectionChangedAction.Add:
+					foreach(var item in e.NewItems)
+					{
+						var propertyChangedItem = item as INotifyPropertyChanged;
+						if (propertyChangedItem != null)
+						{
+							propertyChangedItem.PropertyChanged +=DummyValueTypeCollection_Item_PropertyChanged;
+						}
+					}
+					_changeTracker["DummyValueTypeCollection"] = !ListUtility.EqualTo(_originalDummyValueTypeCollection,DummyValueTypeCollection);
+					OnPropertyChanged("IsChanged");
+					break;
+			}
+		}
+		
+
+		private void DummyValueTypeCollection_Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			var trackingItem = sender as IChangeTracking;
+			if (trackingItem != null)
+			{
+				_changeTracker["DummyValueTypeCollection"] = trackingItem.IsChanged;
+				OnPropertyChanged("IsChanged");
+			}
+			else
+			{
+				_changeTracker["DummyValueTypeCollection"] = !ListUtility.EqualTo(_originalDummyValueTypeCollection,DummyValueTypeCollection);
+				OnPropertyChanged("IsChanged");
+			}
+		}
+		
+
 		private string _title;
 		private string _originalTitle;
 		public string Title
@@ -403,6 +465,62 @@ namespace Model
 		}
 		
 
+		private ObservableTimeEntry _dummyTimeEntry;
+		private ObservableTimeEntry _originalDummyTimeEntry;
+		public ObservableTimeEntry DummyTimeEntry
+		{
+			get
+			{
+				return _dummyTimeEntry;
+			}
+			set
+			{
+				if (_dummyTimeEntry != value)
+				{
+					_dummyTimeEntry = value;
+					OnPropertyChanged("DummyTimeEntry");
+					if (_originalDummyTimeEntry == null || !_originalDummyTimeEntry.Equals(_dummyTimeEntry))
+					{
+						_changeTracker["DummyTimeEntry"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["DummyTimeEntry"] = false;
+					}
+				}
+			}
+		}
+		
+
+		private ObservableCollection<int> _dummyValueTypeCollection;
+		private ObservableCollection<int> _originalDummyValueTypeCollection;
+		public ObservableCollection<int> DummyValueTypeCollection
+		{
+			get
+			{
+				return _dummyValueTypeCollection;
+			}
+			set
+			{
+				if (_dummyValueTypeCollection != value)
+				{
+					_dummyValueTypeCollection = value;
+					OnPropertyChanged("DummyValueTypeCollection");
+					if (_originalDummyValueTypeCollection == null || !_originalDummyValueTypeCollection.Equals(_dummyValueTypeCollection))
+					{
+						_changeTracker["DummyValueTypeCollection"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["DummyValueTypeCollection"] = false;
+					}
+				}
+			}
+		}
+		
+
 		private void ResetProperties()
 		{
 			Title = _originalTitle;
@@ -431,9 +549,27 @@ namespace Model
 			TotalRequiredHours = _originalTotalRequiredHours;
 			
 
+			// Unhook propertyChanged eventhandlers for DummyTimeEntry
+			if (DummyTimeEntry != null) DummyTimeEntry.PropertyChanged -= DummyTimeEntry_PropertyChanged;
+			DummyTimeEntry = _originalDummyTimeEntry == null ? null : GenericCopier<ObservableTimeEntry>.DeepCopy(_originalDummyTimeEntry);
+			// Hookup propertyChanged eventhandlers for DummyTimeEntry
+			if (DummyTimeEntry != null) DummyTimeEntry.PropertyChanged += DummyTimeEntry_PropertyChanged;
+			
+
+			DummyValueTypeCollection = _originalDummyValueTypeCollection == null ? null : GenericCopier<ObservableCollection<int>>.DeepCopy(_originalDummyValueTypeCollection);
+			
+
 		}
 		
 
+		private void DummyTimeEntry_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (_changeTracker["DummyTimeEntry"] != DummyTimeEntry.IsChanged)
+			{
+				_changeTracker["DummyTimeEntry"] = DummyTimeEntry.IsChanged;
+				OnPropertyChanged("IsChanged");
+			}
+		}
 		
 
 		
@@ -483,6 +619,13 @@ namespace Model
 			_originalTotalRequiredHours = _totalRequiredHours;
 			
 
+			_dummyTimeEntry.AcceptChanges();
+			_originalDummyTimeEntry = GenericCopier<ObservableTimeEntry>.DeepCopy(_dummyTimeEntry);
+			
+
+			_originalDummyValueTypeCollection = GenericCopier<ObservableCollection<int>>.DeepCopy(_dummyValueTypeCollection);
+			
+
 			ResetChangeTracking();
 		}
 		
@@ -505,6 +648,8 @@ namespace Model
 			_changeTracker["NonProjectActivityItems"] = false;
 			_changeTracker["RequiredHours"] = false;
 			_changeTracker["TotalRequiredHours"] = false;
+			_changeTracker["DummyTimeEntry"] = false;
+			_changeTracker["DummyValueTypeCollection"] = false;
 		}
 		
 		

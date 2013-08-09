@@ -11,7 +11,6 @@ namespace Model
             ProjectTimeItems = new List<ProjectTaskTimesheetItem>();
             NonProjectActivityItems = new List<ProjectTaskTimesheetItem>();
             RequiredHours = new List<TimeSpan>();
-            DummyTimeEntry = new TimeEntry();
         }
 
         public string Title { get; set; }
@@ -20,7 +19,6 @@ namespace Model
         public List<ProjectTaskTimesheetItem> NonProjectActivityItems { get; set; }
         public List<TimeSpan> RequiredHours { get; set; }
         public TimeSpan TotalRequiredHours { get; set; }
-        public TimeEntry DummyTimeEntry { get; set; }
     }
 }
 
