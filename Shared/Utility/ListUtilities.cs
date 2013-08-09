@@ -12,7 +12,7 @@ namespace Shared.Utility
         /// <param name="list"></param>
         /// <param name="otherList"></param>
         /// <returns></returns>
-        public static bool EqualTo(List<T> list, List<T> otherList)
+        public static bool EqualTo(IList<T> list, IList<T> otherList)
         {
             if (list.Count != otherList.Count)
             {

@@ -61,7 +61,12 @@ namespace Shared.Utility
                 return type;
             }
 
-            if (genericType.Equals("List") || IsTypeObservable(genericType, typeNames))
+            // change List<T> to ObservableCollection<T> to get INotifyCollectionChanged and INotifyPropertyChanged
+            if (genericType.Equals("List"))
+            {
+                genericType = "ObservableCollection";
+            }
+            else if (IsTypeObservable(genericType, typeNames))
             {
                 genericType = prefix + genericType;
             }

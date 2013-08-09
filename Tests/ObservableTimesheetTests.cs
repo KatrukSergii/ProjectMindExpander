@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Model;
 
@@ -127,7 +128,7 @@ namespace Tests
             Assert.IsTrue(ts.IsChanged);
             ts.AbandonChanges();
             Assert.IsFalse(ts.IsChanged);
-            Assert.AreEqual(oldTitle,ts.Title);
+            Assert.AreEqual(oldTitle, ts.Title);
         }
 
         [TestMethod]
@@ -136,6 +137,17 @@ namespace Tests
             var ts = CreateDummyTimesheet();
             ts.DummyTimeEntry.Notes = "new notes";
             Assert.IsTrue(ts.IsChanged);
+        }
+
+        [TestMethod]
+        public void IsChanged_ProjectCodeChangedThenChangedBack_False()
+        {
+            var ts = CreateDummyTimesheet();
+            var originalHours = ts.RequiredHours[0];
+            ts.RequiredHours[0] = TimeSpan.FromMinutes(999);
+            Assert.IsTrue(ts.IsChanged);
+            ts.RequiredHours[0] = originalHours;
+            Assert.IsFalse(ts.IsChanged);
         }
     }
 }

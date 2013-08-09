@@ -1,12 +1,11 @@
-﻿using Model;
-using Shared;
-using Shared.Utility;
+﻿using Shared.Utility;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Linq;
-using Shared.DataStructures;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
 
 
 namespace Model
@@ -36,7 +35,9 @@ namespace Model
 			_originalWorkDetailId = timeEntry.WorkDetailId;
 			
 
+			// Set the properties to the _original property values
 			ResetProperties();
+			//TODO hook up  all of the property changed events for non-collection reference types
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
 		}
@@ -223,7 +224,7 @@ namespace Model
 		{
 			get 
 			{ 
-				return _changeTracker.All(x => x.Value == false);
+				return _changeTracker.Any(x => x.Value == true);
 			}
 			private set
 			{

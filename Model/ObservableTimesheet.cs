@@ -1,12 +1,11 @@
-﻿using Model;
-using Shared;
-using Shared.Utility;
+﻿using Shared.Utility;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Linq;
-using Shared.DataStructures;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
 
 
 namespace Model
@@ -35,16 +34,206 @@ namespace Model
 		{
 			_originalTitle = timesheet.Title;
 			_originalTimesheetId = timesheet.TimesheetId;
-			_originalProjectTimeItems = new ObservableList<ObservableProjectTaskTimesheetItem>(timesheet.ProjectTimeItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
-			_originalNonProjectActivityItems = new ObservableList<ObservableProjectTaskTimesheetItem>(timesheet.NonProjectActivityItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
-			_originalRequiredHours = new ObservableList<TimeSpan>(timesheet.RequiredHours);
+			_originalProjectTimeItems = new ObservableCollection<ObservableProjectTaskTimesheetItem>(timesheet.ProjectTimeItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
+			_originalNonProjectActivityItems = new ObservableCollection<ObservableProjectTaskTimesheetItem>(timesheet.NonProjectActivityItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
+			_originalRequiredHours = new ObservableCollection<TimeSpan>(timesheet.RequiredHours);
 			_originalTotalRequiredHours = timesheet.TotalRequiredHours;
 			_originalDummyTimeEntry = new ObservableTimeEntry(timesheet.DummyTimeEntry);
 			
 
+			// Set the properties to the _original property values
 			ResetProperties();
+			ProjectTimeItems.CollectionChanged += ProjectTimeItems_CollectionChanged;
+			NonProjectActivityItems.CollectionChanged += NonProjectActivityItems_CollectionChanged;
+			RequiredHours.CollectionChanged += RequiredHours_CollectionChanged;
+			//TODO hook up  all of the property changed events for non-collection reference types
+			foreach(var item in ProjectTimeItems)
+			{
+				var propertyChangedItem = item as INotifyPropertyChanged;
+				if(propertyChangedItem != null)
+				{
+					propertyChangedItem.PropertyChanged += ProjectTimeItems_Item_PropertyChanged;
+				}
+			}
+			
+
+			foreach(var item in NonProjectActivityItems)
+			{
+				var propertyChangedItem = item as INotifyPropertyChanged;
+				if(propertyChangedItem != null)
+				{
+					propertyChangedItem.PropertyChanged += NonProjectActivityItems_Item_PropertyChanged;
+				}
+			}
+			
+
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
+		}
+		
+
+		private void ProjectTimeItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			_changeTracker["ProjectTimeItems"] = true;
+			
+
+			switch(e.Action)
+			{
+				case NotifyCollectionChangedAction.Remove:
+				case NotifyCollectionChangedAction.Replace:
+					foreach(var item in e.OldItems)
+					{
+						var propertyChangedItem = item as INotifyPropertyChanged;
+						if (propertyChangedItem != null)
+						{
+							propertyChangedItem.PropertyChanged -= ProjectTimeItems_Item_PropertyChanged;
+						}
+						else
+						{
+							_changeTracker["ProjectTimeItems"] = !ListUtilities<ObservableProjectTaskTimesheetItem>.EqualTo(_originalProjectTimeItems,ProjectTimeItems);
+							OnPropertyChanged("IsChanged");
+						}
+					}
+					break;
+				case NotifyCollectionChangedAction.Add:
+					foreach(var item in e.NewItems)
+					{
+						var propertyChangedItem = item as INotifyPropertyChanged;
+						if (propertyChangedItem != null)
+						{
+							propertyChangedItem.PropertyChanged +=ProjectTimeItems_Item_PropertyChanged;
+						}
+					}
+					_changeTracker["ProjectTimeItems"] = !ListUtilities<ObservableProjectTaskTimesheetItem>.EqualTo(_originalProjectTimeItems,ProjectTimeItems);
+					OnPropertyChanged("IsChanged");
+					break;
+			}
+		}
+		
+
+		private void ProjectTimeItems_Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			var trackingItem = sender as IChangeTracking;
+			if (trackingItem != null)
+			{
+				_changeTracker["ProjectTimeItems"] = trackingItem.IsChanged;
+				OnPropertyChanged("IsChanged");
+			}
+			else
+			{
+				_changeTracker["ProjectTimeItems"] = !ListUtilities<ObservableProjectTaskTimesheetItem>.EqualTo(_originalProjectTimeItems,ProjectTimeItems);
+				OnPropertyChanged("IsChanged");
+			}
+		}
+		
+
+		private void NonProjectActivityItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			_changeTracker["NonProjectActivityItems"] = true;
+			
+
+			switch(e.Action)
+			{
+				case NotifyCollectionChangedAction.Remove:
+				case NotifyCollectionChangedAction.Replace:
+					foreach(var item in e.OldItems)
+					{
+						var propertyChangedItem = item as INotifyPropertyChanged;
+						if (propertyChangedItem != null)
+						{
+							propertyChangedItem.PropertyChanged -= NonProjectActivityItems_Item_PropertyChanged;
+						}
+						else
+						{
+							_changeTracker["NonProjectActivityItems"] = !ListUtilities<ObservableProjectTaskTimesheetItem>.EqualTo(_originalNonProjectActivityItems,NonProjectActivityItems);
+							OnPropertyChanged("IsChanged");
+						}
+					}
+					break;
+				case NotifyCollectionChangedAction.Add:
+					foreach(var item in e.NewItems)
+					{
+						var propertyChangedItem = item as INotifyPropertyChanged;
+						if (propertyChangedItem != null)
+						{
+							propertyChangedItem.PropertyChanged +=NonProjectActivityItems_Item_PropertyChanged;
+						}
+					}
+					_changeTracker["NonProjectActivityItems"] = !ListUtilities<ObservableProjectTaskTimesheetItem>.EqualTo(_originalNonProjectActivityItems,NonProjectActivityItems);
+					OnPropertyChanged("IsChanged");
+					break;
+			}
+		}
+		
+
+		private void NonProjectActivityItems_Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			var trackingItem = sender as IChangeTracking;
+			if (trackingItem != null)
+			{
+				_changeTracker["NonProjectActivityItems"] = trackingItem.IsChanged;
+				OnPropertyChanged("IsChanged");
+			}
+			else
+			{
+				_changeTracker["NonProjectActivityItems"] = !ListUtilities<ObservableProjectTaskTimesheetItem>.EqualTo(_originalNonProjectActivityItems,NonProjectActivityItems);
+				OnPropertyChanged("IsChanged");
+			}
+		}
+		
+
+		private void RequiredHours_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			_changeTracker["RequiredHours"] = true;
+			
+
+			switch(e.Action)
+			{
+				case NotifyCollectionChangedAction.Remove:
+				case NotifyCollectionChangedAction.Replace:
+					foreach(var item in e.OldItems)
+					{
+						var propertyChangedItem = item as INotifyPropertyChanged;
+						if (propertyChangedItem != null)
+						{
+							propertyChangedItem.PropertyChanged -= RequiredHours_Item_PropertyChanged;
+						}
+						else
+						{
+							_changeTracker["RequiredHours"] = !ListUtilities<TimeSpan>.EqualTo(_originalRequiredHours,RequiredHours);
+							OnPropertyChanged("IsChanged");
+						}
+					}
+					break;
+				case NotifyCollectionChangedAction.Add:
+					foreach(var item in e.NewItems)
+					{
+						var propertyChangedItem = item as INotifyPropertyChanged;
+						if (propertyChangedItem != null)
+						{
+							propertyChangedItem.PropertyChanged +=RequiredHours_Item_PropertyChanged;
+						}
+					}
+					_changeTracker["RequiredHours"] = !ListUtilities<TimeSpan>.EqualTo(_originalRequiredHours,RequiredHours);
+					OnPropertyChanged("IsChanged");
+					break;
+			}
+		}
+		
+
+		private void RequiredHours_Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			var trackingItem = sender as IChangeTracking;
+			if (trackingItem != null)
+			{
+				_changeTracker["RequiredHours"] = trackingItem.IsChanged;
+				OnPropertyChanged("IsChanged");
+			}
+			else
+			{
+				_changeTracker["RequiredHours"] = !ListUtilities<TimeSpan>.EqualTo(_originalRequiredHours,RequiredHours);
+				OnPropertyChanged("IsChanged");
+			}
 		}
 		
 
@@ -104,9 +293,9 @@ namespace Model
 		}
 		
 
-		private ObservableList<ObservableProjectTaskTimesheetItem> _projectTimeItems;
-		private ObservableList<ObservableProjectTaskTimesheetItem> _originalProjectTimeItems;
-		public ObservableList<ObservableProjectTaskTimesheetItem> ProjectTimeItems
+		private ObservableCollection<ObservableProjectTaskTimesheetItem> _projectTimeItems;
+		private ObservableCollection<ObservableProjectTaskTimesheetItem> _originalProjectTimeItems;
+		public ObservableCollection<ObservableProjectTaskTimesheetItem> ProjectTimeItems
 		{
 			get
 			{
@@ -132,9 +321,9 @@ namespace Model
 		}
 		
 
-		private ObservableList<ObservableProjectTaskTimesheetItem> _nonProjectActivityItems;
-		private ObservableList<ObservableProjectTaskTimesheetItem> _originalNonProjectActivityItems;
-		public ObservableList<ObservableProjectTaskTimesheetItem> NonProjectActivityItems
+		private ObservableCollection<ObservableProjectTaskTimesheetItem> _nonProjectActivityItems;
+		private ObservableCollection<ObservableProjectTaskTimesheetItem> _originalNonProjectActivityItems;
+		public ObservableCollection<ObservableProjectTaskTimesheetItem> NonProjectActivityItems
 		{
 			get
 			{
@@ -160,9 +349,9 @@ namespace Model
 		}
 		
 
-		private ObservableList<TimeSpan> _requiredHours;
-		private ObservableList<TimeSpan> _originalRequiredHours;
-		public ObservableList<TimeSpan> RequiredHours
+		private ObservableCollection<TimeSpan> _requiredHours;
+		private ObservableCollection<TimeSpan> _originalRequiredHours;
+		public ObservableCollection<TimeSpan> RequiredHours
 		{
 			get
 			{
@@ -248,9 +437,57 @@ namespace Model
 		{
 			Title = _originalTitle;
 			TimesheetId = _originalTimesheetId;
-			ProjectTimeItems = _originalProjectTimeItems == null ? null : _originalProjectTimeItems.DeepCopy();
-			NonProjectActivityItems = _originalNonProjectActivityItems == null ? null : _originalNonProjectActivityItems.DeepCopy();
-			RequiredHours = _originalRequiredHours == null ? null : _originalRequiredHours.DeepCopy();
+			// Unhook propertyChanged eventhandlers for ProjectTimeItems
+			if (ProjectTimeItems != null)
+			{
+				foreach(var item in ProjectTimeItems)
+				{
+					var propertyChangedItem = item as INotifyPropertyChanged;
+					if(propertyChangedItem != null)
+					{
+						propertyChangedItem.PropertyChanged -= ProjectTimeItems_Item_PropertyChanged;
+					}
+				}
+			}
+			ProjectTimeItems = _originalProjectTimeItems == null ? null : GenericCopier<ObservableCollection<ObservableProjectTaskTimesheetItem>>.DeepCopy(_originalProjectTimeItems);
+			// Hook-up propertyChanged eventhandlers for ProjectTimeItems
+			if (ProjectTimeItems != null)
+			{
+				foreach(var item in ProjectTimeItems)
+				{
+					var propertyChangedItem = item as INotifyPropertyChanged;
+					if(propertyChangedItem != null)
+					{
+						propertyChangedItem.PropertyChanged += ProjectTimeItems_Item_PropertyChanged;
+					}
+				}
+			}
+			// Unhook propertyChanged eventhandlers for NonProjectActivityItems
+			if (NonProjectActivityItems != null)
+			{
+				foreach(var item in NonProjectActivityItems)
+				{
+					var propertyChangedItem = item as INotifyPropertyChanged;
+					if(propertyChangedItem != null)
+					{
+						propertyChangedItem.PropertyChanged -= NonProjectActivityItems_Item_PropertyChanged;
+					}
+				}
+			}
+			NonProjectActivityItems = _originalNonProjectActivityItems == null ? null : GenericCopier<ObservableCollection<ObservableProjectTaskTimesheetItem>>.DeepCopy(_originalNonProjectActivityItems);
+			// Hook-up propertyChanged eventhandlers for NonProjectActivityItems
+			if (NonProjectActivityItems != null)
+			{
+				foreach(var item in NonProjectActivityItems)
+				{
+					var propertyChangedItem = item as INotifyPropertyChanged;
+					if(propertyChangedItem != null)
+					{
+						propertyChangedItem.PropertyChanged += NonProjectActivityItems_Item_PropertyChanged;
+					}
+				}
+			}
+			RequiredHours = _originalRequiredHours == null ? null : GenericCopier<ObservableCollection<TimeSpan>>.DeepCopy(_originalRequiredHours);
 			TotalRequiredHours = _originalTotalRequiredHours;
 			DummyTimeEntry = _originalDummyTimeEntry == null ? null : GenericCopier<ObservableTimeEntry>.DeepCopy(_originalDummyTimeEntry);
 		}
@@ -322,7 +559,7 @@ namespace Model
 		{
 			get 
 			{ 
-				return _changeTracker.All(x => x.Value == false);
+				return _changeTracker.Any(x => x.Value == true);
 			}
 			private set
 			{
