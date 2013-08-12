@@ -65,30 +65,24 @@ namespace Tests
 
     }
 
-    public class DummyObject : IEqualityComparer<DummyObject>
+    public class DummyObject : IEquatable<DummyObject>
     {
         public string Field1 { get; set; }
         public int Field2 { get; set; }
 
-
-        public bool Equals(DummyObject x, DummyObject y)
+        public bool Equals(DummyObject other)
         {
-            if (x.Field1 != y.Field1)
+            if (Field1 != other.Field1)
             {
                 return false;
             }
 
-            if (x.Field2 != y.Field2)
+            if (Field2 != other.Field2)
             {
                 return false;
             }
 
             return true;
-        }
-
-        public int GetHashCode(DummyObject obj)
-        {
-            throw new InvalidOperationException("Cannot use Dummy Object in Dictionary");
         }
     }
 }

@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 namespace Model
 {
 	[Serializable]
-	public partial class ObservableTimesheet : INotifyPropertyChanged, IChangeTracking
+	public partial class ObservableTimesheet : INotifyPropertyChanged, IChangeTracking, ICloneable
 	{
 		private Dictionary<string,bool> _changeTracker;
 		private bool _isTrackingEnabled;
@@ -42,26 +42,6 @@ namespace Model
 			ProjectTimeItems.CollectionChanged += ProjectTimeItems_CollectionChanged;
 			NonProjectActivityItems.CollectionChanged += NonProjectActivityItems_CollectionChanged;
 			RequiredHours.CollectionChanged += RequiredHours_CollectionChanged;
-			foreach(var item in ProjectTimeItems)
-			{
-				var propertyChangedItem = item as INotifyPropertyChanged;
-				if(propertyChangedItem != null)
-				{
-					propertyChangedItem.PropertyChanged += ProjectTimeItems_Item_PropertyChanged;
-				}
-			}
-			
-
-			foreach(var item in NonProjectActivityItems)
-			{
-				var propertyChangedItem = item as INotifyPropertyChanged;
-				if(propertyChangedItem != null)
-				{
-					propertyChangedItem.PropertyChanged += NonProjectActivityItems_Item_PropertyChanged;
-				}
-			}
-			
-
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
 		}
@@ -529,5 +509,36 @@ namespace Model
 		}
 				
 		#endregion
+		
+
+		public object Clone()
+		{
+			var clone = default(ObservableTimesheet);
+			clone.Title = Title;
+			
+
+			clone.TimesheetId = TimesheetId;
+			
+
+			clone.ProjectTimeItems = default(ObservableCollection<ObservableProjectTaskTimesheetItem>);
+			
+
+			clone.NonProjectActivityItems = default(ObservableCollection<ObservableProjectTaskTimesheetItem>);
+			
+
+			clone.RequiredHours = default(ObservableCollection<TimeSpan>);
+			
+
+			clone.TotalRequiredHours = TotalRequiredHours;
+			
+
+			clone.AttachEventHandlers();
+			return clone;
+		}
+		
+
+		public void AttachEventHandlers()
+		{
+		}
 	}
 }

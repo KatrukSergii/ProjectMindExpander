@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 namespace Model
 {
 	[Serializable]
-	public partial class ObservableDummyTestObject : INotifyPropertyChanged, IChangeTracking
+	public partial class ObservableDummyTestObject : INotifyPropertyChanged, IChangeTracking, ICloneable
 	{
 		private Dictionary<string,bool> _changeTracker;
 		private bool _isTrackingEnabled;
@@ -47,26 +47,6 @@ namespace Model
 			NonProjectActivityItems.CollectionChanged += NonProjectActivityItems_CollectionChanged;
 			RequiredHours.CollectionChanged += RequiredHours_CollectionChanged;
 			DummyValueTypeCollection.CollectionChanged += DummyValueTypeCollection_CollectionChanged;
-			foreach(var item in ProjectTimeItems)
-			{
-				var propertyChangedItem = item as INotifyPropertyChanged;
-				if(propertyChangedItem != null)
-				{
-					propertyChangedItem.PropertyChanged += ProjectTimeItems_Item_PropertyChanged;
-				}
-			}
-			
-
-			foreach(var item in NonProjectActivityItems)
-			{
-				var propertyChangedItem = item as INotifyPropertyChanged;
-				if(propertyChangedItem != null)
-				{
-					propertyChangedItem.PropertyChanged += NonProjectActivityItems_Item_PropertyChanged;
-				}
-			}
-			
-
 			DummyTimeEntry.PropertyChanged += DummyTimeEntry_PropertyChanged;
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
@@ -674,5 +654,64 @@ namespace Model
 		}
 				
 		#endregion
+		
+
+		public object Clone()
+		{
+			var clone = default(ObservableDummyTestObject);
+			clone.Title = Title;
+			
+
+			clone.TimesheetId = TimesheetId;
+			
+
+			clone.ProjectTimeItems = default(ObservableCollection<ObservableProjectTaskTimesheetItem>);
+			
+
+			clone.NonProjectActivityItems = default(ObservableCollection<ObservableProjectTaskTimesheetItem>);
+			
+
+			clone.RequiredHours = default(ObservableCollection<TimeSpan>);
+			
+
+			clone.TotalRequiredHours = TotalRequiredHours;
+			
+
+			clone.DummyTimeEntry = default(ObservableTimeEntry);
+			
+
+			clone.DummyValueTypeCollection = default(ObservableCollection<int>);
+			
+
+			clone.AttachEventHandlers();
+			return clone;
+		}
+		
+
+		public void AttachEventHandlers()
+		{
+		}
 	}
 }
+//Value Properties:
+	//Title -  string
+	//TimesheetId -  string
+	//TotalRequiredHours -  TimeSpan
+	//Value -  int
+	//Name -  string
+	
+
+//Observable Properties:
+	//DummyTimeEntry -  TimeEntry
+	
+
+// Value Type List Properties
+	//RequiredHours -  List<TimeSpan>
+	//DummyValueTypeCollection -  List<int>
+	
+
+// Observable Type List Properties
+	//ProjectTimeItems -  List<ProjectTaskTimesheetItem>
+	//NonProjectActivityItems -  List<ProjectTaskTimesheetItem>
+	
+

@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 namespace Model
 {
 	[Serializable]
-	public partial class ObservableProjectTaskTimesheetItem : INotifyPropertyChanged, IChangeTracking
+	public partial class ObservableProjectTaskTimesheetItem : INotifyPropertyChanged, IChangeTracking, ICloneable
 	{
 		private Dictionary<string,bool> _changeTracker;
 		private bool _isTrackingEnabled;
@@ -34,16 +34,6 @@ namespace Model
 			// Set the properties to the _original property values
 			ResetProperties();
 			TimeEntries.CollectionChanged += TimeEntries_CollectionChanged;
-			foreach(var item in TimeEntries)
-			{
-				var propertyChangedItem = item as INotifyPropertyChanged;
-				if(propertyChangedItem != null)
-				{
-					propertyChangedItem.PropertyChanged += TimeEntries_Item_PropertyChanged;
-				}
-			}
-			
-
 			ProjectCode.PropertyChanged += ProjectCode_PropertyChanged;
 			TaskCode.PropertyChanged += TaskCode_PropertyChanged;
 			ResetChangeTracking();
@@ -314,5 +304,56 @@ namespace Model
 		}
 				
 		#endregion
+		
+
+		public object Clone()
+		{
+			var clone = default(ObservableProjectTaskTimesheetItem);
+			clone.ProjectCode = default(ObservablePickListItem);
+			
+
+			clone.TaskCode = default(ObservablePickListItem);
+			
+
+			clone.TimeEntries = default(ObservableCollection<ObservableTimeEntry>);
+			
+
+			clone.AttachEventHandlers();
+			return clone;
+		}
+		
+
+		public void AttachEventHandlers()
+		{
+		}
 	}
 }
+//Value Properties:
+	//Title -  string
+	//TimesheetId -  string
+	//TotalRequiredHours -  TimeSpan
+	//Value -  int
+	//Name -  string
+	//LoggedTime -  TimeSpan?
+	//ExtraTime -  TimeSpan?
+	//Notes -  string
+	//WorkDetailId -  int?
+	
+
+//Observable Properties:
+	//DummyTimeEntry -  TimeEntry
+	//ProjectCode -  PickListItem
+	//TaskCode -  PickListItem
+	
+
+// Value Type List Properties
+	//RequiredHours -  List<TimeSpan>
+	//DummyValueTypeCollection -  List<int>
+	
+
+// Observable Type List Properties
+	//ProjectTimeItems -  List<ProjectTaskTimesheetItem>
+	//NonProjectActivityItems -  List<ProjectTaskTimesheetItem>
+	//TimeEntries -  List<TimeEntry>
+	
+

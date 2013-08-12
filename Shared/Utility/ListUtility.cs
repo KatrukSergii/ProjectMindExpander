@@ -9,7 +9,7 @@ namespace Shared.Utility
     public static class ListUtility
     {
         /// <summary>
-        /// Allows comparison of List<[ValueType]> or List<[IEqualityComparer]>
+        /// Allows comparison of List<[ValueType]> or List<[IEquatable]>
         /// </summary>
         /// <param name="list"></param>
         /// <param name="otherList"></param>
@@ -24,30 +24,31 @@ namespace Shared.Utility
             Collection<string> x;
 
             var isValueType = typeof(T).IsValueType || typeof(T) == typeof(string);
-            var isIComparable = typeof(IEqualityComparer<T>).IsAssignableFrom(typeof(T));
+            var isIComparable = typeof(IEquatable<T>).IsAssignableFrom(typeof(T));
 
             // assume each list is in same order
             for (var i = 0; i < otherList.Count; i++)
             {
-                var item = otherList[i];
+                var thisItem = list[i];
+                var otherItem = otherList[i];
 
                 if (isValueType)
                 {
-                    if (!list[i].Equals(otherList[i]))
+                    if (!thisItem.Equals(otherItem))
                     {
                         return false;
                     }
                 }
                 else if (isIComparable)
                 {
-                    if (!((IEqualityComparer<T>)list[i]).Equals(otherList[i]))
+                    if (!((IEquatable<T>)thisItem).Equals(otherItem))
                     {
                         return false;
                     }
                 }
                 else
                 {
-                    throw new ArgumentException("Can only compare equality for lists of value types or IEqualityComparer<T> objects");
+                    throw new ArgumentException("Can only compare equality for lists of value types or IEquatabler<T> objects");
                 }
             }
 
