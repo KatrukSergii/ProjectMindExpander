@@ -319,6 +319,7 @@ namespace Tests
         [TestMethod]
         public void IsChanged_ProjectItemsAddAcceptChange_True()
         {
+
             var ts = CreateDummyTimesheet();
             var item = new ProjectTaskTimesheetItem(new PickListItem(10, "item1"), new PickListItem(20, "item2"));
             ts.ProjectTimeItems.Add(new ObservableProjectTaskTimesheetItem(item));

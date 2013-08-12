@@ -1,4 +1,5 @@
 ﻿using Shared.Utility;
+using Shared.Interfaces;
 using System;
 using System.Linq;
 using System.ComponentModel;
@@ -11,7 +12,7 @@ using System.Runtime.CompilerServices;
 namespace Model
 {
 	[Serializable]
-	public partial class ObservablePickListItem : INotifyPropertyChanged, IChangeTracking, ICloneable
+	public partial class ObservablePickListItem : INotifyPropertyChanged, IChangeTracking, ICloneable, IAttachEventHandler
 	{
 		private Dictionary<string,bool> _changeTracker;
 		private bool _isTrackingEnabled;
@@ -178,7 +179,7 @@ namespace Model
 
 		public object Clone()
 		{
-			var clone = default(ObservablePickListItem);
+			var clone = new ObservablePickListItem();
 			clone.Value = Value;
 			
 
@@ -195,28 +196,3 @@ namespace Model
 		}
 	}
 }
-//Value Properties:
-	//Title -  string
-	//TimesheetId -  string
-	//TotalRequiredHours -  TimeSpan
-	//Value -  int
-	//Name -  string
-	
-
-//Observable Properties:
-	//DummyTimeEntry -  TimeEntry
-	//ProjectCode -  PickListItem
-	//TaskCode -  PickListItem
-	
-
-// Value Type List Properties
-	//RequiredHours -  List<TimeSpan>
-	//DummyValueTypeCollection -  List<int>
-	
-
-// Observable Type List Properties
-	//ProjectTimeItems -  List<ProjectTaskTimesheetItem>
-	//NonProjectActivityItems -  List<ProjectTaskTimesheetItem>
-	//TimeEntries -  List<TimeEntry>
-	
-

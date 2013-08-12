@@ -1,4 +1,5 @@
 ﻿using Shared.Utility;
+using Shared.Interfaces;
 using System;
 using System.Linq;
 using System.ComponentModel;
@@ -11,7 +12,7 @@ using System.Runtime.CompilerServices;
 namespace Model
 {
 	[Serializable]
-	public partial class ObservableTimeEntry : INotifyPropertyChanged, IChangeTracking, ICloneable
+	public partial class ObservableTimeEntry : INotifyPropertyChanged, IChangeTracking, ICloneable, IAttachEventHandler
 	{
 		private Dictionary<string,bool> _changeTracker;
 		private bool _isTrackingEnabled;
@@ -252,17 +253,17 @@ namespace Model
 
 		public object Clone()
 		{
-			var clone = default(ObservableTimeEntry);
-			clone.LoggedTime = default(TimeSpan?);
+			var clone = new ObservableTimeEntry();
+			clone.LoggedTime = new TimeSpan?();
 			
 
-			clone.ExtraTime = default(TimeSpan?);
+			clone.ExtraTime = new TimeSpan?();
 			
 
 			clone.Notes = Notes;
 			
 
-			clone.WorkDetailId = default(int?);
+			clone.WorkDetailId = new int?();
 			
 
 			clone.AttachEventHandlers();
@@ -275,38 +276,3 @@ namespace Model
 		}
 	}
 }
-Error - value type propertties already contains a key for property Title
-Error - value type propertties already contains a key for property TimesheetId
-Error - _observableTypeListProperties already contains a key for property ProjectTimeItems
-Error - _observableTypeListProperties already contains a key for property NonProjectActivityItems
-Error - _valueTypeListProperties already contains a key for property RequiredHours
-Error - value type propertties already contains a key for property TotalRequiredHours
-//Value Properties:
-	//Title -  string
-	//TimesheetId -  string
-	//TotalRequiredHours -  TimeSpan
-	//Value -  int
-	//Name -  string
-	//LoggedTime -  TimeSpan?
-	//ExtraTime -  TimeSpan?
-	//Notes -  string
-	//WorkDetailId -  int?
-	
-
-//Observable Properties:
-	//DummyTimeEntry -  TimeEntry
-	//ProjectCode -  PickListItem
-	//TaskCode -  PickListItem
-	
-
-// Value Type List Properties
-	//RequiredHours -  List<TimeSpan>
-	//DummyValueTypeCollection -  List<int>
-	
-
-// Observable Type List Properties
-	//ProjectTimeItems -  List<ProjectTaskTimesheetItem>
-	//NonProjectActivityItems -  List<ProjectTaskTimesheetItem>
-	//TimeEntries -  List<TimeEntry>
-	
-

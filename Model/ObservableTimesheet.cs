@@ -1,4 +1,5 @@
 ﻿using Shared.Utility;
+using Shared.Interfaces;
 using System;
 using System.Linq;
 using System.ComponentModel;
@@ -11,7 +12,7 @@ using System.Runtime.CompilerServices;
 namespace Model
 {
 	[Serializable]
-	public partial class ObservableTimesheet : INotifyPropertyChanged, IChangeTracking, ICloneable
+	public partial class ObservableTimesheet : INotifyPropertyChanged, IChangeTracking, ICloneable, IAttachEventHandler
 	{
 		private Dictionary<string,bool> _changeTracker;
 		private bool _isTrackingEnabled;
@@ -513,20 +514,32 @@ namespace Model
 
 		public object Clone()
 		{
-			var clone = default(ObservableTimesheet);
+			var clone = new ObservableTimesheet();
 			clone.Title = Title;
 			
 
 			clone.TimesheetId = TimesheetId;
 			
 
-			clone.ProjectTimeItems = default(ObservableCollection<ObservableProjectTaskTimesheetItem>);
+			clone.ProjectTimeItems = new ObservableCollection<ObservableProjectTaskTimesheetItem>();
+			foreach(var item in ProjectTimeItems)
+			{
+				clone.ProjectTimeItems.Add(item);
+			}
 			
 
-			clone.NonProjectActivityItems = default(ObservableCollection<ObservableProjectTaskTimesheetItem>);
+			clone.NonProjectActivityItems = new ObservableCollection<ObservableProjectTaskTimesheetItem>();
+			foreach(var item in NonProjectActivityItems)
+			{
+				clone.NonProjectActivityItems.Add(item);
+			}
 			
 
-			clone.RequiredHours = default(ObservableCollection<TimeSpan>);
+			clone.RequiredHours = new ObservableCollection<TimeSpan>();
+			foreach(var item in RequiredHours)
+			{
+				clone.RequiredHours.Add(item);
+			}
 			
 
 			clone.TotalRequiredHours = TotalRequiredHours;

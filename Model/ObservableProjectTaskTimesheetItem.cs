@@ -1,4 +1,5 @@
 ﻿using Shared.Utility;
+using Shared.Interfaces;
 using System;
 using System.Linq;
 using System.ComponentModel;
@@ -11,7 +12,7 @@ using System.Runtime.CompilerServices;
 namespace Model
 {
 	[Serializable]
-	public partial class ObservableProjectTaskTimesheetItem : INotifyPropertyChanged, IChangeTracking, ICloneable
+	public partial class ObservableProjectTaskTimesheetItem : INotifyPropertyChanged, IChangeTracking, ICloneable, IAttachEventHandler
 	{
 		private Dictionary<string,bool> _changeTracker;
 		private bool _isTrackingEnabled;
@@ -308,14 +309,18 @@ namespace Model
 
 		public object Clone()
 		{
-			var clone = default(ObservableProjectTaskTimesheetItem);
-			clone.ProjectCode = default(ObservablePickListItem);
+			var clone = new ObservableProjectTaskTimesheetItem();
+			clone.ProjectCode = new ObservablePickListItem();
 			
 
-			clone.TaskCode = default(ObservablePickListItem);
+			clone.TaskCode = new ObservablePickListItem();
 			
 
-			clone.TimeEntries = default(ObservableCollection<ObservableTimeEntry>);
+			clone.TimeEntries = new ObservableCollection<ObservableTimeEntry>();
+			foreach(var item in TimeEntries)
+			{
+				clone.TimeEntries.Add(item);
+			}
 			
 
 			clone.AttachEventHandlers();
@@ -328,32 +333,3 @@ namespace Model
 		}
 	}
 }
-//Value Properties:
-	//Title -  string
-	//TimesheetId -  string
-	//TotalRequiredHours -  TimeSpan
-	//Value -  int
-	//Name -  string
-	//LoggedTime -  TimeSpan?
-	//ExtraTime -  TimeSpan?
-	//Notes -  string
-	//WorkDetailId -  int?
-	
-
-//Observable Properties:
-	//DummyTimeEntry -  TimeEntry
-	//ProjectCode -  PickListItem
-	//TaskCode -  PickListItem
-	
-
-// Value Type List Properties
-	//RequiredHours -  List<TimeSpan>
-	//DummyValueTypeCollection -  List<int>
-	
-
-// Observable Type List Properties
-	//ProjectTimeItems -  List<ProjectTaskTimesheetItem>
-	//NonProjectActivityItems -  List<ProjectTaskTimesheetItem>
-	//TimeEntries -  List<TimeEntry>
-	
-
