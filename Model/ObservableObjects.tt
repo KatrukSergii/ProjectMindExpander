@@ -58,13 +58,13 @@
 	private const string _prefix = "Observable"; // change this to alter the output class names 
 	private const string _namespaceName = "Model";
 	
-	private Dictionary<string,PropertyData> _properties = new Dictionary<string,PropertyData>();
+	private Dictionary<string,PropertyData> _propertyCache = new Dictionary<string,PropertyData>();
 	
 	// Cache property info so that each section of the document doesn't have to check for type properties
 	private void PopulatePropertyCache(Type type, IEnumerable<string> typeNames)
 	{
 		var properties = GetPublicPropertyDetails(type);
-		_properties.Clear();
+		_propertyCache.Clear();
 
 		foreach(var property in properties)
 		{
@@ -73,7 +73,7 @@
 			{
 				// property type is in the list of types that implement IObservable
 				var propertyInfo = new PropertyData(property.Value, PropertyType.Observable, string.Empty, string.Empty);
-				_properties.Add(property.Key, propertyInfo);
+				_propertyCache.Add(property.Key, propertyInfo);
 			}
 			else
 			{		
@@ -87,20 +87,20 @@
                     {
 						// property is List<ValueType>
 						var propertyInfo = new PropertyData(property.Value, PropertyType.ValueTypeList, genericType, genericParameterType);
-						_properties.Add(property.Key, propertyInfo);
+						_propertyCache.Add(property.Key, propertyInfo);
                     }
 					else
 					{
 						// property is List<IObservable> (assume that all reference types are IObservable for the moment)
 						var propertyInfo = new PropertyData(property.Value, PropertyType.ObservableList, genericType, genericParameterType);
-						_properties.Add(property.Key, propertyInfo);
+						_propertyCache.Add(property.Key, propertyInfo);
                     }
                 }
 				else
 				{
 					// property is a plain old value type (or string)
 					var propertyInfo = new PropertyData(property.Value, PropertyType.ValueType, string.Empty, string.Empty);
-					_properties.Add(property.Key, propertyInfo);
+					_propertyCache.Add(property.Key, propertyInfo);
 				}
 			}
 		}
@@ -135,7 +135,7 @@
 
 						CreateCloneMethod(type.Name, properties,typeNames);
 
-						CreateAttachEventHandlersMethod(properties,typeNames);
+						CreateAttachEventHandlersMethod(_propertyCache);
 				}
 		 }
 	}
@@ -184,12 +184,14 @@
 		using(new Brace("public " + _prefix + type.Name + "()", this)){
 			
 			WriteLine("InitializeChangeTracker();");
-
+			WriteLine("_isTrackingEnabled = false;");
+			WriteLine(Environment.NewLine);
 			foreach (var kvp in properties)
 			{
 				var isObservable = TypeUtility.IsTypeObservable(kvp.Value,typeNames);
 				CreatePropertyInitializer(kvp.Key,kvp.Value, isObservable);
 			}
+			WriteLine("_isTrackingEnabled = true;");
 		}
 
 		var collectionPropertyNames = new Dictionary<string,string>();
@@ -198,6 +200,8 @@
 		// e.g.  ObservableFoo(Foo foo)
 		using(new Brace("public " + _prefix + type.Name + "(" + type.Name + " " + camelCaseName + ") : this()", this)){
 
+			WriteLine("_isTrackingEnabled = false;");
+			WriteLine(Environment.NewLine);
 			// Assign the _originalX properties
 			foreach (var kvp in properties)
 			{
@@ -419,9 +423,7 @@
 					using(new Brace("if (" + privateFieldName + " != value)", this))
 					{
 						WriteLine(privateFieldName + " = value;");
-						WriteLine(@"OnPropertyChanged(""" + propertyName + @""");");
-
-						using(new Brace("if (_original" + propertyName + " == null || !_original" + propertyName + ".Equals(" + privateFieldName + "))",this))
+						using(new Brace("if ((_original" + propertyName + " == null && value != null) || (_original" + propertyName + " != null && !_original" + propertyName + ".Equals(" + privateFieldName + ")))",this))
 						{
 							WriteLine(@"_changeTracker[""" + propertyName + @"""] = true;");
 							WriteLine(@"OnPropertyChanged(""IsChanged"");");
@@ -430,6 +432,7 @@
 						{
 							WriteLine(@"_changeTracker[""" + propertyName + @"""] = false;");
 						}
+						WriteLine(@"OnPropertyChanged(""" + propertyName + @""");");
 					}
 				}
 		}
@@ -650,8 +653,8 @@ public bool IsChanged
 			WriteLine("var clone = new Observable" + typeName + "();");
 			foreach (var kvp in properties)
 			{
-				
-				if (TypeUtility.IsValueType(kvp.Value))
+				// if value type or nullable value type (e.g. TimeSpan?)
+				if (TypeUtility.IsValueType(kvp.Value) || (kvp.Value.EndsWith("?") && TypeUtility.IsValueType(kvp.Value.Replace("?",""))))
 				{
 					WriteLine("clone." + kvp.Key + " = " + kvp.Key + ";");
 					WriteLine(Environment.NewLine);
@@ -684,19 +687,40 @@ public bool IsChanged
 			}
 
 			WriteLine("clone.AttachEventHandlers();");
+			WriteLine("clone.AcceptChanges();");
 			WriteLine("return clone;");
         }
 
 		WriteLine(Environment.NewLine);
     }
 
-	private void CreateAttachEventHandlersMethod(Dictionary<string,string> properties, IEnumerable<string> typeNames)
+	private void CreateAttachEventHandlersMethod(Dictionary<string,PropertyData> properties)
     {
+		WriteLine("// This is only called after Clone() (so no need to unhook handlers)");
 		using(new Brace("public void AttachEventHandlers()", this))
         {
 			foreach(var kvp in properties)
             {
-
+				switch (kvp.Value.PropertyType)
+                {
+					case PropertyType.ValueType:
+						// Do nothing
+						break;
+					case PropertyType.Observable:
+						WriteLine(kvp.Key + ".PropertyChanged += " + kvp.Key + "_PropertyChanged;");
+						WriteLine(kvp.Key + ".AttachEventHandlers();");
+						break;
+					case PropertyType.ValueTypeList:
+						WriteLine(kvp.Key + ".CollectionChanged += " + kvp.Key + "_CollectionChanged;");
+						break;
+					case PropertyType.ObservableList:
+						using (new Brace("foreach(var item in " + kvp.Key + ")",this))
+                        {
+							WriteLine("item.PropertyChanged += " + kvp.Key + "_Item_PropertyChanged;");
+							WriteLine("item.AttachEventHandlers();");
+                        }
+						break;
+                }
             }
         }
     }

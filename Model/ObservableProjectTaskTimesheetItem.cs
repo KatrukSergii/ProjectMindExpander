@@ -21,12 +21,19 @@ namespace Model
 		public ObservableProjectTaskTimesheetItem()
 		{
 			InitializeChangeTracker();
+			_isTrackingEnabled = false;
+			
+
 			ProjectCode = new ObservablePickListItem();
 			TaskCode = new ObservablePickListItem();
 			TimeEntries = null;
+			_isTrackingEnabled = true;
 		}
 		public ObservableProjectTaskTimesheetItem(ProjectTaskTimesheetItem projectTaskTimesheetItem) : this()
 		{
+			_isTrackingEnabled = false;
+			
+
 			_originalProjectCode = new ObservablePickListItem(projectTaskTimesheetItem.ProjectCode);
 			_originalTaskCode = new ObservablePickListItem(projectTaskTimesheetItem.TaskCode);
 			_originalTimeEntries = new ObservableCollection<ObservableTimeEntry>(projectTaskTimesheetItem.TimeEntries.Select(x => new ObservableTimeEntry(x)).ToList());
@@ -111,8 +118,7 @@ namespace Model
 				if (_projectCode != value)
 				{
 					_projectCode = value;
-					OnPropertyChanged("ProjectCode");
-					if (_originalProjectCode == null || !_originalProjectCode.Equals(_projectCode))
+					if ((_originalProjectCode == null && value != null) || (_originalProjectCode != null && !_originalProjectCode.Equals(_projectCode)))
 					{
 						_changeTracker["ProjectCode"] = true;
 						OnPropertyChanged("IsChanged");
@@ -121,6 +127,7 @@ namespace Model
 					{
 						_changeTracker["ProjectCode"] = false;
 					}
+					OnPropertyChanged("ProjectCode");
 				}
 			}
 		}
@@ -139,8 +146,7 @@ namespace Model
 				if (_taskCode != value)
 				{
 					_taskCode = value;
-					OnPropertyChanged("TaskCode");
-					if (_originalTaskCode == null || !_originalTaskCode.Equals(_taskCode))
+					if ((_originalTaskCode == null && value != null) || (_originalTaskCode != null && !_originalTaskCode.Equals(_taskCode)))
 					{
 						_changeTracker["TaskCode"] = true;
 						OnPropertyChanged("IsChanged");
@@ -149,6 +155,7 @@ namespace Model
 					{
 						_changeTracker["TaskCode"] = false;
 					}
+					OnPropertyChanged("TaskCode");
 				}
 			}
 		}
@@ -167,8 +174,7 @@ namespace Model
 				if (_timeEntries != value)
 				{
 					_timeEntries = value;
-					OnPropertyChanged("TimeEntries");
-					if (_originalTimeEntries == null || !_originalTimeEntries.Equals(_timeEntries))
+					if ((_originalTimeEntries == null && value != null) || (_originalTimeEntries != null && !_originalTimeEntries.Equals(_timeEntries)))
 					{
 						_changeTracker["TimeEntries"] = true;
 						OnPropertyChanged("IsChanged");
@@ -177,6 +183,7 @@ namespace Model
 					{
 						_changeTracker["TimeEntries"] = false;
 					}
+					OnPropertyChanged("TimeEntries");
 				}
 			}
 		}
@@ -324,12 +331,23 @@ namespace Model
 			
 
 			clone.AttachEventHandlers();
+			clone.AcceptChanges();
 			return clone;
 		}
 		
 
+		// This is only called after Clone() (so no need to unhook handlers)
 		public void AttachEventHandlers()
 		{
+			ProjectCode.PropertyChanged += ProjectCode_PropertyChanged;
+			ProjectCode.AttachEventHandlers();
+			TaskCode.PropertyChanged += TaskCode_PropertyChanged;
+			TaskCode.AttachEventHandlers();
+			foreach(var item in TimeEntries)
+			{
+				item.PropertyChanged += TimeEntries_Item_PropertyChanged;
+				item.AttachEventHandlers();
+			}
 		}
 	}
 }

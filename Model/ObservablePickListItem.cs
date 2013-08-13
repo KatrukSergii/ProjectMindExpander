@@ -21,11 +21,18 @@ namespace Model
 		public ObservablePickListItem()
 		{
 			InitializeChangeTracker();
+			_isTrackingEnabled = false;
+			
+
 			Value = default(int);
 			Name = default(string);
+			_isTrackingEnabled = true;
 		}
 		public ObservablePickListItem(PickListItem pickListItem) : this()
 		{
+			_isTrackingEnabled = false;
+			
+
 			_originalValue = pickListItem.Value;
 			_originalName = pickListItem.Name;
 			
@@ -50,8 +57,7 @@ namespace Model
 				if (_value != value)
 				{
 					_value = value;
-					OnPropertyChanged("Value");
-					if (_originalValue == null || !_originalValue.Equals(_value))
+					if ((_originalValue == null && value != null) || (_originalValue != null && !_originalValue.Equals(_value)))
 					{
 						_changeTracker["Value"] = true;
 						OnPropertyChanged("IsChanged");
@@ -60,6 +66,7 @@ namespace Model
 					{
 						_changeTracker["Value"] = false;
 					}
+					OnPropertyChanged("Value");
 				}
 			}
 		}
@@ -78,8 +85,7 @@ namespace Model
 				if (_name != value)
 				{
 					_name = value;
-					OnPropertyChanged("Name");
-					if (_originalName == null || !_originalName.Equals(_name))
+					if ((_originalName == null && value != null) || (_originalName != null && !_originalName.Equals(_name)))
 					{
 						_changeTracker["Name"] = true;
 						OnPropertyChanged("IsChanged");
@@ -88,6 +94,7 @@ namespace Model
 					{
 						_changeTracker["Name"] = false;
 					}
+					OnPropertyChanged("Name");
 				}
 			}
 		}
@@ -187,10 +194,12 @@ namespace Model
 			
 
 			clone.AttachEventHandlers();
+			clone.AcceptChanges();
 			return clone;
 		}
 		
 
+		// This is only called after Clone() (so no need to unhook handlers)
 		public void AttachEventHandlers()
 		{
 		}

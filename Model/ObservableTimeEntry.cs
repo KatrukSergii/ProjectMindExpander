@@ -21,13 +21,20 @@ namespace Model
 		public ObservableTimeEntry()
 		{
 			InitializeChangeTracker();
+			_isTrackingEnabled = false;
+			
+
 			LoggedTime = null;
 			ExtraTime = null;
 			Notes = default(string);
 			WorkDetailId = null;
+			_isTrackingEnabled = true;
 		}
 		public ObservableTimeEntry(TimeEntry timeEntry) : this()
 		{
+			_isTrackingEnabled = false;
+			
+
 			_originalLoggedTime = timeEntry.LoggedTime;
 			_originalExtraTime = timeEntry.ExtraTime;
 			_originalNotes = timeEntry.Notes;
@@ -54,8 +61,7 @@ namespace Model
 				if (_loggedTime != value)
 				{
 					_loggedTime = value;
-					OnPropertyChanged("LoggedTime");
-					if (_originalLoggedTime == null || !_originalLoggedTime.Equals(_loggedTime))
+					if ((_originalLoggedTime == null && value != null) || (_originalLoggedTime != null && !_originalLoggedTime.Equals(_loggedTime)))
 					{
 						_changeTracker["LoggedTime"] = true;
 						OnPropertyChanged("IsChanged");
@@ -64,6 +70,7 @@ namespace Model
 					{
 						_changeTracker["LoggedTime"] = false;
 					}
+					OnPropertyChanged("LoggedTime");
 				}
 			}
 		}
@@ -82,8 +89,7 @@ namespace Model
 				if (_extraTime != value)
 				{
 					_extraTime = value;
-					OnPropertyChanged("ExtraTime");
-					if (_originalExtraTime == null || !_originalExtraTime.Equals(_extraTime))
+					if ((_originalExtraTime == null && value != null) || (_originalExtraTime != null && !_originalExtraTime.Equals(_extraTime)))
 					{
 						_changeTracker["ExtraTime"] = true;
 						OnPropertyChanged("IsChanged");
@@ -92,6 +98,7 @@ namespace Model
 					{
 						_changeTracker["ExtraTime"] = false;
 					}
+					OnPropertyChanged("ExtraTime");
 				}
 			}
 		}
@@ -110,8 +117,7 @@ namespace Model
 				if (_notes != value)
 				{
 					_notes = value;
-					OnPropertyChanged("Notes");
-					if (_originalNotes == null || !_originalNotes.Equals(_notes))
+					if ((_originalNotes == null && value != null) || (_originalNotes != null && !_originalNotes.Equals(_notes)))
 					{
 						_changeTracker["Notes"] = true;
 						OnPropertyChanged("IsChanged");
@@ -120,6 +126,7 @@ namespace Model
 					{
 						_changeTracker["Notes"] = false;
 					}
+					OnPropertyChanged("Notes");
 				}
 			}
 		}
@@ -138,8 +145,7 @@ namespace Model
 				if (_workDetailId != value)
 				{
 					_workDetailId = value;
-					OnPropertyChanged("WorkDetailId");
-					if (_originalWorkDetailId == null || !_originalWorkDetailId.Equals(_workDetailId))
+					if ((_originalWorkDetailId == null && value != null) || (_originalWorkDetailId != null && !_originalWorkDetailId.Equals(_workDetailId)))
 					{
 						_changeTracker["WorkDetailId"] = true;
 						OnPropertyChanged("IsChanged");
@@ -148,6 +154,7 @@ namespace Model
 					{
 						_changeTracker["WorkDetailId"] = false;
 					}
+					OnPropertyChanged("WorkDetailId");
 				}
 			}
 		}
@@ -254,23 +261,25 @@ namespace Model
 		public object Clone()
 		{
 			var clone = new ObservableTimeEntry();
-			clone.LoggedTime = new TimeSpan?();
+			clone.LoggedTime = LoggedTime;
 			
 
-			clone.ExtraTime = new TimeSpan?();
+			clone.ExtraTime = ExtraTime;
 			
 
 			clone.Notes = Notes;
 			
 
-			clone.WorkDetailId = new int?();
+			clone.WorkDetailId = WorkDetailId;
 			
 
 			clone.AttachEventHandlers();
+			clone.AcceptChanges();
 			return clone;
 		}
 		
 
+		// This is only called after Clone() (so no need to unhook handlers)
 		public void AttachEventHandlers()
 		{
 		}

@@ -2,12 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
+using Shared.Interfaces;
 
 namespace Shared.Utility
 {
@@ -18,22 +20,22 @@ namespace Shared.Utility
     /// NB - Eventhandlers are not copied - must re-attach eventhandlers after the copy
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public static class GenericCopier<T>
+    public static class GenericCopier<T> where T : new()
     {
         public static T DeepCopy(object objectToCopy)
         {
             // Get the object to return a copy instead of serializing/de-serializing
             if (typeof (ICloneable).IsAssignableFrom(typeof (T)))
             {
-                return (T) ((ICloneable) objectToCopy).Clone();
+                var clone =  (T) ((ICloneable) objectToCopy).Clone();
+                return clone;
             }
             
-            if (typeof(IList<>).IsAssignableFrom(typeof(T)))
+            if (TypeUtility.IsAssignableToGenericType(typeof(T),typeof(IList<>)))
             {
-                var newList = default(T);
+                var newList = new T();
                 var genericTypeParameter = objectToCopy.GetType().GetGenericArguments()[0]; // assume only 1
                 
-                // Only continue if the items in the list are cloneable
                 if (typeof (ICloneable).IsAssignableFrom(genericTypeParameter))
                 {
                     foreach (var item in ((IEnumerable) objectToCopy))
@@ -42,6 +44,16 @@ namespace Shared.Utility
                         ((IList) newList).Add(clone);
                     }
                 }
+                else
+                {
+                    // Value type e.g. List<int>
+                    foreach (var item in ((IEnumerable)objectToCopy))
+                    {
+                        ((IList)newList).Add(item);
+                    }
+                }
+
+                return newList;
             }
 
             // using DataContractSerializer because I there were issues with the binaryFormatter not serializing (even though DCS is a bit slower)

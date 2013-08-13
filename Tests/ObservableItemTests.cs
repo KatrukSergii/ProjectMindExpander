@@ -65,15 +65,15 @@ namespace Tests
             //timesheet.ProjectTimeItems.Add(timesheetItem2);
             //timesheet.ProjectTimeItems.Add(timesheetItem3);
 
-            //timesheet.RequiredHours.AddRange(new List<TimeSpan> { 
-            //    TimeSpan.FromHours(7.5), 
-            //    TimeSpan.FromHours(7.5), 
-            //    TimeSpan.FromHours(7.5), 
-            //    TimeSpan.FromHours(7.5), 
-            //    TimeSpan.FromHours(7.5), 
-            //    TimeSpan.FromHours(7.5), 
-            //    TimeSpan.FromHours(7.5)
-            //});
+            timesheet.RequiredHours.AddRange(new List<TimeSpan> { 
+                TimeSpan.FromHours(7.5), 
+                TimeSpan.FromHours(7.5), 
+                TimeSpan.FromHours(7.5), 
+                TimeSpan.FromHours(7.5), 
+                TimeSpan.FromHours(7.5), 
+                TimeSpan.FromHours(7.5), 
+                TimeSpan.FromHours(7.5)
+            });
 
             timesheet.TotalRequiredHours = TimeSpan.FromHours(37.5);
             timesheet.Title = "timesheetTiele";
@@ -186,6 +186,7 @@ namespace Tests
         public void IsChanged_RequiredHoursChangedThenChangedBack_False()
         {
             var ts = CreateDummyTimesheet();
+            Assert.IsFalse(ts.IsChanged);
             var originalHours = ts.RequiredHours[0];
             ts.RequiredHours[0] = TimeSpan.FromMinutes(999);
             Assert.IsTrue(ts.IsChanged);

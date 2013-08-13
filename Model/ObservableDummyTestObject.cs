@@ -21,6 +21,9 @@ namespace Model
 		public ObservableDummyTestObject()
 		{
 			InitializeChangeTracker();
+			_isTrackingEnabled = false;
+			
+
 			Title = default(string);
 			TimesheetId = default(string);
 			ProjectTimeItems = null;
@@ -29,9 +32,13 @@ namespace Model
 			TotalRequiredHours = new TimeSpan();
 			DummyTimeEntry = new ObservableTimeEntry();
 			DummyValueTypeCollection = null;
+			_isTrackingEnabled = true;
 		}
 		public ObservableDummyTestObject(DummyTestObject dummyTestObject) : this()
 		{
+			_isTrackingEnabled = false;
+			
+
 			_originalTitle = dummyTestObject.Title;
 			_originalTimesheetId = dummyTestObject.TimesheetId;
 			_originalProjectTimeItems = new ObservableCollection<ObservableProjectTaskTimesheetItem>(dummyTestObject.ProjectTimeItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
@@ -291,8 +298,7 @@ namespace Model
 				if (_title != value)
 				{
 					_title = value;
-					OnPropertyChanged("Title");
-					if (_originalTitle == null || !_originalTitle.Equals(_title))
+					if ((_originalTitle == null && value != null) || (_originalTitle != null && !_originalTitle.Equals(_title)))
 					{
 						_changeTracker["Title"] = true;
 						OnPropertyChanged("IsChanged");
@@ -301,6 +307,7 @@ namespace Model
 					{
 						_changeTracker["Title"] = false;
 					}
+					OnPropertyChanged("Title");
 				}
 			}
 		}
@@ -319,8 +326,7 @@ namespace Model
 				if (_timesheetId != value)
 				{
 					_timesheetId = value;
-					OnPropertyChanged("TimesheetId");
-					if (_originalTimesheetId == null || !_originalTimesheetId.Equals(_timesheetId))
+					if ((_originalTimesheetId == null && value != null) || (_originalTimesheetId != null && !_originalTimesheetId.Equals(_timesheetId)))
 					{
 						_changeTracker["TimesheetId"] = true;
 						OnPropertyChanged("IsChanged");
@@ -329,6 +335,7 @@ namespace Model
 					{
 						_changeTracker["TimesheetId"] = false;
 					}
+					OnPropertyChanged("TimesheetId");
 				}
 			}
 		}
@@ -347,8 +354,7 @@ namespace Model
 				if (_projectTimeItems != value)
 				{
 					_projectTimeItems = value;
-					OnPropertyChanged("ProjectTimeItems");
-					if (_originalProjectTimeItems == null || !_originalProjectTimeItems.Equals(_projectTimeItems))
+					if ((_originalProjectTimeItems == null && value != null) || (_originalProjectTimeItems != null && !_originalProjectTimeItems.Equals(_projectTimeItems)))
 					{
 						_changeTracker["ProjectTimeItems"] = true;
 						OnPropertyChanged("IsChanged");
@@ -357,6 +363,7 @@ namespace Model
 					{
 						_changeTracker["ProjectTimeItems"] = false;
 					}
+					OnPropertyChanged("ProjectTimeItems");
 				}
 			}
 		}
@@ -375,8 +382,7 @@ namespace Model
 				if (_nonProjectActivityItems != value)
 				{
 					_nonProjectActivityItems = value;
-					OnPropertyChanged("NonProjectActivityItems");
-					if (_originalNonProjectActivityItems == null || !_originalNonProjectActivityItems.Equals(_nonProjectActivityItems))
+					if ((_originalNonProjectActivityItems == null && value != null) || (_originalNonProjectActivityItems != null && !_originalNonProjectActivityItems.Equals(_nonProjectActivityItems)))
 					{
 						_changeTracker["NonProjectActivityItems"] = true;
 						OnPropertyChanged("IsChanged");
@@ -385,6 +391,7 @@ namespace Model
 					{
 						_changeTracker["NonProjectActivityItems"] = false;
 					}
+					OnPropertyChanged("NonProjectActivityItems");
 				}
 			}
 		}
@@ -403,8 +410,7 @@ namespace Model
 				if (_requiredHours != value)
 				{
 					_requiredHours = value;
-					OnPropertyChanged("RequiredHours");
-					if (_originalRequiredHours == null || !_originalRequiredHours.Equals(_requiredHours))
+					if ((_originalRequiredHours == null && value != null) || (_originalRequiredHours != null && !_originalRequiredHours.Equals(_requiredHours)))
 					{
 						_changeTracker["RequiredHours"] = true;
 						OnPropertyChanged("IsChanged");
@@ -413,6 +419,7 @@ namespace Model
 					{
 						_changeTracker["RequiredHours"] = false;
 					}
+					OnPropertyChanged("RequiredHours");
 				}
 			}
 		}
@@ -431,8 +438,7 @@ namespace Model
 				if (_totalRequiredHours != value)
 				{
 					_totalRequiredHours = value;
-					OnPropertyChanged("TotalRequiredHours");
-					if (_originalTotalRequiredHours == null || !_originalTotalRequiredHours.Equals(_totalRequiredHours))
+					if ((_originalTotalRequiredHours == null && value != null) || (_originalTotalRequiredHours != null && !_originalTotalRequiredHours.Equals(_totalRequiredHours)))
 					{
 						_changeTracker["TotalRequiredHours"] = true;
 						OnPropertyChanged("IsChanged");
@@ -441,6 +447,7 @@ namespace Model
 					{
 						_changeTracker["TotalRequiredHours"] = false;
 					}
+					OnPropertyChanged("TotalRequiredHours");
 				}
 			}
 		}
@@ -459,8 +466,7 @@ namespace Model
 				if (_dummyTimeEntry != value)
 				{
 					_dummyTimeEntry = value;
-					OnPropertyChanged("DummyTimeEntry");
-					if (_originalDummyTimeEntry == null || !_originalDummyTimeEntry.Equals(_dummyTimeEntry))
+					if ((_originalDummyTimeEntry == null && value != null) || (_originalDummyTimeEntry != null && !_originalDummyTimeEntry.Equals(_dummyTimeEntry)))
 					{
 						_changeTracker["DummyTimeEntry"] = true;
 						OnPropertyChanged("IsChanged");
@@ -469,6 +475,7 @@ namespace Model
 					{
 						_changeTracker["DummyTimeEntry"] = false;
 					}
+					OnPropertyChanged("DummyTimeEntry");
 				}
 			}
 		}
@@ -487,8 +494,7 @@ namespace Model
 				if (_dummyValueTypeCollection != value)
 				{
 					_dummyValueTypeCollection = value;
-					OnPropertyChanged("DummyValueTypeCollection");
-					if (_originalDummyValueTypeCollection == null || !_originalDummyValueTypeCollection.Equals(_dummyValueTypeCollection))
+					if ((_originalDummyValueTypeCollection == null && value != null) || (_originalDummyValueTypeCollection != null && !_originalDummyValueTypeCollection.Equals(_dummyValueTypeCollection)))
 					{
 						_changeTracker["DummyValueTypeCollection"] = true;
 						OnPropertyChanged("IsChanged");
@@ -497,6 +503,7 @@ namespace Model
 					{
 						_changeTracker["DummyValueTypeCollection"] = false;
 					}
+					OnPropertyChanged("DummyValueTypeCollection");
 				}
 			}
 		}
@@ -701,12 +708,28 @@ namespace Model
 			
 
 			clone.AttachEventHandlers();
+			clone.AcceptChanges();
 			return clone;
 		}
 		
 
+		// This is only called after Clone() (so no need to unhook handlers)
 		public void AttachEventHandlers()
 		{
+			foreach(var item in ProjectTimeItems)
+			{
+				item.PropertyChanged += ProjectTimeItems_Item_PropertyChanged;
+				item.AttachEventHandlers();
+			}
+			foreach(var item in NonProjectActivityItems)
+			{
+				item.PropertyChanged += NonProjectActivityItems_Item_PropertyChanged;
+				item.AttachEventHandlers();
+			}
+			RequiredHours.CollectionChanged += RequiredHours_CollectionChanged;
+			DummyTimeEntry.PropertyChanged += DummyTimeEntry_PropertyChanged;
+			DummyTimeEntry.AttachEventHandlers();
+			DummyValueTypeCollection.CollectionChanged += DummyValueTypeCollection_CollectionChanged;
 		}
 	}
 }
