@@ -30,7 +30,7 @@
 // NB: 
 //	+ Only handles List<T> at the moment (no HashSets, Collections etc) 
 //  + Only generic type tested is List<T>. List<T> is converted to ObservableCollection<T> by the template
-// 	+ Assumes that reference types implement IEquatable
+// 	+ Assumes that reference types implement IEquatable (for Foo.Equals(Bar))
 //	+ Assumes that reference types have parameterless constructors and are made into ObservableXXX objects (i.e. support INotifyPropertyChanged and IChangeTracking)
 //  + Assumes c# type aliases are used (e.g. string, int, bool not Int32  etc)
 
@@ -193,6 +193,7 @@
 			}
 			WriteLine("_isTrackingEnabled = true;");
 		}
+		WriteLine(Environment.NewLine);
 
 		var collectionPropertyNames = new Dictionary<string,string>();
 		var observablePropertyNames = new List<string>();
@@ -202,14 +203,14 @@
 
 			WriteLine("_isTrackingEnabled = false;");
 			WriteLine(Environment.NewLine);
-			// Assign the _originalX properties
+			// Assign the OriginalX properties
 			foreach (var kvp in properties)
 			{
 				var genericType = TypeUtility.ConvertTypeNameToObservableTypeName(kvp.Value,typeNames,_prefix);
 
-				Write("_original" + kvp.Key + " = ");
+				Write("Original" + kvp.Key + " = ");
 
-				// if the type starts with 'Observable' we need to new up the object in the constructor, e.g _originalX = new ObservableFoo();
+				// if the type starts with 'Observable' we need to new up the object in the constructor, e.g OriginalX = new ObservableFoo();
 				if (genericType.StartsWith(_prefix))
 				{
 					var genericParam = TypeUtility.GetGenericTypeParameter(kvp.Value);
@@ -223,7 +224,7 @@
 						observablePropertyNames.Add(kvp.Key);
 					}
 
-					//e.g. _originalFoos = new ObservableCollection<ObservableFoo>(myObject.Foos.Select(x => new ObservableFoo(x)).ToList());
+					//e.g. OriginalFoos = new ObservableCollection<ObservableFoo>(myObject.Foos.Select(x => new ObservableFoo(x)).ToList());
 
 					var constructorParam = camelCaseName +  "." + kvp.Key;
 					if (TypeUtility.IsTypeObservable(genericParam, typeNames))
@@ -241,7 +242,7 @@
 			}
 
 			WriteLine(Environment.NewLine);
-			WriteLine("// Set the properties to the _original property values");
+			WriteLine("// Set the properties to the Original property values");
 			WriteLine("ResetProperties();");
 			foreach(var prop in collectionPropertyNames)
 			{
@@ -307,7 +308,7 @@
 					WriteLine("else");
 					using(new Brace("",this))
 					{
-						WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtility.EqualTo(_original" + propertyName + "," + propertyName + ");");
+						WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtility.EqualTo(Original" + propertyName + "," + propertyName + ");");
 					}
 					WriteLine(@"OnPropertyChanged(""IsChanged"");");
 				}
@@ -324,7 +325,7 @@
 						WriteLine("propertyChangedItem.PropertyChanged +=" + propertyName + "_Item_PropertyChanged;");
 					}
 				}
-				WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtility.EqualTo(_original" + propertyName + "," + propertyName + ");");
+				WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtility.EqualTo(Original" + propertyName + "," + propertyName + ");");
 				WriteLine(@"OnPropertyChanged(""IsChanged"");");
 				WriteLine("break;");
 				PopIndent();
@@ -346,7 +347,7 @@
 			WriteLine("else");
 			using(new Brace("",this))
 			{
-				WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtility.EqualTo(_original" + propertyName + "," + propertyName + ");");
+				WriteLine(@"_changeTracker[""" + propertyName + @"""] = !ListUtility.EqualTo(Original" + propertyName + "," + propertyName + ");");
 				WriteLine(@"OnPropertyChanged(""IsChanged"");");
 			}
 		}
@@ -408,7 +409,7 @@
 		// private backing field
 		WriteLine("private " + propertyType + " " + privateFieldName + ";");
 		// original value field
-		WriteLine("private " + propertyType + " _original" + propertyName + ";");
+		WriteLine("public " + propertyType + " Original" + propertyName + " { get; private set; }");
 
 		// public property
 		using(new Brace("public " + propertyType + " " + propertyName,this))
@@ -423,7 +424,7 @@
 					using(new Brace("if (" + privateFieldName + " != value)", this))
 					{
 						WriteLine(privateFieldName + " = value;");
-						using(new Brace("if ((_original" + propertyName + " == null && value != null) || (_original" + propertyName + " != null && !_original" + propertyName + ".Equals(" + privateFieldName + ")))",this))
+						using(new Brace("if ((Original" + propertyName + " == null && value != null) || (Original" + propertyName + " != null && !Original" + propertyName + ".Equals(" + privateFieldName + ")))",this))
 						{
 							WriteLine(@"_changeTracker[""" + propertyName + @"""] = true;");
 							WriteLine(@"OnPropertyChanged(""IsChanged"");");
@@ -440,7 +441,7 @@
 		WriteLine(Environment.NewLine);
 	}
 
-	// Set public properties to have the same values as the _original properties ( and un-hook then hook-up propertychanged event handlers)
+	// Set public properties to have the same values as the Original properties ( and un-hook then hook-up propertychanged event handlers)
 	private void CreateResetPropertiesMethod(Dictionary<string,string> properties, IEnumerable<string> typeNames)
 	{
 
@@ -452,7 +453,7 @@
 				
 				if (TypeUtility.IsValueType(kvp.Value))
 				{
-					WriteLine(kvp.Key + " = _original" + kvp.Key + ";");
+					WriteLine(kvp.Key + " = Original" + kvp.Key + ";");
 					WriteLine(Environment.NewLine);
 				}
 				else
@@ -481,9 +482,9 @@
 						}
 					}
 
-					Write(kvp.Key + " = _original" + kvp.Key + " == null ? null : ");
+					Write(kvp.Key + " = Original" + kvp.Key + " == null ? null : ");
 					
-					WriteLine("GenericCopier<" + observableTypeName + ">.DeepCopy(_original" + kvp.Key + ");" );
+					WriteLine("GenericCopier<" + observableTypeName + ">.DeepCopy(Original" + kvp.Key + ");" );
 
 					// Hook up event handlers
 					if (observableTypeName.StartsWith("Observable"))
@@ -582,13 +583,13 @@ protected virtual void OnPropertyChanged([CallerMemberName] string propertyName 
 						WriteLine("_" + camelCaseName + ".AcceptChanges();");
 					}
 
-					WriteLine("_original" + property.Key + " = GenericCopier<" + observableType + ">.DeepCopy(_" + camelCaseName + ");");
+					WriteLine("Original" + property.Key + " = GenericCopier<" + observableType + ">.DeepCopy(_" + camelCaseName + ");");
 					WriteLine(Environment.NewLine);
 				}
 				else
 				{
 					// Value type - safe to assign
-					WriteLine("_original" + property.Key + " = _" + camelCaseName + ";");
+					WriteLine("Original" + property.Key + " = _" + camelCaseName + ";");
 					WriteLine(Environment.NewLine);
 				}
 			}
@@ -696,7 +697,7 @@ public bool IsChanged
 
 	private void CreateAttachEventHandlersMethod(Dictionary<string,PropertyData> properties)
     {
-		WriteLine("// This is only called after Clone() (so no need to unhook handlers)");
+		WriteLine("// This is only called after Clone() (so no need to unhook handlers). Need to refactor so that ResetProperties calls this");
 		using(new Brace("public void AttachEventHandlers()", this))
         {
 			foreach(var kvp in properties)

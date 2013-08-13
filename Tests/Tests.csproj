@@ -65,6 +65,7 @@
     <Compile Include="ListUtilitiesTest.cs" />
     <Compile Include="ObservableItemTests.cs" />
     <Compile Include="TypeUtilityTests.cs" />
+    <Compile Include="ObservableTimesheetTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Communication\Communication.csproj">

@@ -28,16 +28,18 @@ namespace Model
 			Name = default(string);
 			_isTrackingEnabled = true;
 		}
+		
+
 		public ObservablePickListItem(PickListItem pickListItem) : this()
 		{
 			_isTrackingEnabled = false;
 			
 
-			_originalValue = pickListItem.Value;
-			_originalName = pickListItem.Name;
+			OriginalValue = pickListItem.Value;
+			OriginalName = pickListItem.Name;
 			
 
-			// Set the properties to the _original property values
+			// Set the properties to the Original property values
 			ResetProperties();
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
@@ -45,7 +47,7 @@ namespace Model
 		
 
 		private int _value;
-		private int _originalValue;
+		public int OriginalValue { get; private set; }
 		public int Value
 		{
 			get
@@ -57,7 +59,7 @@ namespace Model
 				if (_value != value)
 				{
 					_value = value;
-					if ((_originalValue == null && value != null) || (_originalValue != null && !_originalValue.Equals(_value)))
+					if ((OriginalValue == null && value != null) || (OriginalValue != null && !OriginalValue.Equals(_value)))
 					{
 						_changeTracker["Value"] = true;
 						OnPropertyChanged("IsChanged");
@@ -73,7 +75,7 @@ namespace Model
 		
 
 		private string _name;
-		private string _originalName;
+		public string OriginalName { get; private set; }
 		public string Name
 		{
 			get
@@ -85,7 +87,7 @@ namespace Model
 				if (_name != value)
 				{
 					_name = value;
-					if ((_originalName == null && value != null) || (_originalName != null && !_originalName.Equals(_name)))
+					if ((OriginalName == null && value != null) || (OriginalName != null && !OriginalName.Equals(_name)))
 					{
 						_changeTracker["Name"] = true;
 						OnPropertyChanged("IsChanged");
@@ -102,10 +104,10 @@ namespace Model
 
 		private void ResetProperties()
 		{
-			Value = _originalValue;
+			Value = OriginalValue;
 			
 
-			Name = _originalName;
+			Name = OriginalName;
 			
 
 		}
@@ -134,10 +136,10 @@ namespace Model
 
 		public void AcceptChanges()
 		{
-			_originalValue = _value;
+			OriginalValue = _value;
 			
 
-			_originalName = _name;
+			OriginalName = _name;
 			
 
 			ResetChangeTracking();
@@ -199,7 +201,7 @@ namespace Model
 		}
 		
 
-		// This is only called after Clone() (so no need to unhook handlers)
+		// This is only called after Clone() (so no need to unhook handlers). Need to refactor so that ResetProperties calls this
 		public void AttachEventHandlers()
 		{
 		}

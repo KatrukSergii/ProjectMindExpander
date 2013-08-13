@@ -172,13 +172,28 @@ namespace Communication
                         var notesValue = htmlNode.SelectSingleNode(string.Format(notesSelector, index, j.ToString(CultureInfo.InvariantCulture)));
                         var workDetailValue = htmlNode.SelectSingleNode(string.Format(workDetailSelector, index, j.ToString(CultureInfo.InvariantCulture)));
 
-                        if (timeValue.Attributes["Value"] != null)
+                        if (timeValue != null && timeValue.Attributes["value"] != null)
                         {
                             timesheetItem.TimeEntries[j].LoggedTime = TimeSpan.Parse(timeValue.Attributes["value"].Value);
-                            timesheetItem.TimeEntries[j].ExtraTime = TimeSpan.Parse(extraTimeValue.Attributes["value"].Value);
-                            timesheetItem.TimeEntries[j].Notes = notesValue.Attributes["value"].Value;
-                            timesheetItem.TimeEntries[j].WorkDetailId = int.Parse(workDetailValue.Attributes["value"].Value);
                         }
+
+                        if (extraTimeValue != null && extraTimeValue.Attributes["value"] != null)
+                        {
+                            timesheetItem.TimeEntries[j].ExtraTime =
+                                TimeSpan.Parse(extraTimeValue.Attributes["value"].Value);
+                        }
+
+                        if (notesValue != null && notesValue.Attributes["value"] != null)
+                        {
+                            timesheetItem.TimeEntries[j].Notes = notesValue.Attributes["value"].Value;
+                        }
+
+                        if (workDetailValue != null && workDetailValue.Attributes["value"] != null)
+                        {
+                            timesheetItem.TimeEntries[j].WorkDetailId =
+                                int.Parse(workDetailValue.Attributes["value"].Value);
+                        }
+
                     }
 
                     i++;

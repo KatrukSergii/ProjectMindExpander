@@ -64,6 +64,7 @@
     <Compile Include="ObservableTimesheet.cs">
       <DependentUpon>ObservableObjects.tt</DependentUpon>
     </Compile>
+    <Compile Include="ObservableTimesheet.partial.cs" />
     <Compile Include="PickListItem.cs" />
     <Compile Include="ProjectTaskTimesheetItem.cs" />
     <Compile Include="Properties\Annotations.cs" />

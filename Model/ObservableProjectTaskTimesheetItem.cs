@@ -29,17 +29,19 @@ namespace Model
 			TimeEntries = null;
 			_isTrackingEnabled = true;
 		}
+		
+
 		public ObservableProjectTaskTimesheetItem(ProjectTaskTimesheetItem projectTaskTimesheetItem) : this()
 		{
 			_isTrackingEnabled = false;
 			
 
-			_originalProjectCode = new ObservablePickListItem(projectTaskTimesheetItem.ProjectCode);
-			_originalTaskCode = new ObservablePickListItem(projectTaskTimesheetItem.TaskCode);
-			_originalTimeEntries = new ObservableCollection<ObservableTimeEntry>(projectTaskTimesheetItem.TimeEntries.Select(x => new ObservableTimeEntry(x)).ToList());
+			OriginalProjectCode = new ObservablePickListItem(projectTaskTimesheetItem.ProjectCode);
+			OriginalTaskCode = new ObservablePickListItem(projectTaskTimesheetItem.TaskCode);
+			OriginalTimeEntries = new ObservableCollection<ObservableTimeEntry>(projectTaskTimesheetItem.TimeEntries.Select(x => new ObservableTimeEntry(x)).ToList());
 			
 
-			// Set the properties to the _original property values
+			// Set the properties to the Original property values
 			ResetProperties();
 			TimeEntries.CollectionChanged += TimeEntries_CollectionChanged;
 			ProjectCode.PropertyChanged += ProjectCode_PropertyChanged;
@@ -68,7 +70,7 @@ namespace Model
 						}
 						else
 						{
-							_changeTracker["TimeEntries"] = !ListUtility.EqualTo(_originalTimeEntries,TimeEntries);
+							_changeTracker["TimeEntries"] = !ListUtility.EqualTo(OriginalTimeEntries,TimeEntries);
 						}
 						OnPropertyChanged("IsChanged");
 					}
@@ -82,7 +84,7 @@ namespace Model
 							propertyChangedItem.PropertyChanged +=TimeEntries_Item_PropertyChanged;
 						}
 					}
-					_changeTracker["TimeEntries"] = !ListUtility.EqualTo(_originalTimeEntries,TimeEntries);
+					_changeTracker["TimeEntries"] = !ListUtility.EqualTo(OriginalTimeEntries,TimeEntries);
 					OnPropertyChanged("IsChanged");
 					break;
 			}
@@ -99,14 +101,14 @@ namespace Model
 			}
 			else
 			{
-				_changeTracker["TimeEntries"] = !ListUtility.EqualTo(_originalTimeEntries,TimeEntries);
+				_changeTracker["TimeEntries"] = !ListUtility.EqualTo(OriginalTimeEntries,TimeEntries);
 				OnPropertyChanged("IsChanged");
 			}
 		}
 		
 
 		private ObservablePickListItem _projectCode;
-		private ObservablePickListItem _originalProjectCode;
+		public ObservablePickListItem OriginalProjectCode { get; private set; }
 		public ObservablePickListItem ProjectCode
 		{
 			get
@@ -118,7 +120,7 @@ namespace Model
 				if (_projectCode != value)
 				{
 					_projectCode = value;
-					if ((_originalProjectCode == null && value != null) || (_originalProjectCode != null && !_originalProjectCode.Equals(_projectCode)))
+					if ((OriginalProjectCode == null && value != null) || (OriginalProjectCode != null && !OriginalProjectCode.Equals(_projectCode)))
 					{
 						_changeTracker["ProjectCode"] = true;
 						OnPropertyChanged("IsChanged");
@@ -134,7 +136,7 @@ namespace Model
 		
 
 		private ObservablePickListItem _taskCode;
-		private ObservablePickListItem _originalTaskCode;
+		public ObservablePickListItem OriginalTaskCode { get; private set; }
 		public ObservablePickListItem TaskCode
 		{
 			get
@@ -146,7 +148,7 @@ namespace Model
 				if (_taskCode != value)
 				{
 					_taskCode = value;
-					if ((_originalTaskCode == null && value != null) || (_originalTaskCode != null && !_originalTaskCode.Equals(_taskCode)))
+					if ((OriginalTaskCode == null && value != null) || (OriginalTaskCode != null && !OriginalTaskCode.Equals(_taskCode)))
 					{
 						_changeTracker["TaskCode"] = true;
 						OnPropertyChanged("IsChanged");
@@ -162,7 +164,7 @@ namespace Model
 		
 
 		private ObservableCollection<ObservableTimeEntry> _timeEntries;
-		private ObservableCollection<ObservableTimeEntry> _originalTimeEntries;
+		public ObservableCollection<ObservableTimeEntry> OriginalTimeEntries { get; private set; }
 		public ObservableCollection<ObservableTimeEntry> TimeEntries
 		{
 			get
@@ -174,7 +176,7 @@ namespace Model
 				if (_timeEntries != value)
 				{
 					_timeEntries = value;
-					if ((_originalTimeEntries == null && value != null) || (_originalTimeEntries != null && !_originalTimeEntries.Equals(_timeEntries)))
+					if ((OriginalTimeEntries == null && value != null) || (OriginalTimeEntries != null && !OriginalTimeEntries.Equals(_timeEntries)))
 					{
 						_changeTracker["TimeEntries"] = true;
 						OnPropertyChanged("IsChanged");
@@ -193,21 +195,21 @@ namespace Model
 		{
 			// Unhook propertyChanged eventhandlers for ProjectCode
 			if (ProjectCode != null) ProjectCode.PropertyChanged -= ProjectCode_PropertyChanged;
-			ProjectCode = _originalProjectCode == null ? null : GenericCopier<ObservablePickListItem>.DeepCopy(_originalProjectCode);
+			ProjectCode = OriginalProjectCode == null ? null : GenericCopier<ObservablePickListItem>.DeepCopy(OriginalProjectCode);
 			// Hookup propertyChanged eventhandlers for ProjectCode
 			if (ProjectCode != null) ProjectCode.PropertyChanged += ProjectCode_PropertyChanged;
 			
 
 			// Unhook propertyChanged eventhandlers for TaskCode
 			if (TaskCode != null) TaskCode.PropertyChanged -= TaskCode_PropertyChanged;
-			TaskCode = _originalTaskCode == null ? null : GenericCopier<ObservablePickListItem>.DeepCopy(_originalTaskCode);
+			TaskCode = OriginalTaskCode == null ? null : GenericCopier<ObservablePickListItem>.DeepCopy(OriginalTaskCode);
 			// Hookup propertyChanged eventhandlers for TaskCode
 			if (TaskCode != null) TaskCode.PropertyChanged += TaskCode_PropertyChanged;
 			
 
 			// Unhook propertyChanged eventhandlers for TimeEntries
 			if (TimeEntries != null) ListUtility.AttachPropertyChangedEventHandlers(TimeEntries,TimeEntries_Item_PropertyChanged, attach:false);
-			TimeEntries = _originalTimeEntries == null ? null : GenericCopier<ObservableCollection<ObservableTimeEntry>>.DeepCopy(_originalTimeEntries);
+			TimeEntries = OriginalTimeEntries == null ? null : GenericCopier<ObservableCollection<ObservableTimeEntry>>.DeepCopy(OriginalTimeEntries);
 			// Hookup propertyChanged eventhandlers for TimeEntries
 			if (TimeEntries != null) ListUtility.AttachPropertyChangedEventHandlers(TimeEntries,TimeEntries_Item_PropertyChanged, attach:true);
 			
@@ -255,18 +257,18 @@ namespace Model
 		public void AcceptChanges()
 		{
 			_projectCode.AcceptChanges();
-			_originalProjectCode = GenericCopier<ObservablePickListItem>.DeepCopy(_projectCode);
+			OriginalProjectCode = GenericCopier<ObservablePickListItem>.DeepCopy(_projectCode);
 			
 
 			_taskCode.AcceptChanges();
-			_originalTaskCode = GenericCopier<ObservablePickListItem>.DeepCopy(_taskCode);
+			OriginalTaskCode = GenericCopier<ObservablePickListItem>.DeepCopy(_taskCode);
 			
 
 			foreach(var item in _timeEntries)
 			{
 				item.AcceptChanges();
 			}
-			_originalTimeEntries = GenericCopier<ObservableCollection<ObservableTimeEntry>>.DeepCopy(_timeEntries);
+			OriginalTimeEntries = GenericCopier<ObservableCollection<ObservableTimeEntry>>.DeepCopy(_timeEntries);
 			
 
 			ResetChangeTracking();
@@ -336,7 +338,7 @@ namespace Model
 		}
 		
 
-		// This is only called after Clone() (so no need to unhook handlers)
+		// This is only called after Clone() (so no need to unhook handlers). Need to refactor so that ResetProperties calls this
 		public void AttachEventHandlers()
 		{
 			ProjectCode.PropertyChanged += ProjectCode_PropertyChanged;

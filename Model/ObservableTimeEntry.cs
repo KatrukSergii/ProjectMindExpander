@@ -24,33 +24,35 @@ namespace Model
 			_isTrackingEnabled = false;
 			
 
-			LoggedTime = null;
-			ExtraTime = null;
+			LoggedTime = new TimeSpan();
+			ExtraTime = new TimeSpan();
 			Notes = default(string);
-			WorkDetailId = null;
+			WorkDetailId = default(int);
 			_isTrackingEnabled = true;
 		}
+		
+
 		public ObservableTimeEntry(TimeEntry timeEntry) : this()
 		{
 			_isTrackingEnabled = false;
 			
 
-			_originalLoggedTime = timeEntry.LoggedTime;
-			_originalExtraTime = timeEntry.ExtraTime;
-			_originalNotes = timeEntry.Notes;
-			_originalWorkDetailId = timeEntry.WorkDetailId;
+			OriginalLoggedTime = timeEntry.LoggedTime;
+			OriginalExtraTime = timeEntry.ExtraTime;
+			OriginalNotes = timeEntry.Notes;
+			OriginalWorkDetailId = timeEntry.WorkDetailId;
 			
 
-			// Set the properties to the _original property values
+			// Set the properties to the Original property values
 			ResetProperties();
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
 		}
 		
 
-		private TimeSpan? _loggedTime;
-		private TimeSpan? _originalLoggedTime;
-		public TimeSpan? LoggedTime
+		private TimeSpan _loggedTime;
+		public TimeSpan OriginalLoggedTime { get; private set; }
+		public TimeSpan LoggedTime
 		{
 			get
 			{
@@ -61,7 +63,7 @@ namespace Model
 				if (_loggedTime != value)
 				{
 					_loggedTime = value;
-					if ((_originalLoggedTime == null && value != null) || (_originalLoggedTime != null && !_originalLoggedTime.Equals(_loggedTime)))
+					if ((OriginalLoggedTime == null && value != null) || (OriginalLoggedTime != null && !OriginalLoggedTime.Equals(_loggedTime)))
 					{
 						_changeTracker["LoggedTime"] = true;
 						OnPropertyChanged("IsChanged");
@@ -76,9 +78,9 @@ namespace Model
 		}
 		
 
-		private TimeSpan? _extraTime;
-		private TimeSpan? _originalExtraTime;
-		public TimeSpan? ExtraTime
+		private TimeSpan _extraTime;
+		public TimeSpan OriginalExtraTime { get; private set; }
+		public TimeSpan ExtraTime
 		{
 			get
 			{
@@ -89,7 +91,7 @@ namespace Model
 				if (_extraTime != value)
 				{
 					_extraTime = value;
-					if ((_originalExtraTime == null && value != null) || (_originalExtraTime != null && !_originalExtraTime.Equals(_extraTime)))
+					if ((OriginalExtraTime == null && value != null) || (OriginalExtraTime != null && !OriginalExtraTime.Equals(_extraTime)))
 					{
 						_changeTracker["ExtraTime"] = true;
 						OnPropertyChanged("IsChanged");
@@ -105,7 +107,7 @@ namespace Model
 		
 
 		private string _notes;
-		private string _originalNotes;
+		public string OriginalNotes { get; private set; }
 		public string Notes
 		{
 			get
@@ -117,7 +119,7 @@ namespace Model
 				if (_notes != value)
 				{
 					_notes = value;
-					if ((_originalNotes == null && value != null) || (_originalNotes != null && !_originalNotes.Equals(_notes)))
+					if ((OriginalNotes == null && value != null) || (OriginalNotes != null && !OriginalNotes.Equals(_notes)))
 					{
 						_changeTracker["Notes"] = true;
 						OnPropertyChanged("IsChanged");
@@ -132,9 +134,9 @@ namespace Model
 		}
 		
 
-		private int? _workDetailId;
-		private int? _originalWorkDetailId;
-		public int? WorkDetailId
+		private int _workDetailId;
+		public int OriginalWorkDetailId { get; private set; }
+		public int WorkDetailId
 		{
 			get
 			{
@@ -145,7 +147,7 @@ namespace Model
 				if (_workDetailId != value)
 				{
 					_workDetailId = value;
-					if ((_originalWorkDetailId == null && value != null) || (_originalWorkDetailId != null && !_originalWorkDetailId.Equals(_workDetailId)))
+					if ((OriginalWorkDetailId == null && value != null) || (OriginalWorkDetailId != null && !OriginalWorkDetailId.Equals(_workDetailId)))
 					{
 						_changeTracker["WorkDetailId"] = true;
 						OnPropertyChanged("IsChanged");
@@ -162,16 +164,16 @@ namespace Model
 
 		private void ResetProperties()
 		{
-			LoggedTime = _originalLoggedTime == null ? null : GenericCopier<TimeSpan?>.DeepCopy(_originalLoggedTime);
+			LoggedTime = OriginalLoggedTime;
 			
 
-			ExtraTime = _originalExtraTime == null ? null : GenericCopier<TimeSpan?>.DeepCopy(_originalExtraTime);
+			ExtraTime = OriginalExtraTime;
 			
 
-			Notes = _originalNotes;
+			Notes = OriginalNotes;
 			
 
-			WorkDetailId = _originalWorkDetailId == null ? null : GenericCopier<int?>.DeepCopy(_originalWorkDetailId);
+			WorkDetailId = OriginalWorkDetailId;
 			
 
 		}
@@ -200,16 +202,16 @@ namespace Model
 
 		public void AcceptChanges()
 		{
-			_originalLoggedTime = _loggedTime;
+			OriginalLoggedTime = _loggedTime;
 			
 
-			_originalExtraTime = _extraTime;
+			OriginalExtraTime = _extraTime;
 			
 
-			_originalNotes = _notes;
+			OriginalNotes = _notes;
 			
 
-			_originalWorkDetailId = _workDetailId;
+			OriginalWorkDetailId = _workDetailId;
 			
 
 			ResetChangeTracking();
@@ -279,7 +281,7 @@ namespace Model
 		}
 		
 
-		// This is only called after Clone() (so no need to unhook handlers)
+		// This is only called after Clone() (so no need to unhook handlers). Need to refactor so that ResetProperties calls this
 		public void AttachEventHandlers()
 		{
 		}

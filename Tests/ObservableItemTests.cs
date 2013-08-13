@@ -19,7 +19,7 @@ namespace Tests
                     Notes = "notes",
                     ExtraTime = TimeSpan.FromHours(1),
                     LoggedTime = TimeSpan.FromHours(1),
-                    WorkDetailId = null
+                   // WorkDetailId = null
                 };
 
             var projectCode1 = new PickListItem(1, "projectCode1");

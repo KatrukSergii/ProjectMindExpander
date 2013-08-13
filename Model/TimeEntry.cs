@@ -7,15 +7,14 @@ namespace Model
     {
         public TimeEntry()
         {
-            LoggedTime = null;
-            ExtraTime = null;
+            LoggedTime = TimeSpan.Zero;
+            ExtraTime = TimeSpan.Zero;
             Notes = string.Empty;
-            WorkDetailId = null;
         }
 
-        public TimeSpan? LoggedTime { get; set; }
-        public TimeSpan? ExtraTime { get; set; }
+        public TimeSpan LoggedTime { get; set; }
+        public TimeSpan ExtraTime { get; set; }
         public string Notes { get; set; }
-        public int? WorkDetailId { get; set; }
+        public int WorkDetailId { get; set; }
     }
 }
