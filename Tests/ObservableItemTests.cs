@@ -156,7 +156,7 @@ namespace Tests
         public void IsChanged_ChangedTimeEntryLoggedTime_True()
         {
             var ts = CreateDummyTimesheet();
-            ts.DummyTimeEntry.LoggedTime = ts.DummyTimeEntry.LoggedTime.Value.Add(TimeSpan.FromHours(1));
+            ts.DummyTimeEntry.LoggedTime = ts.DummyTimeEntry.LoggedTime.Add(TimeSpan.FromHours(1));
             Assert.IsTrue(ts.IsChanged);
         }
 

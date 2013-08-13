@@ -97,19 +97,19 @@ namespace Tests
             var timesheet = CreateDummyTimesheet();
             timesheet.ProjectTimeItems[0].TimeEntries[0].LoggedTime = TimeSpan.FromHours(8);  // 30 mins greater than required hours
             timesheet.ProjectTimeItems[0].TimeEntries[0].ExtraTime = TimeSpan.FromMinutes(30);
-            timesheet.ProjectTimeItems[1].TimeEntries[0].LoggedTime = TimeSpan.FromHours(8);  // 30 mins greater than required hours
+            timesheet.ProjectTimeItems[1].TimeEntries[0].LoggedTime = TimeSpan.FromMinutes(30);  // 60 mins 
             timesheet.ProjectTimeItems[1].TimeEntries[0].ExtraTime = TimeSpan.FromMinutes(30);
-            timesheet.ProjectTimeItems[2].TimeEntries[0].LoggedTime = TimeSpan.FromHours(8);  // 30 mins greater than required hours
+            timesheet.ProjectTimeItems[2].TimeEntries[0].LoggedTime = TimeSpan.FromMinutes(30);  // 90 mins
             timesheet.ProjectTimeItems[2].TimeEntries[0].ExtraTime = TimeSpan.FromMinutes(30);
 
             timesheet.AcceptChanges();
             timesheet.FixHours();
             // first item has 30 minutes of extra time
-            Assert.AreEqual(TimeSpan.FromMinutes(30), timesheet.ProjectTimeItems[0].TimeEntries[0].ExtraTime);
+            Assert.AreEqual(TimeSpan.FromMinutes(90), timesheet.ProjectTimeItems[0].TimeEntries[0].ExtraTime, "first item");
             // second item has no extra time
-            Assert.AreEqual(TimeSpan.Zero, timesheet.ProjectTimeItems[1].TimeEntries[0].ExtraTime);
+            Assert.AreEqual(TimeSpan.Zero, timesheet.ProjectTimeItems[1].TimeEntries[0].ExtraTime, "second item");
             // third item has no extra time
-            Assert.AreEqual(TimeSpan.Zero, timesheet.ProjectTimeItems[2].TimeEntries[0].ExtraTime);
+            Assert.AreEqual(TimeSpan.Zero, timesheet.ProjectTimeItems[2].TimeEntries[0].ExtraTime, "third item");
         }
 
         [TestMethod]
@@ -135,6 +135,34 @@ namespace Tests
             Assert.AreEqual(TimeSpan.Zero, timesheet.ProjectTimeItems[2].TimeEntries[0].ExtraTime);
             // first item has 60 minutes of extra time
             Assert.AreEqual(TimeSpan.FromHours(1), timesheet.ProjectTimeItems[0].TimeEntries[0].ExtraTime);
+        }
+
+        [TestMethod]
+        public void FixHours_ExtraTimeAndLoggedTimeOnAllItemsIncludingNonProjectTime_ExtraTimeCalculatedAndAddedToFirstItemAndRemovedFromOthers()
+        {
+            var timesheet = CreateDummyTimesheet();
+            timesheet.ProjectTimeItems[0].TimeEntries[0].LoggedTime = TimeSpan.FromHours(8);  // 30 mins greater than required hours
+            timesheet.ProjectTimeItems[0].TimeEntries[0].ExtraTime = TimeSpan.FromMinutes(30);
+            timesheet.ProjectTimeItems[1].TimeEntries[0].LoggedTime = TimeSpan.FromMinutes(30);  // 60 mins 
+            timesheet.ProjectTimeItems[1].TimeEntries[0].ExtraTime = TimeSpan.FromMinutes(30);
+            timesheet.ProjectTimeItems[2].TimeEntries[0].LoggedTime = TimeSpan.FromMinutes(30);  // 90 mins
+            timesheet.ProjectTimeItems[2].TimeEntries[0].ExtraTime = TimeSpan.FromMinutes(30);
+
+            timesheet.NonProjectActivityItems[0].TimeEntries[0].LoggedTime = TimeSpan.FromMinutes(30);  // 120 mins greater than required hours
+            timesheet.NonProjectActivityItems[0].TimeEntries[0].ExtraTime = TimeSpan.FromMinutes(30);
+            timesheet.NonProjectActivityItems[1].TimeEntries[0].LoggedTime = TimeSpan.FromMinutes(30);  // 150 mins 
+            timesheet.NonProjectActivityItems[1].TimeEntries[0].ExtraTime = TimeSpan.FromMinutes(30);
+            timesheet.NonProjectActivityItems[2].TimeEntries[0].LoggedTime = TimeSpan.FromMinutes(30);  // 180 mins
+            timesheet.NonProjectActivityItems[2].TimeEntries[0].ExtraTime = TimeSpan.FromMinutes(30);
+
+            timesheet.AcceptChanges();
+            timesheet.FixHours();
+            // first item has 30 minutes of extra time
+            Assert.AreEqual(TimeSpan.FromMinutes(180), timesheet.ProjectTimeItems[0].TimeEntries[0].ExtraTime, "first item");
+            // second item has no extra time
+            Assert.AreEqual(TimeSpan.Zero, timesheet.ProjectTimeItems[1].TimeEntries[0].ExtraTime, "second item");
+            // third item has no extra time
+            Assert.AreEqual(TimeSpan.Zero, timesheet.ProjectTimeItems[2].TimeEntries[0].ExtraTime, "third item");
         }
 
         // Sunday (Required hours = 7:30)

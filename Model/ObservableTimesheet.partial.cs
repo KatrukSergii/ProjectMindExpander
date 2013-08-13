@@ -99,6 +99,39 @@ namespace Model
             return controlName;
         }
 
+
+        /// <summary>
+        /// Clears the extra time property for all project+task items on a given day of the week
+        /// </summary>
+        /// <param name="dayOfWeekIndex"></param>
+        /// <param name="list"></param>
+        private void ClearExtraTime(int dayOfWeekIndex, IEnumerable<ObservableProjectTaskTimesheetItem> list)
+        {
+            foreach (var item in list)
+            {
+                item.TimeEntries[dayOfWeekIndex].ExtraTime = TimeSpan.Zero;
+
+            }
+        }
+
+        /// <summary>
+        /// Totals the logged time for all project+task items on a given day of the week
+        /// </summary>
+        /// <param name="dayOfWeekIndex"></param>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        private TimeSpan GetTotalLoggedTime(int dayOfWeekIndex, IEnumerable<ObservableProjectTaskTimesheetItem> list)
+        {
+            var totalTime = TimeSpan.Zero;
+
+            foreach (var item in list)
+            {
+                totalTime = totalTime.Add(item.TimeEntries[dayOfWeekIndex].LoggedTime);
+            }
+
+            return totalTime;
+        }
+
         /// <summary>
         /// Fix extra time (based on the required hours)
         /// </summary>
@@ -107,26 +140,22 @@ namespace Model
             // if total time across all project+tasks is greated than required hours 
             // then clear extra time for all items and add the difference to the extra hours of the first item
 
-            // foreach day of the week
-                // GetTotalLoggedProjectTime
-                // GetTotalLoggedNonProjectTime
-                // var totalLoggedTime = x + Y
-                // if totalLoggeTime > requiredHours
-                // extraTime = totalLoggedTime - requiredHours
-                // ResetExtraTimeForProjectItems
-                // ResetExtraTimeForNonProjectItems
-                // project item 0 . extraTime = extraTime
-            // accept changes
-
             // for each day of the week 
             for (int i = 0; i < 7; i++)
             {
-                var totalProjectTime = TimeSpan.Zero;
+                var totalProjectTime = GetTotalLoggedTime(i,ProjectTimeItems);
+                var totalNonProjectTime = GetTotalLoggedTime(i, NonProjectActivityItems);
+                var totalLoggedTime = totalNonProjectTime.Add(totalProjectTime);
 
-                // Get the total logged project time
-                foreach (var item in ProjectTimeItems)
+                if (totalLoggedTime > RequiredHours[i])
                 {
-                    //totalProjectTime.Add(item.TimeEntries[i].LoggedTime);
+                    var extraTime = totalLoggedTime.Subtract(RequiredHours[i]);
+
+                    // Reset extra time for all items (on this particular day)
+                    ClearExtraTime(i,ProjectTimeItems);
+                    ClearExtraTime(i, NonProjectActivityItems);
+                    ProjectTimeItems.First().TimeEntries[i].ExtraTime = extraTime;
+                    AcceptChanges();
                 }
             }
         }
