@@ -15,20 +15,21 @@ namespace PME
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            InitializeIoC();
+        }
+
+        public static IContainer AutoFacContainer { get; private set; }
+
         /// <summary>
         /// Initialise autofac container.
         /// </summary>
-        private static void InitialiseAutofacContainer()
+        private static void InitializeIoC()
         {
             var builder = new ContainerBuilder();
             builder.RegisterModule<CommunicationModule>();
-            IContainer rootContainer = builder.Build();
-           // AutofacHostFactory.Container = rootContainer;
-            //// Send the container into the lower layers
-            //DataAccess.Container.Instance = rootContainer;
-            //Services.Container.Instance = rootContainer;
-
-            //rootContainer.Resolve<Bootstrapper>();
+            AutoFacContainer = builder.Build();
         }
     }
 

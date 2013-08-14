@@ -3,6 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <ComboBox HorizontalAlignment="Left" Margin="162,65,0,0" VerticalAlignment="Top" Width="120"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="162,123,0,0" TextWrapping="Wrap" Text="7:30" VerticalAlignment="Top" Width="54" FontSize="14" TextAlignment="Right"/>
+        <Label Content="Monday" HorizontalAlignment="Left" Margin="162,89,0,0" VerticalAlignment="Top" FontSize="18" Width="78"/>
+
     </Grid>
 </Window>

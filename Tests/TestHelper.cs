@@ -10,7 +10,7 @@ namespace Tests
         /// Write contents of the timesheet to the console
         /// </summary>
         /// <param name="timesheet"></param>
-        public static void PrettyPrintTimesheet(Timesheet timesheet)
+        public static void PrettyPrintTimesheet(ObservableTimesheet timesheet)
         {
             Console.WriteLine(timesheet.TimesheetId + ":  " + timesheet.Title + Environment.NewLine);
 

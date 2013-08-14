@@ -11,7 +11,7 @@ namespace Communication
     /// <summary>
     /// Based on odetocode.com/articles/162.aspx
     /// </summary>
-    public class WebScraper
+    public class WebScraper : IWebScraper
     {
         private readonly Uri LOGINPAGE;
         private readonly Uri TIMESHEETPAGE;
@@ -43,7 +43,7 @@ namespace Communication
         /// <summary>
         /// Submit user credentials to the login page, store the auth cookies in the cookie container and return a timesheet
         /// </summary>
-        public Timesheet LoginAndGetTimesheet()
+        public ObservableTimesheet LoginAndGetTimesheet()
         {
             var webRequest = WebRequest.Create(LOGINPAGE) as HttpWebRequest;
             string responseData = GetResponseData(webRequest);
@@ -59,7 +59,8 @@ namespace Communication
             responseData = GetWebResponse(LOGINPAGE, _cookies, postData);
 
             var timesheet = _parser.ParseTimesheet(responseData, out _viewState);
-            return timesheet;
+
+            return new ObservableTimesheet(timesheet);
         }
 
         /// <summary>
@@ -129,7 +130,7 @@ namespace Communication
         /// </summary>
         /// <param name="timesheet">timesheet with changes</param>
         /// <returns></returns>
-        public Timesheet UpdateTimeSheet(Timesheet timesheet)
+        public ObservableTimesheet UpdateTimeSheet(ObservableTimesheet timesheet)
         {
             if (_cookies.Count == 0)
             {
@@ -144,7 +145,7 @@ namespace Communication
                                                       "ctl00$hSave", "Y",
                                                       "ctl00$C1$hdnTimesheetId", timesheet.TimesheetId);
 
-            var changes = ExtractChanges(timesheet);
+            var changes = timesheet.ExtractChanges();
             var changesQueryString = HtmlHelper.ConstructQuerystring(changes);
             postData += "&" + changesQueryString;
            
@@ -169,18 +170,18 @@ namespace Communication
             var parser = new HtmlParser();
             var updatedTimesheet = parser.ParseTimesheet(reponseData, out _viewState);
 
-            return updatedTimesheet;
+            return new ObservableTimesheet(updatedTimesheet);
         }
 
-        /// <summary>
-        /// Finds all timesheet items that have changes and returns the new values string pairs
-        /// </summary>
-        /// <returns></returns>
-        private Dictionary<string,string> ExtractChanges(Timesheet timesheet)
-        {
+        ///// <summary>
+        ///// Finds all timesheet items that have changes and returns the new values string pairs
+        ///// </summary>
+        ///// <returns></returns>
+        //private Dictionary<string,string> ExtractChanges(ObservableTimesheet timesheet)
+        //{
 
-            var changes = new Dictionary<string, string> {{ "ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", "3:20" }};
-            return changes;
-        }
+        //    var changes = new Dictionary<string, string> {{ "ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", "3:20" }};
+        //    return changes;
+        //}
     }
 }

@@ -2,6 +2,7 @@
 using Autofac;
 using Communication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Model;
 using Shared;
 
 namespace Tests

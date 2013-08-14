@@ -12,9 +12,6 @@ namespace Communication
                         .AsImplementedInterfaces()
                         .AsSelf()
                         .As(q => q.BaseType);
-
-           // builder.RegisterType<IrisLegalContext>().AsSelf()
-             //       .WithParameter("connectionString", ConfigurationManager.ConnectionStrings["XXXXX"].ConnectionString);
         }
     }
 }

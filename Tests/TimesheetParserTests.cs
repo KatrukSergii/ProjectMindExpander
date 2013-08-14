@@ -73,7 +73,7 @@ namespace Tests
             Assert.IsNotNull(timesheet.ProjectTimeItems);
             Assert.AreEqual(7, timesheet.ProjectTimeItems.Count);
             Assert.AreEqual("60621", timesheet.TimesheetId);
-            TestHelper.PrettyPrintTimesheet(timesheet);
+            TestHelper.PrettyPrintTimesheet(new ObservableTimesheet(timesheet));
 
         }
 

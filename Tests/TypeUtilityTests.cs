@@ -84,7 +84,7 @@ namespace Tests
             var type = "List<string>";
             var types = new List<string> {"a", "b", "c"};
             var returnType = TypeUtility.ConvertTypeNameToObservableTypeName(type, types, _prefix);
-            Assert.AreEqual("PREFIX_List<string>",returnType);
+            Assert.AreEqual("ObservableCollection<string>",returnType);
         }
 
         [TestMethod]
@@ -93,7 +93,7 @@ namespace Tests
             var type = "List<Foo>";
             var types = new List<string> {"a", "b", "Foo"};
             var returnType = TypeUtility.ConvertTypeNameToObservableTypeName(type, types, _prefix);
-            Assert.AreEqual("PREFIX_List<PREFIX_Foo>", returnType);
+            Assert.AreEqual("ObservableCollection<PREFIX_Foo>", returnType);
         }
         
         [TestMethod]
@@ -111,7 +111,7 @@ namespace Tests
             var type = "List<List<string>>";
             var types = new List<string> {"Foo", "Bar"};
             var returnType = TypeUtility.ConvertTypeNameToObservableTypeName(type, types, _prefix);
-            Assert.AreEqual("PREFIX_List<PREFIX_List<string>>", returnType);
+            Assert.AreEqual("ObservableCollection<ObservableCollection<string>>", returnType);
         }
 
         [TestMethod]
@@ -120,7 +120,7 @@ namespace Tests
             var type = "List<Foo<Bar<Collection<string>>>";
             var types = new List<string> {"Foo", "Bar"};
             var returnType = TypeUtility.ConvertTypeNameToObservableTypeName(type, types, _prefix);
-            Assert.AreEqual("PREFIX_List<PREFIX_Foo<PREFIX_Bar<Collection<string>>>", returnType);
+            Assert.AreEqual("ObservableCollection<PREFIX_Foo<PREFIX_Bar<Collection<string>>>", returnType);
         }
     }
 }
