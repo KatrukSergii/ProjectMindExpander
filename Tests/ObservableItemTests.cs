@@ -329,5 +329,31 @@ namespace Tests
             Assert.IsTrue(ts.IsChanged);
         }
 
+        #region Totals
+        [TestMethod]
+        public void CalculateTotals_LoggedTimeProject1EachDay_CorrectTotalsUnchangedItems()
+        {
+            var ts = new Timesheet();
+            var projectCode = new PickListItem(1, "pc1");
+            var taskCode = new PickListItem(1, "tc1");
+            var projectItem = new ProjectTaskTimesheetItem(projectCode, taskCode);
+            
+            for(int i=0; i < 7; i++)
+            {
+                projectItem.TimeEntries[i].LoggedTime = TimeSpan.FromHours(1);
+            }
+
+            ts.ProjectTimeItems.Add(projectItem);
+
+            for (int i = 0; i < 7; i++ )
+            {
+                ts.RequiredHours[i] = TimeSpan.FromHours(7.5);
+            }
+
+            var timesheet = new ObservableTimesheet(ts);
+            timesheet.CalculateTotals();
+        }
+        #endregion
+
     }
 }

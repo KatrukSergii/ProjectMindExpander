@@ -319,10 +319,10 @@ namespace Model
 		public object Clone()
 		{
 			var clone = new ObservableProjectTaskTimesheetItem();
-			clone.ProjectCode = new ObservablePickListItem();
+			clone.ProjectCode = (ObservablePickListItem)ProjectCode.Clone();
 			
 
-			clone.TaskCode = new ObservablePickListItem();
+			clone.TaskCode = (ObservablePickListItem)TaskCode.Clone();
 			
 
 			clone.TimeEntries = new ObservableCollection<ObservableTimeEntry>();

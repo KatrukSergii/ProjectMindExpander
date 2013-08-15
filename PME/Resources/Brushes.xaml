@@ -1,0 +1,4 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush Color="#D4D8D8" x:Key="WeekendBackground"></SolidColorBrush>
+</ResourceDictionary>

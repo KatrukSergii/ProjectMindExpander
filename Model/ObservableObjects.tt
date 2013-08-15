@@ -665,10 +665,10 @@ public bool IsChanged
 					// Reference Types need to be deep copied
 					var observableTypeName = TypeUtility.ConvertTypeNameToObservableTypeName(kvp.Value, typeNames, _prefix);
 
-					WriteLine("clone." + kvp.Key + " = new " + observableTypeName + "();");
-
 					if (observableTypeName.StartsWith("ObservableCollection"))
                     {
+						WriteLine("clone." + kvp.Key + " = new " + observableTypeName + "();");
+
 						using(new Brace("foreach(var item in " + kvp.Key + ")", this))
 						{
 							if (TypeUtility.GetGenericTypeParameter(kvp.Key).StartsWith("Observable"))
@@ -682,6 +682,10 @@ public bool IsChanged
 							}
 						}
                     }
+					else
+					{
+						WriteLine("clone." + kvp.Key + " = (" + observableTypeName + ")" + kvp.Key + ".Clone();");
+					}
 
 					WriteLine(Environment.NewLine);
 				}

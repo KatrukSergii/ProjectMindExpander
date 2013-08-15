@@ -699,7 +699,7 @@ namespace Model
 			clone.TotalRequiredHours = TotalRequiredHours;
 			
 
-			clone.DummyTimeEntry = new ObservableTimeEntry();
+			clone.DummyTimeEntry = (ObservableTimeEntry)DummyTimeEntry.Clone();
 			
 
 			clone.DummyValueTypeCollection = new ObservableCollection<int>();

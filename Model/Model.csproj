@@ -43,8 +43,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DummyTestObject.cs" />
+    <Compile Include="HoursSummary.cs" />
     <Compile Include="IObservable.cs" />
     <Compile Include="ObservableDummyTestObject.cs">
+      <DependentUpon>ObservableObjects.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ObservableHoursSummary.cs">
       <DependentUpon>ObservableObjects.tt</DependentUpon>
     </Compile>
     <Compile Include="ObservableObjects.cs">

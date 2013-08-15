@@ -177,5 +177,56 @@ namespace Model
                 }
             }
         }
+
+        /// <summary>
+        /// Create totals for each day
+        /// </summary>
+        public void CalculateTotals()
+        {
+            var totalExtraHours = TimeSpan.Zero;
+            var totalLoggedHours = TimeSpan.Zero;
+            var totalRemainingCoreHours = TimeSpan.Zero;
+            var totalCoreHours = TimeSpan.Zero;
+
+            for (int i = 0; i < 7; i++)
+            {
+               var loggedHours = TimeSpan.Zero;
+               var extraHours = TimeSpan.Zero;
+
+                foreach (var item in ProjectTimeItems)
+                {
+                    loggedHours = loggedHours.Add(item.TimeEntries[i].LoggedTime);
+                    extraHours = extraHours.Add(item.TimeEntries[i].ExtraTime);
+                }
+
+                foreach (var item in NonProjectActivityItems)
+                {
+                    loggedHours = loggedHours.Add(item.TimeEntries[i].LoggedTime);
+                    extraHours = extraHours.Add(item.TimeEntries[i].ExtraTime);
+                }
+
+                var remainingCore = RequiredHours[i].Subtract(loggedHours.Add(extraHours));
+
+                var totalsForDay = Totals[i];
+                totalsForDay.LoggedHours = loggedHours;
+                totalsForDay.ExtraHours = extraHours;
+                totalsForDay.CoreHours = RequiredHours[i];
+                totalsForDay.RemainingCoreHours = remainingCore;
+                totalsForDay.AcceptChanges();
+
+                totalLoggedHours = totalLoggedHours.Add(loggedHours);
+                totalExtraHours = totalExtraHours.Add(extraHours);
+                totalRemainingCoreHours = totalRemainingCoreHours.Add(remainingCore);
+                totalCoreHours = totalCoreHours.Add(RequiredHours[i]);
+            }
+
+
+            var weekSummary = Totals[7];
+            weekSummary.LoggedHours = totalLoggedHours;
+            weekSummary.ExtraHours = totalExtraHours;
+            weekSummary.CoreHours = totalCoreHours;
+            weekSummary.RemainingCoreHours = totalRemainingCoreHours;
+            weekSummary.AcceptChanges();
+        }
     }
 }

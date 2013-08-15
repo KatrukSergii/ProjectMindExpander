@@ -30,6 +30,7 @@ namespace Model
 			NonProjectActivityItems = null;
 			RequiredHours = null;
 			TotalRequiredHours = new TimeSpan();
+			Totals = null;
 			_isTrackingEnabled = true;
 		}
 		
@@ -45,6 +46,7 @@ namespace Model
 			OriginalNonProjectActivityItems = new ObservableCollection<ObservableProjectTaskTimesheetItem>(timesheet.NonProjectActivityItems.Select(x => new ObservableProjectTaskTimesheetItem(x)).ToList());
 			OriginalRequiredHours = new ObservableCollection<TimeSpan>(timesheet.RequiredHours);
 			OriginalTotalRequiredHours = timesheet.TotalRequiredHours;
+			OriginalTotals = new ObservableCollection<ObservableHoursSummary>(timesheet.Totals.Select(x => new ObservableHoursSummary(x)).ToList());
 			
 
 			// Set the properties to the Original property values
@@ -52,6 +54,7 @@ namespace Model
 			ProjectTimeItems.CollectionChanged += ProjectTimeItems_CollectionChanged;
 			NonProjectActivityItems.CollectionChanged += NonProjectActivityItems_CollectionChanged;
 			RequiredHours.CollectionChanged += RequiredHours_CollectionChanged;
+			Totals.CollectionChanged += Totals_CollectionChanged;
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
 		}
@@ -225,6 +228,62 @@ namespace Model
 		}
 		
 
+		private void Totals_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			
+
+			switch(e.Action)
+			{
+				case NotifyCollectionChangedAction.Remove:
+				case NotifyCollectionChangedAction.Replace:
+					foreach(var item in e.OldItems)
+					{
+						var propertyChangedItem = item as INotifyPropertyChanged;
+						if (propertyChangedItem != null)
+						{
+							propertyChangedItem.PropertyChanged -= Totals_Item_PropertyChanged;
+							// always treat a remove or replace on a reference type as a change
+							_changeTracker["ProjectTimeItems"] = true;
+						}
+						else
+						{
+							_changeTracker["Totals"] = !ListUtility.EqualTo(OriginalTotals,Totals);
+						}
+						OnPropertyChanged("IsChanged");
+					}
+					break;
+				case NotifyCollectionChangedAction.Add:
+					foreach(var item in e.NewItems)
+					{
+						var propertyChangedItem = item as INotifyPropertyChanged;
+						if (propertyChangedItem != null)
+						{
+							propertyChangedItem.PropertyChanged +=Totals_Item_PropertyChanged;
+						}
+					}
+					_changeTracker["Totals"] = !ListUtility.EqualTo(OriginalTotals,Totals);
+					OnPropertyChanged("IsChanged");
+					break;
+			}
+		}
+		
+
+		private void Totals_Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			var trackingItem = sender as IChangeTracking;
+			if (trackingItem != null)
+			{
+				_changeTracker["Totals"] = trackingItem.IsChanged;
+				OnPropertyChanged("IsChanged");
+			}
+			else
+			{
+				_changeTracker["Totals"] = !ListUtility.EqualTo(OriginalTotals,Totals);
+				OnPropertyChanged("IsChanged");
+			}
+		}
+		
+
 		private string _title;
 		public string OriginalTitle { get; private set; }
 		public string Title
@@ -393,6 +452,34 @@ namespace Model
 		}
 		
 
+		private ObservableCollection<ObservableHoursSummary> _totals;
+		public ObservableCollection<ObservableHoursSummary> OriginalTotals { get; private set; }
+		public ObservableCollection<ObservableHoursSummary> Totals
+		{
+			get
+			{
+				return _totals;
+			}
+			set
+			{
+				if (_totals != value)
+				{
+					_totals = value;
+					if ((OriginalTotals == null && value != null) || (OriginalTotals != null && !OriginalTotals.Equals(_totals)))
+					{
+						_changeTracker["Totals"] = true;
+						OnPropertyChanged("IsChanged");
+					}
+					else
+					{
+						_changeTracker["Totals"] = false;
+					}
+					OnPropertyChanged("Totals");
+				}
+			}
+		}
+		
+
 		private void ResetProperties()
 		{
 			Title = OriginalTitle;
@@ -419,6 +506,13 @@ namespace Model
 			
 
 			TotalRequiredHours = OriginalTotalRequiredHours;
+			
+
+			// Unhook propertyChanged eventhandlers for Totals
+			if (Totals != null) ListUtility.AttachPropertyChangedEventHandlers(Totals,Totals_Item_PropertyChanged, attach:false);
+			Totals = OriginalTotals == null ? null : GenericCopier<ObservableCollection<ObservableHoursSummary>>.DeepCopy(OriginalTotals);
+			// Hookup propertyChanged eventhandlers for Totals
+			if (Totals != null) ListUtility.AttachPropertyChangedEventHandlers(Totals,Totals_Item_PropertyChanged, attach:true);
 			
 
 		}
@@ -473,6 +567,13 @@ namespace Model
 			OriginalTotalRequiredHours = _totalRequiredHours;
 			
 
+			foreach(var item in _totals)
+			{
+				item.AcceptChanges();
+			}
+			OriginalTotals = GenericCopier<ObservableCollection<ObservableHoursSummary>>.DeepCopy(_totals);
+			
+
 			ResetChangeTracking();
 		}
 		
@@ -495,6 +596,7 @@ namespace Model
 			_changeTracker["NonProjectActivityItems"] = false;
 			_changeTracker["RequiredHours"] = false;
 			_changeTracker["TotalRequiredHours"] = false;
+			_changeTracker["Totals"] = false;
 		}
 		
 		
@@ -554,6 +656,13 @@ namespace Model
 			clone.TotalRequiredHours = TotalRequiredHours;
 			
 
+			clone.Totals = new ObservableCollection<ObservableHoursSummary>();
+			foreach(var item in Totals)
+			{
+				clone.Totals.Add(item);
+			}
+			
+
 			clone.AttachEventHandlers();
 			clone.AcceptChanges();
 			return clone;
@@ -574,6 +683,11 @@ namespace Model
 				item.AttachEventHandlers();
 			}
 			RequiredHours.CollectionChanged += RequiredHours_CollectionChanged;
+			foreach(var item in Totals)
+			{
+				item.PropertyChanged += Totals_Item_PropertyChanged;
+				item.AttachEventHandlers();
+			}
 		}
 	}
 }

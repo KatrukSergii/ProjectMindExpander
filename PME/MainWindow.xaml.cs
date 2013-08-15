@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Autofac;
+using Communication;
 
 namespace PME
 {
@@ -23,7 +25,8 @@ namespace PME
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainWindowViewModel();
+            var scraper = App.AutoFacContainer.Resolve<IWebScraper>();
+            DataContext = new MainWindowViewModel(scraper);
         }
     }
 }

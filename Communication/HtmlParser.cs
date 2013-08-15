@@ -129,7 +129,7 @@ namespace Communication
             {
                 var requiredHoursNode = htmlNode.SelectSingleNode(string.Format(requiredHoursSelector, i.ToString()));
                 var parsedTime = requiredHoursNode.Attributes["value"].Value == "0"
-                                     ? TimeSpan.MinValue
+                                     ? TimeSpan.Zero
                                      : TimeSpan.Parse(requiredHoursNode.Attributes["value"].Value);
                 requiredHours.Add(parsedTime);
             }

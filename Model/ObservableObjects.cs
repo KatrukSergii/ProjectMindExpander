@@ -13,5 +13,6 @@
 // ProjectMindExpander\Model\ObservableTimeEntry.cs
 // ProjectMindExpander\Model\ObservableProjectTaskTimesheetItem.cs
 // ProjectMindExpander\Model\ObservablePickListItem.cs
+// ProjectMindExpander\Model\ObservableHoursSummary.cs
 // ProjectMindExpander\Model\ObservableDummyTestObject.cs
 

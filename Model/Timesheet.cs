@@ -11,14 +11,28 @@ namespace Model
             ProjectTimeItems = new List<ProjectTaskTimesheetItem>();
             NonProjectActivityItems = new List<ProjectTaskTimesheetItem>();
             RequiredHours = new List<TimeSpan>();
+            Totals = new List<HoursSummary>();
+
+            for (int i = 0; i < 7; i++)
+            {
+                Totals.Add(new HoursSummary());
+                RequiredHours.Add(TimeSpan.Zero);
+            }
+            
+            // totals for the week
+            Totals.Add(new HoursSummary());
         }
 
         public string Title { get; set; }
         public string TimesheetId { get; set; }
         public List<ProjectTaskTimesheetItem> ProjectTimeItems { get; set; }
         public List<ProjectTaskTimesheetItem> NonProjectActivityItems { get; set; }
+        // Should contain 7 items - 1 for each day of the week
         public List<TimeSpan> RequiredHours { get; set; }
         public TimeSpan TotalRequiredHours { get; set; }
+        
+        // Should contain 8 items - 1 for each day of the week and a weekly total
+        public List<HoursSummary> Totals { get; set; }
     }
 }
 
