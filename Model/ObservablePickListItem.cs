@@ -43,7 +43,11 @@ namespace Model
 			ResetProperties();
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
+			Initialize();
 		}
+		
+
+		partial void Initialize();
 		
 
 		private int _value;

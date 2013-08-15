@@ -249,24 +249,6 @@
 				WriteLine(prop.Key + ".CollectionChanged += " + prop.Key + "_CollectionChanged;");
 			}
 
-
-			//// This is now done inside of ResetProperties()
-			//foreach(var prop in collectionPropertyNames)
-			//{
-			//	if (!TypeUtility.IsValueType(prop.Value))
-			//	{
-			//		using(new Brace("foreach(var item in " + prop.Key + ")",this))
-			//		{
-			//			WriteLine("var propertyChangedItem = item as INotifyPropertyChanged;");
-			//			using(new Brace("if(propertyChangedItem != null)",this))
-			//			{
-			//				WriteLine("propertyChangedItem.PropertyChanged += " + prop.Key + "_Item_PropertyChanged;");
-			//			}
-			//		}
-			//		WriteLine(Environment.NewLine);
-			//	}
-			//}
-
 			foreach(var prop in observablePropertyNames)
 			{
 				WriteLine(prop + ".PropertyChanged += " + prop + "_PropertyChanged;");
@@ -274,8 +256,11 @@
 
 			WriteLine("ResetChangeTracking();");
 			WriteLine("_isTrackingEnabled = true;");
+			WriteLine("Initialize();");
 		}
 		
+		WriteLine(Environment.NewLine);
+		WriteLine("partial void Initialize();");
 		WriteLine(Environment.NewLine);
 		 
 		// Create the collection changed and property changed event handlers

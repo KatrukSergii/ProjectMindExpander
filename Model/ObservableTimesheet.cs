@@ -57,7 +57,11 @@ namespace Model
 			Totals.CollectionChanged += Totals_CollectionChanged;
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
+			Initialize();
 		}
+		
+
+		partial void Initialize();
 		
 
 		private void ProjectTimeItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

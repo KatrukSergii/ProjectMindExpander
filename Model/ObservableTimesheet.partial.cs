@@ -8,6 +8,20 @@ namespace Model
 {
     public partial class ObservableTimesheet
     {
+        partial void Initialize()
+        {
+            PropertyChanged += ObservableTimesheet_PropertyChanged;
+        }
+
+        private void ObservableTimesheet_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            // TODO may need to look into the performance of this 
+            if (e.PropertyName == "IsChanged")
+            {
+                CalculateTotals();
+            }
+        }
+
         /// <summary>
         /// Return only the changes in a <controlname,stringValue> format (for conversion into a querystring)
         /// NB at the moment if there are any changes for a particular project/task then the logged time for all days is shown

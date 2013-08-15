@@ -11,176 +11,184 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-        <Grid x:Name="MainGrid" Grid.Column="1" Margin="10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
-            </Grid.RowDefinitions>
-            <Grid x:Name="Title" Grid.Row="1" Margin="0 0 0 10">
-                <Grid.ColumnDefinitions>
-                    <!-- Project/Task -->
-                    <ColumnDefinition SharedSizeGroup="ProjectTask" Width="250"/>
-                    <!-- Monday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Tuesday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Wednesday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Thursday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Friday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Saturday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Sunday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.ColumnSpan="8" TextAlignment="Right" Text="{Binding Timesheet.Title}"></TextBlock>
-            </Grid>
-            <Grid x:Name="BackgroundGrid" Grid.Row="2" RowSpan="2">
-                <Grid.ColumnDefinitions>
-                    <!-- Project/Task -->
-                    <ColumnDefinition SharedSizeGroup="ProjectTask" Width="250"/>
-                    <!-- Monday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Tuesday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Wednesday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Thursday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Friday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Saturday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Sunday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                </Grid.ColumnDefinitions>
-                <Grid Column="0" ColumnSpan="6" Width="5100" ></Grid>
-                <Grid Column="6" Background="{StaticResource WeekendBackground}" Width="120"></Grid>
-                <Grid Column="7" Background="{StaticResource WeekendBackground}" Width="120"></Grid>
-            </Grid>
-            <Grid x:Name="Headers" Grid.Row="2" Height="Auto" >
-                <Grid.ColumnDefinitions>
-                    <!-- Project/Task -->
-                    <ColumnDefinition SharedSizeGroup="ProjectTask" Width="250"/>
-                    <!-- Monday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Tuesday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Wednesday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Thursday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Friday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Saturday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                    <!-- Sunday -->
-                    <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
-                </Grid.ColumnDefinitions>
+            <Grid x:Name="MainGrid" Grid.Column="1" Margin="10" Grid.IsSharedSizeScope="True">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition> <!-- title -->
+                    <RowDefinition Height="Auto"></RowDefinition> <!-- Headers -->
+                    <RowDefinition Height="Auto"></RowDefinition> <!-- project items -->
+                    <RowDefinition Height="Auto"></RowDefinition> <!-- non project items -->
+                    <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
-                <Grid Grid.Column="1" Margin="10" Width="90">
+                <Grid x:Name="Title" Grid.Row="1" Margin="0 0 0 10">
+                    <Grid.ColumnDefinitions>
+                        <!-- Project/Task -->
+                        <ColumnDefinition SharedSizeGroup="ProjectTask" Width="250"/>
+                        <!-- Monday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Tuesday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Wednesday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Thursday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Friday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Saturday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Sunday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.ColumnSpan="8" TextAlignment="Right" Text="{Binding Timesheet.Title}"></TextBlock>
+                </Grid>
+                <Grid x:Name="BackgroundGrid" Grid.Row="2" RowSpan="2">
+                    <Grid.ColumnDefinitions>
+                        <!-- Project/Task -->
+                        <ColumnDefinition SharedSizeGroup="ProjectTask" />
+                        <!-- Monday -->
+                        <ColumnDefinition SharedSizeGroup="Day" />
+                        <!-- Tuesday -->                        
+                        <ColumnDefinition SharedSizeGroup="Day" />
+                        <!-- Wednesday -->                      
+                        <ColumnDefinition SharedSizeGroup="Day" />
+                        <!-- Thursday -->                       
+                        <ColumnDefinition SharedSizeGroup="Day" />
+                        <!-- Friday -->                         
+                        <ColumnDefinition SharedSizeGroup="Day" />
+                        <!-- Saturday -->                       
+                        <ColumnDefinition SharedSizeGroup="Day" />
+                        <!-- Sunday -->                         
+                        <ColumnDefinition SharedSizeGroup="Day" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Column="0" ColumnSpan="6" Width="5100" ></Grid>
+                    <Grid Column="6" Background="{StaticResource WeekendBackground}" Width="120"></Grid>
+                    <Grid Column="7" Background="{StaticResource WeekendBackground}" Width="120"></Grid>
+                </Grid>
+                <Grid x:Name="Headers" Grid.Row="2" Height="Auto" >
+                    <Grid.ColumnDefinitions>
+                        <!-- Project/Task -->
+                        <ColumnDefinition SharedSizeGroup="ProjectTask" Width="250"/>
+                        <!-- Monday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Tuesday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Wednesday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Thursday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Friday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Saturday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                        <!-- Sunday -->
+                        <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
+                    </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Style="{StaticResource DayHeader}" >Mo</TextBlock>
-                    <TextBlock Grid.Row="1" Style="{StaticResource DaySubheader}">12 Aug</TextBlock>
+                    <Grid Grid.Column="1" Margin="10" Width="90">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Style="{StaticResource DayHeader}" >Mo</TextBlock>
+                        <TextBlock Grid.Row="1" Style="{StaticResource DaySubheader}">12 Aug</TextBlock>
+                    </Grid>
+                    <Grid Grid.Column="2"  Margin="10" Width="90">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Style="{StaticResource DayHeader}" >Tu</TextBlock>
+                        <TextBlock Grid.Row="1"  Style="{StaticResource DaySubheader}" >13 Aug</TextBlock>
+                    </Grid>
+                    <Grid Grid.Column="3"  Margin="10" Width="90">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0"  Style="{StaticResource DayHeader}" >We</TextBlock>
+                        <TextBlock Grid.Row="1"  Style="{StaticResource DaySubheader}" >14 Aug</TextBlock>
+                    </Grid>
+                    <Grid Grid.Column="4"  Margin="10" Width="90">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Style="{StaticResource DayHeader}" >Th</TextBlock>
+                        <TextBlock Grid.Row="1" Style="{StaticResource DaySubheader}" >15 Aug</TextBlock>
+                    </Grid>
+                    <Grid Grid.Column="5"  Margin="10" Width="90">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0"  Style="{StaticResource DayHeader}" >Fr</TextBlock>
+                        <TextBlock Grid.Row="1"  Style="{StaticResource DaySubheader}" >16 Aug</TextBlock>
+                    </Grid>
+                    <Grid Grid.Column="6"  Margin="10" Width="90">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0"  Style="{StaticResource DayHeader}" >Sa</TextBlock>
+                        <TextBlock Grid.Row="1" Style="{StaticResource DaySubheader}" >17 Aug</TextBlock>
+                    </Grid>
+                    <Grid Grid.Column="7"  Margin="10" Width="90">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0"  Style="{StaticResource DayHeader}" >Su</TextBlock>
+                        <TextBlock Grid.Row="1"  Style="{StaticResource DaySubheader}" >18 Aug</TextBlock>
+                    </Grid>
                 </Grid>
-                <Grid Grid.Column="2"  Margin="10" Width="90">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Style="{StaticResource DayHeader}" >Tu</TextBlock>
-                    <TextBlock Grid.Row="1"  Style="{StaticResource DaySubheader}" >13 Aug</TextBlock>
-                </Grid>
-                <Grid Grid.Column="3"  Margin="10" Width="90">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0"  Style="{StaticResource DayHeader}" >We</TextBlock>
-                    <TextBlock Grid.Row="1"  Style="{StaticResource DaySubheader}" >14 Aug</TextBlock>
-                </Grid>
-                <Grid Grid.Column="4"  Margin="10" Width="90">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Style="{StaticResource DayHeader}" >Th</TextBlock>
-                    <TextBlock Grid.Row="1" Style="{StaticResource DaySubheader}" >15 Aug</TextBlock>
-                </Grid>
-                <Grid Grid.Column="5"  Margin="10" Width="90">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0"  Style="{StaticResource DayHeader}" >Fr</TextBlock>
-                    <TextBlock Grid.Row="1"  Style="{StaticResource DaySubheader}" >16 Aug</TextBlock>
-                </Grid>
-                <Grid Grid.Column="6"  Margin="10" Width="90">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0"  Style="{StaticResource DayHeader}" >Sa</TextBlock>
-                    <TextBlock Grid.Row="1" Style="{StaticResource DaySubheader}" >17 Aug</TextBlock>
-                </Grid>
-                <Grid Grid.Column="7"  Margin="10" Width="90">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0"  Style="{StaticResource DayHeader}" >Su</TextBlock>
-                    <TextBlock Grid.Row="1"  Style="{StaticResource DaySubheader}" >18 Aug</TextBlock>
-                </Grid>
-            </Grid>
-            <ItemsControl Grid.Row="3" ItemsSource="{Binding Timesheet.ProjectTimeItems}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid x:Name="timesheetRow" Height="Auto">
-                            <Grid.ColumnDefinitions>
-                                <!-- Project/Task -->
-                                <ColumnDefinition SharedSizeGroup="ProjectTask"/>
-                                <!-- Monday -->
-                                <ColumnDefinition SharedSizeGroup="Day"/>
-                                <!-- Tuesday -->
-                                <ColumnDefinition SharedSizeGroup="Day"/>
-                                <!-- Wednesday -->
-                                <ColumnDefinition SharedSizeGroup="Day"/>
-                                <!-- Thursday -->
-                                <ColumnDefinition SharedSizeGroup="Day"/>
-                                <!-- Friday -->
-                                <ColumnDefinition SharedSizeGroup="Day"/>
-                                <!-- Saturday -->
-                                <ColumnDefinition SharedSizeGroup="Day" />
-                                <!-- Sunday -->
-                                <ColumnDefinition SharedSizeGroup="Day"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid x:Name="ProjectTask1" Grid.Column="0">
+                <ItemsControl Grid.Row="3" ItemsSource="{Binding Timesheet.ProjectTimeItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid x:Name="timesheetRow" Height="Auto" Margin="0 0 0 10">
+                                <Grid.ColumnDefinitions>
+                                    <!-- Project/Task -->
+                                    <ColumnDefinition SharedSizeGroup="ProjectTask"/>
+                                    <!-- Monday -->
+                                    <ColumnDefinition SharedSizeGroup="Day"/>
+                                    <!-- Tuesday -->
+                                    <ColumnDefinition SharedSizeGroup="Day"/>
+                                    <!-- Wednesday -->
+                                    <ColumnDefinition SharedSizeGroup="Day"/>
+                                    <!-- Thursday -->
+                                    <ColumnDefinition SharedSizeGroup="Day"/>
+                                    <!-- Friday -->
+                                    <ColumnDefinition SharedSizeGroup="Day"/>
+                                    <!-- Saturday -->
+                                    <ColumnDefinition SharedSizeGroup="Day" />
+                                    <!-- Sunday -->
+                                    <ColumnDefinition SharedSizeGroup="Day"/>
+                                </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Style="{StaticResource ProjectName}" Text="{Binding ProjectCode.Name}"></TextBlock>
-                                <TextBlock Grid.Row="1" Text="{Binding TaskCode.Name}"></TextBlock>
+                                <Grid x:Name="ProjectTask1" Grid.Column="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"></RowDefinition>
+                                        <RowDefinition Height="Auto"></RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Style="{StaticResource ProjectName}" Text="{Binding ProjectCode.Name}"></TextBlock>
+                                    <TextBlock Grid.Row="1" Text="{Binding TaskCode.Name}"></TextBlock>
+                                </Grid>
+                                <TextBox Grid.Column="1" Text="{Binding TimeEntries[0].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
+                                <TextBox Grid.Column="2" Text="{Binding TimeEntries[1].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
+                                <TextBox Grid.Column="3" Text="{Binding TimeEntries[2].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
+                                <TextBox Grid.Column="4" Text="{Binding TimeEntries[3].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
+                                <TextBox Grid.Column="5" Text="{Binding TimeEntries[4].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
+                                <TextBox Grid.Column="6" Text="{Binding TimeEntries[5].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
+                                <TextBox Grid.Column="7" Text="{Binding TimeEntries[6].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
                             </Grid>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
-        </Grid>
+            </Grid>
         </Grid>
     </ScrollViewer>
 

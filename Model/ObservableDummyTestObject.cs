@@ -60,7 +60,11 @@ namespace Model
 			DummyTimeEntry.PropertyChanged += DummyTimeEntry_PropertyChanged;
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
+			Initialize();
 		}
+		
+
+		partial void Initialize();
 		
 
 		private void ProjectTimeItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

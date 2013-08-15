@@ -48,7 +48,11 @@ namespace Model
 			TaskCode.PropertyChanged += TaskCode_PropertyChanged;
 			ResetChangeTracking();
 			_isTrackingEnabled = true;
+			Initialize();
 		}
+		
+
+		partial void Initialize();
 		
 
 		private void TimeEntries_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
