@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Input;
 using Communication;
 using Model;
 
@@ -12,7 +13,10 @@ namespace PME
         {
             _webScraper = webScraper;
             Timesheet = webScraper.LoginAndGetTimesheet();
+            SaveCommand = new DelegateCommand(x => Save(), x => HasChanges());
         }
+
+        public ICommand SaveCommand { get; set; }
 
         private ObservableTimesheet _timesheet;
         public ObservableTimesheet Timesheet
@@ -25,5 +29,15 @@ namespace PME
             }
         }
 
+        public bool HasChanges()
+        {
+            return (Timesheet != null) && (Timesheet.IsChanged);
+        }
+
+        public void Save()
+        {
+            Timesheet = _webScraper.UpdateTimeSheet(Timesheet);
+            Timesheet.AcceptChanges();
+        }
     }
 }

@@ -18,6 +18,7 @@
                     <RowDefinition Height="Auto"></RowDefinition> <!-- Headers -->
                     <RowDefinition Height="Auto"></RowDefinition> <!-- project items -->
                     <RowDefinition Height="Auto"></RowDefinition> <!-- non project items -->
+                    <RowDefinition Height="Auto"></RowDefinition> <!-- Save -->
                     <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Grid x:Name="Title" Grid.Row="1" Margin="0 0 0 10">
@@ -187,7 +188,9 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-
+                <Grid x:Name="SaveGrid" Grid.Row="8" Margin="0 10 0 0" >
+                    <Button Content="Save" Command="{Binding SaveCommand}" HorizontalAlignment="Right"></Button>
+                </Grid>
             </Grid>
         </Grid>
     </ScrollViewer>

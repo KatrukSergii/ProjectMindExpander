@@ -47,6 +47,8 @@ namespace Tests
 
             var updatedTimesheet = scraper.UpdateTimeSheet(timesheet);
             TestHelper.PrettyPrintTimesheet(updatedTimesheet);
+
+            Assert.AreEqual(1, updatedTimesheet.ProjectTimeItems[0].TimeEntries[0].LoggedTime.TotalHours);
         }  
 
     }
