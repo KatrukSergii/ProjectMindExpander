@@ -78,11 +78,19 @@ namespace Tests
         }
 
         [TestMethod]
-        public void test()
+        [DeploymentItemAttribute("TimesheetHistoryView.htm")]
+        public void ParseTimesheetHistory_TimesheetHistoryHtml_ValidList()
         {
-            var list1 = new List<string> {"a", "b", "c"};
-            var list2 = new List<string> { "a", "b", "c" };
-            Console.WriteLine(list1.Equals(list2));
+            Dictionary<string, string> list = null;
+
+            using (var streamReader = new StreamReader("TimesheetHistoryView.htm"))
+            {
+                var parser = _container.Resolve<IHtmlParser>();
+                var htmlString = streamReader.ReadToEnd();
+                var latestTimesheetId = parser.GetLatestTimesheetId(htmlString);
+                Assert.AreEqual("61701",latestTimesheetId.Id);
+                Assert.AreEqual("12 Aug 2013", latestTimesheetId.DateString);
+            }
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Shared;
 using Shared.Enum;
 
 namespace Model
@@ -66,12 +67,12 @@ namespace Model
                             
                             if (timeEntry.LoggedTime != timeEntry.OriginalLoggedTime)
                             {
-                                changes.Add(GetTimeControlName(i, j, TimeEntryFieldType.LoggedTime, isNonProjectTime), timeEntry.LoggedTime.ToString());
+                                changes.Add(GetTimeControlName(i, j, TimeEntryFieldType.LoggedTime, isNonProjectTime), timeEntry.LoggedTime.ToShortString());
                             }
 
                             if (timeEntry.ExtraTime != timeEntry.OriginalLoggedTime)
                             {
-                                changes.Add(GetTimeControlName(i, j, TimeEntryFieldType.ExtraTime, isNonProjectTime), timeEntry.ExtraTime.ToString());
+                                changes.Add(GetTimeControlName(i, j, TimeEntryFieldType.ExtraTime, isNonProjectTime), timeEntry.ExtraTime.ToShortString());
                             }
 
                             if (timeEntry.Notes != timeEntry.OriginalNotes)
@@ -81,7 +82,7 @@ namespace Model
 
                             if (timeEntry.WorkDetailId != timeEntry.OriginalWorkDetailId)
                             {
-                                changes.Add(GetTimeControlName(i, j, TimeEntryFieldType.WorkDetailId, isNonProjectTime), timeEntry.WorkDetailId.ToString());
+                                changes.Add(GetTimeControlName(i, j, TimeEntryFieldType.WorkDetailId, isNonProjectTime), timeEntry.WorkDetailId.ToString(CultureInfo.InvariantCulture));
                             }
                         }
                     }

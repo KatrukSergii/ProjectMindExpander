@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Shared
 {
@@ -15,6 +16,13 @@ namespace Shared
                             int.Parse(inputString.Split(':')[1]),    // minutes
                             0);
             return timeSpan;
+        }
+
+        public static string ToShortString(this TimeSpan timeSpan)
+        {
+            // Can't use ToString("h:mm"); here :(
+            var returnString = timeSpan.Hours.ToString(CultureInfo.InvariantCulture) + ":" + timeSpan.Minutes.ToString(CultureInfo.InvariantCulture).PadLeft(2,'0');
+            return returnString;
         }
     }
 }

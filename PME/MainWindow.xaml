@@ -1,7 +1,8 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="PME.MainWindow"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:pme="clr-namespace:PME" mc:Ignorable="d" x:Class="PME.MainWindow"
         Title="MainWindow" d:DesignWidth="920">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
@@ -24,7 +25,7 @@
                 <Grid x:Name="Title" Grid.Row="1" Margin="0 0 0 10">
                     <Grid.ColumnDefinitions>
                         <!-- Project/Task -->
-                        <ColumnDefinition SharedSizeGroup="ProjectTask" Width="250"/>
+                        <ColumnDefinition SharedSizeGroup="ProjectTask" Width="200"/>
                         <!-- Monday -->
                         <ColumnDefinition SharedSizeGroup="Day" Width="120"/>
                         <!-- Tuesday -->
@@ -177,13 +178,13 @@
                                     <TextBlock Grid.Row="0" Style="{StaticResource ProjectName}" Text="{Binding ProjectCode.Name}"></TextBlock>
                                     <TextBlock Grid.Row="1" Text="{Binding TaskCode.Name}"></TextBlock>
                                 </Grid>
-                                <TextBox Grid.Column="1" Text="{Binding TimeEntries[0].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
-                                <TextBox Grid.Column="2" Text="{Binding TimeEntries[1].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
-                                <TextBox Grid.Column="3" Text="{Binding TimeEntries[2].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
-                                <TextBox Grid.Column="4" Text="{Binding TimeEntries[3].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
-                                <TextBox Grid.Column="5" Text="{Binding TimeEntries[4].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
-                                <TextBox Grid.Column="6" Text="{Binding TimeEntries[5].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
-                                <TextBox Grid.Column="7" Text="{Binding TimeEntries[6].LoggedTime}" Style="{StaticResource TextboxTimesheet}"></TextBox>
+                                <pme:TimesheetTextbox Grid.Column="1" Text="{Binding TimeEntries[0].LoggedTime}"></pme:TimesheetTextbox>
+                                <pme:TimesheetTextbox Grid.Column="2" Text="{Binding TimeEntries[1].LoggedTime}"></pme:TimesheetTextbox>
+                                <pme:TimesheetTextbox Grid.Column="3" Text="{Binding TimeEntries[2].LoggedTime}"></pme:TimesheetTextbox>
+                                <pme:TimesheetTextbox Grid.Column="4" Text="{Binding TimeEntries[3].LoggedTime}"></pme:TimesheetTextbox>
+                                <pme:TimesheetTextbox Grid.Column="5" Text="{Binding TimeEntries[4].LoggedTime}"></pme:TimesheetTextbox>
+                                <pme:TimesheetTextbox Grid.Column="6" Text="{Binding TimeEntries[5].LoggedTime}"></pme:TimesheetTextbox>
+                                <pme:TimesheetTextbox Grid.Column="7" Text="{Binding TimeEntries[6].LoggedTime}"></pme:TimesheetTextbox>
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

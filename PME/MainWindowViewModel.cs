@@ -7,7 +7,7 @@ namespace PME
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        private IWebScraper _webScraper;
+        private readonly IWebScraper _webScraper;
 
         public MainWindowViewModel(IWebScraper webScraper)
         {
@@ -37,7 +37,6 @@ namespace PME
         public void Save()
         {
             Timesheet = _webScraper.UpdateTimeSheet(Timesheet);
-            Timesheet.AcceptChanges();
         }
     }
 }

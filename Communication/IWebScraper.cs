@@ -18,5 +18,6 @@ namespace Communication
         /// <param name="timesheet">timesheet with changes</param>
         /// <returns></returns>
         ObservableTimesheet UpdateTimeSheet(ObservableTimesheet timesheet);
+
     }
 }

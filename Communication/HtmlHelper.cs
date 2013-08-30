@@ -69,16 +69,5 @@ namespace Communication
 
             return sb.ToString();
         }
-
-        ///// <summary>
-        ///// Takes a querystring and appends extra values to the end
-        ///// </summary>
-        ///// <param name="querystring"></param>
-        ///// <param name="values"></param>
-        ///// <returns></returns>
-        //public static string QuerystringCombine(this string querystring, Dictionary<string, string> values)
-        //{
-        //    return querystring + ("&" + ConstructQueryString(values));
-        //}
     }
 }

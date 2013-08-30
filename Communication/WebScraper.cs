@@ -49,7 +49,6 @@ namespace Communication
             string responseData = GetResponseData(webRequest);
 
             _viewState = _parser.ParseViewState(responseData);
-            //_viewState = _parser.ParseViewState(responseData);
 
             string postData = HtmlHelper.ConstructQuerystring(HtmlHelper.VIEWSTATENAME, _viewState,
                                                                 USERNAMECONTROLNAME, USERNAME, 
@@ -111,20 +110,6 @@ namespace Communication
             return response;
         }
 
-        ///// <summary>
-        ///// Constructs a Timesheet object from the contents of the HTML page
-        ///// </summary>
-        ///// <returns></returns>
-        //public Timesheet GetTimesheet()
-        //{
-        //    var parser = new HtmlParser();
-        //    var response = GetWebResponse(TIMESHEETPAGE, _cookies);
-
-        //    Timesheet timesheet = parser.ParseTimesheet(response, out _viewState);
-
-        //    return timesheet;
-        //}
-
         /// <summary>
         /// Submit timesheet changes and read in the newly saved timesheet
         /// </summary>
@@ -148,8 +133,9 @@ namespace Communication
             var changes = timesheet.ExtractChanges();
             var changesQueryString = HtmlHelper.ConstructQuerystring(changes);
             postData += "&" + changesQueryString;
-           
-            // post to the login form
+
+            //postData += "&" + "ctl00$C1$ProjectGrid$ctl02$txtLoggedTime1=1:11";
+
             var webRequest = WebRequest.Create(TIMESHEETPAGE) as HttpWebRequest;
             webRequest.Method = "POST";
             webRequest.ContentType = "application/x-www-form-urlencoded";
@@ -173,15 +159,24 @@ namespace Communication
             return new ObservableTimesheet(updatedTimesheet);
         }
 
-        ///// <summary>
-        ///// Finds all timesheet items that have changes and returns the new values string pairs
-        ///// </summary>
-        ///// <returns></returns>
-        //private Dictionary<string,string> ExtractChanges(ObservableTimesheet timesheet)
-        //{
 
-        //    var changes = new Dictionary<string, string> {{ "ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", "3:20" }};
-        //    return changes;
-        //}
+        public string GetTimesheetHistoryView()
+        {
+            if (_cookies.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot get TimesheetHistoryView as login cookies have not been set");
+            }
+
+            string timesheetHistoryView = string.Empty;
+            
+            string postData = HtmlHelper.ConstructQuerystring(
+                                                      USERNAMECONTROLNAME, USERNAME,
+                                                      PASSWORDCONTROLNAME, PASSWORD,
+                                                      "__EVENTTARGET", "ctl00$TabMenu1$__theSubTabMenu$ctl01$btnSubMenuInactive");
+
+            var responseData = GetWebResponse(TIMESHEETPAGE, _cookies, postData);
+
+            return timesheetHistoryView;
+        }
     }
 }

@@ -156,8 +156,53 @@ namespace Tests
         public void IsChanged_ChangedTimeEntryLoggedTime_True()
         {
             var ts = CreateDummyTimesheet();
+            Assert.IsFalse(ts.IsChanged);
             ts.DummyTimeEntry.LoggedTime = ts.DummyTimeEntry.LoggedTime.Add(TimeSpan.FromHours(1));
             Assert.IsTrue(ts.IsChanged);
+        }
+
+        [TestMethod]
+        public void IsChanged_ChangedTimeEntryLoggedTimeReplaced_True()
+        {
+            var ts = CreateDummyTimesheet();
+            Assert.IsFalse(ts.IsChanged);
+            ts.DummyTimeEntry.LoggedTime = ts.DummyTimeEntry.LoggedTime = TimeSpan.FromMinutes(666);
+            Assert.IsTrue(ts.IsChanged);
+        }
+
+        [TestMethod]
+        public void IsChanged_ChangedProjectItemTimeEntryLoggedTime_True()
+        {
+            var ts = CreateDummyTimesheet();
+            Assert.IsFalse(ts.IsChanged);
+            ts.ProjectTimeItems[0].TimeEntries[6].LoggedTime = new TimeSpan(1, 0, 0);
+            Assert.IsTrue(ts.IsChanged);
+        }
+        
+        [TestMethod]
+        public void IsChanged__ChangedProjectItemTimeEntryLoggedTimeObservableTimesheet_True()
+        {
+            var ts = new Timesheet();
+            var projectCode = new PickListItem(1, "pc1");
+            var taskCode = new PickListItem(1, "tc1");
+            var projectItem = new ProjectTaskTimesheetItem(projectCode, taskCode);
+
+            for (int i = 0; i < 7; i++)
+            {
+                projectItem.TimeEntries[i].LoggedTime = TimeSpan.FromMinutes(1);
+            }
+
+            ts.ProjectTimeItems.Add(projectItem);
+
+            for (int i = 0; i < 7; i++)
+            {
+                ts.RequiredHours[i] = TimeSpan.FromHours(7.5);
+            }
+
+            var timesheet = new ObservableTimesheet(ts);
+            Assert.IsFalse(timesheet.IsChanged);
+            timesheet.ProjectTimeItems[0].TimeEntries[6].LoggedTime = new TimeSpan(1, 0, 0);
+            Assert.IsTrue(timesheet.IsChanged);
         }
 
         // Timespan Property replaced with the same value

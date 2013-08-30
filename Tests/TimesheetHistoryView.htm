@@ -1,0 +1,1938 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"> -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<title>ProjectMinder
+		</title>
+		<meta http-equiv="Expires" content="0" />
+		<meta http-equiv="Cache-Control" content="no-cache" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link href="favicon.ico?v=2" rel="icon" type="image/x-icon" />
+		<link href="favicon.ico?v=2" rel="shortcut icon" type="image/x-icon" />
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap/bootstrap.min.css?130814161801" />
+		<link rel="stylesheet" type="text/css" href="/Css/bootstrap-datepicker/datepicker.css?130814161801" />
+		<link rel="stylesheet" type="text/css" href="/css/layoutlib.css?130814161801" />
+		<link rel="stylesheet" type="text/css" href="/css/textlib.css?130814161801" />
+		<link rel="stylesheet" type="text/css" href="/css/formlib.css?130814161801" />
+		<link rel="stylesheet" type="text/css" href="/css/new/Histogram.css?130814161801" />
+		<link rel="stylesheet" type="text/css" href="/css/new/Tabs.css?130814161801" />
+		<link rel="stylesheet" type="text/css" href="/css/Utils/Popup.css?130814161801" />
+		<link rel="stylesheet" type="text/css" href="/css/Utils/SlidePanel.css?130814161801" />
+		<link rel="stylesheet" type="text/css" href="/css/ftable-header-menu.css?130814161801" />
+		<script type="text/javascript" src="/Js/Extensions.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/PM.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/PMLibrary.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/DHTMLapi.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/CustomFields.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/Tabs/Tabs.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/Utils/Popup.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/Utils/SlidePanel.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/JQuery/jquery-1.9.1.min.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/bootstrap/bootstrap.min.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/bootstrap-datepicker/bootstrap-datepicker.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/gantt-ui.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/ftable-header-menu.js?130814161801"> </script>
+		<script type="text/javascript" src="/Js/SortableColumnHeader.js?130814161801"> </script>
+
+		<!--[if IE 8]>
+			<script type="text/javascript" src="/Js/respond.min.js?130814161801"> </script>
+		<![endif]-->
+
+		<script type="text/javascript">
+
+			var $j = jQuery;
+//.noConflict();
+
+			var IsSmallPracticeEdition = false;
+			var ConfigPanelId = 'ctl00_pnlConfigPanel';
+
+			function leftAction(button) {
+				showDisableLayer(true);
+				document.getElementById('ctl00_hAction').value = button;
+				theForm.submit();
+				return false;
+			}
+
+			window.onhelp = function() {
+				return false;
+			};
+			jQuery(document).keydown(function(e) {
+				if (e.which == 112) {
+					jQuery('.context-help-btn').click();
+
+					if (event.preventDefault) event.preventDefault();
+					event.returnValue = false;
+
+					return false;
+				}
+			});
+
+			jQuery(document).ready(function() {
+
+				var dirtyHiddenField = jQuery('#ctl00_hSave');
+
+				if (dirtyHiddenField.length && dirtyHiddenField.val().toLowerCase() === "y") {
+					showSaveRequiredAlert();
+				} else {
+					hideSaveRequiredAlert();
+				}
+
+				addAcknowledgeNotificationHandlers();
+			});
+
+			function isPageDataDirty() {
+				var isDirty = jQuery('#ctl00_hSave').val();
+				return (isDirty === "Y");
+			}
+
+		</script>
+
+
+
+		<!-- Page Specified Includes -->
+
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-16152394-1']);
+			_gaq.push(['_trackPageview']);
+			(function() {
+				var ga = document.createElement('script');
+				ga.type = 'text/javascript';
+				ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				var s = document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(ga, s);
+			})();
+		</script>
+	</head>
+
+	<body>
+		<form name="aspnetForm" method="post" action="TimesheetHistoryView.aspx" id="aspnetForm">
+			<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwULLTEyMDE4NDE5MTgPZBYCZg9kFgICAw9kFg4CBQ8PFgIeB1Zpc2libGVoZBYMAgMPZBYCAgEPDxYCHgtOYXZpZ2F0ZVVybAUiaHR0cDovL3N1cHBvcnQuYXBwbGUuY29tL2tiL2RsMTUzMWRkAgUPZBYCAgEPDxYCHwEFM2h0dHA6Ly93d3cubWFjdXBkYXRlLmNvbS9hcHAvbWFjLzE1Njc1L2FwcGxlLXNhZmFyaWRkAgcPZBYCAgEPDxYCHwEFQGh0dHA6Ly93aW5kb3dzLm1pY3Jvc29mdC5jb20vZW4tdXMvaW50ZXJuZXQtZXhwbG9yZXIvZG93bmxvYWQtaWVkZAIJD2QWAgIBDw8WAh8BBU1odHRwOi8vaGVscC5wcm9qZWN0bWluZGVyLmNvbS9wcm9qZWN0bWluZGVyX3N1cHBvcnQvQnJvd3Nlcl9jb21wYXRpYmlsaXR5Lmh0bWRkAgsPZBYCAgEPDxYCHwEFQGh0dHA6Ly93aW5kb3dzLm1pY3Jvc29mdC5jb20vZW4tdXMvaW50ZXJuZXQtZXhwbG9yZXIvZG93bmxvYWQtaWVkZAIND2QWAgIBDw8WAh8BBTNodHRwOi8vd3d3Lm1hY3VwZGF0ZS5jb20vYXBwL21hYy8xNTY3NS9hcHBsZS1zYWZhcmlkZAIHDxYCHgtfIUl0ZW1Db3VudAIBFgJmD2QWAmYPFQMkYTFjODUzZWItNGI1OS00OTc2LThkNzMtYWZlOTNhZTk1ODgyDENvbWluZyBTb29uIdgBUHJvamVjdE1pbmRlciBpcyBiZWluZyByZWJyYW5kZWQgdG8gPGI+VjEgUHJvamVjdCBBY2NvdW50aW5nPC9iPiBvbiBNb25kYXkgMm5kIFNlcHRlbWJlciAyMDEzLiBDbGljayA8YSBocmVmPSJodHRwOi8vd3d3LnByb2plY3RtaW5kZXIuY29tL2ZvcnVtL0RlZmF1bHQuYXNweD9nPXBvc3RzJnQ9MTU5IiB0YXJnZXQ9Il9ibGFuayI+aGVyZTwvYT4gZm9yIG1vcmUgZGV0YWlscy4gZAIJD2QWDAIDDxYCHwBoZAIHDw8WAh4EVGV4dAUMUGV0ZSBKb2huc29uZGQCCw8PZBYCHgdvbmNsaWNrBTByZXR1cm4gU2hvd0NoYW5nZVVzZXJMb2dpblBhc3N3b3JkRGlhbG9nKGV2ZW50KTtkAg8PZBYCZg8WAh8CAgQWCGYPZBYCZg8VAlJodHRwOi8vaGVscC5wcm9qZWN0bWluZGVyLmNvbS9QUk9KRUNUbWluZGVySGVscC5odG0jcmVsZWFzZV9ub3Rlcy9OZXdfZmVhdHVyZXMuaHRtDU5ldyBGZWF0dXJlcyFkAgEPZBYCZg8VAmBodHRwOi8vaGVscC5wcm9qZWN0bWluZGVyLmNvbS9QUk9KRUNUbWluZGVySGVscC5odG0jcHJvamVjdG1pbmRlcl9zdXBwb3J0L0hpbnRzLF90aXBzXyZfbmV3cy5odG0SSGludHMsIFRpcHMgJiBOZXdzZAICD2QWAmYPFQIqaHR0cDovL3Byb2plY3Qtc29sdXRpb25zLmlyaXMuY28udWsvZm9ydW0vDE9ubGluZSBGb3J1bWQCAw9kFgJmDxUCM2h0dHA6Ly9oZWxwLnByb2plY3RtaW5kZXIuY29tL1Byb2plY3RNaW5kZXJIZWxwLmh0bRNIZWxwICZhbXA7IFRyYWluaW5nZAIRDw8WAh8AaGRkAhMPFgIfAGcWBAIBDw9kFgQfBAUbcmV0dXJuIExhdW5jaENvbnRleHRIZWxwKCk7HhBjb250ZXh0LWhlbHAtdXJsBT5odHRwOi8vaGVscC5wcm9qZWN0bWluZGVyLmNvbS90aW1lc2hlZXRzL1RpbWVzaGVldF9oaXN0b3J5Lmh0bWQCAg8PZBYEHwQFG3JldHVybiBMYXVuY2hDb250ZXh0SGVscCgpOx8FBT5odHRwOi8vaGVscC5wcm9qZWN0bWluZGVyLmNvbS90aW1lc2hlZXRzL1RpbWVzaGVldF9oaXN0b3J5Lmh0bWQCDQ8WAh8DBRhWaWV3IHByZXZpb3VzIHRpbWVzaGVldHNkAg8PFgIfAGgWBAIBDxYCHwBoZAIED2QWAmYPDxYCHg1PbkNsaWVudENsaWNrBRtyZXR1cm4gVmFsaWRhdGVGb3JtKGV2ZW50KTsWAh4QZGF0YS1zYXZlLWJ1dHRvbgUEdHJ1ZWQCJw8PFgIfAQUBIxYCHwQFV2hlbHAoJ2h0dHA6Ly93d3cucHJvamVjdG1pbmRlci5jb20vZm9ydW0vRGVmYXVsdC5hc3B4P2c9cG9zdHMmdD0xNTknLCAnUFJPSkVDVG1pbmRlcicpOxYCZg8WAh4JaW5uZXJodG1sBSRDT01JTkcgU09PTiEgLSBWMSBQcm9qZWN0IEFjY291bnRpbmdkAikPDxYCHwBoZGRk" />
+
+
+			<script type="text/javascript" src="/ajaxpro/prototype.asjx"> </script>
+			<script type="text/javascript" src="/ajaxpro/core.asjx"> </script>
+			<script type="text/javascript" src="/ajaxpro/ms.asjx"> </script>
+			<script type="text/javascript" src="/ajaxpro/converter.asjx"> </script>
+			<script type="text/javascript" src="/ajaxpro/PROJECTminder.UI.WebFormsApp.Library.AjaxMethod,PROJECTminder.UI.WebFormsApp.asjx"> </script>
+
+
+			<!--hidden field of "viewstate" for left action buttons -->
+			<input type="hidden" name="ctl00$hAction" id="ctl00_hAction" />
+			<!--hidden field of "viewstate" for save button -->
+			<input type="hidden" name="ctl00$hSave" id="ctl00_hSave" />
+
+			<div id="toolbox">
+				<iframe onload=" Toolbox.ContentsLoaded(); " scrolling="no" frameborder="0" src="blank.htm"></iframe>
+			</div>
+
+			<div id="notifications">
+
+
+
+
+				<div class="alert notification" style="margin: 0px">
+					<button type="button" class="close" data-dismiss="alert" data-acknowledge-notification='a1c853eb-4b59-4976-8d73-afe93ae95882' title="Click here to acknowledge this notification">×</button>
+					<strong>Coming Soon!</strong> ProjectMinder is being rebranded to <b>V1 Project Accounting</b> on Monday 2nd September 2013. Click <a href="http://www.projectminder.com/forum/Default.aspx?g=posts&t=159" target="_blank">here</a> for more details. 
+				</div>
+
+			</div>
+
+			<!--Top level navigation-->
+
+			<div class="navbar">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar btn-inverse" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand pull-left" href="#">
+							<div class="product-logo-crop">
+								<img src="img/productlogos/project-minder-logo-product.png" id="ctl00_TabMenu1_projectMinderLogo" title="ProjectMinder" alt="ProjectMinder Logo" style="border: 0px;" class="big-brand" />
+
+							</div>
+						</a>
+						<div class="nav-collapse">
+							<ul class="nav dynamic-font" style="line-height: 20px; padding-left: 0px;">
+
+
+								<li>
+									<a id="ctl00_TabMenu1___theTabMenu_ctl00_LinkButton1" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$__theTabMenu$ctl00$LinkButton1&#39;,&#39;&#39;)">Home</a>
+								</li>
+
+
+
+
+
+								<li>
+									<a id="ctl00_TabMenu1___theTabMenu_ctl01_LinkButton1" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$__theTabMenu$ctl01$LinkButton1&#39;,&#39;&#39;)">My Work</a>
+								</li>
+
+
+
+
+
+								<li>
+									<a id="ctl00_TabMenu1___theTabMenu_ctl02_LinkButton1" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$__theTabMenu$ctl02$LinkButton1&#39;,&#39;&#39;)">Contacts</a>
+								</li>
+
+
+
+
+
+
+								<li class='beforeactive'>
+									<a id="ctl00_TabMenu1___theTabMenu_ctl03_LinkButton2" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$__theTabMenu$ctl03$LinkButton2&#39;,&#39;&#39;)">Projects</a>
+								</li>
+
+
+
+
+
+
+								<li class="active">
+									<a id="ctl00_TabMenu1___theTabMenu_ctl04_LinkButton3" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$__theTabMenu$ctl04$LinkButton3&#39;,&#39;&#39;)">Timesheet</a>
+								</li>
+
+
+
+								<li>
+									<a id="ctl00_TabMenu1___theTabMenu_ctl05_LinkButton1" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$__theTabMenu$ctl05$LinkButton1&#39;,&#39;&#39;)">Expenses</a>
+								</li>
+
+
+
+
+
+								<li>
+									<a id="ctl00_TabMenu1___theTabMenu_ctl06_LinkButton1" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$__theTabMenu$ctl06$LinkButton1&#39;,&#39;&#39;)">Documents</a>
+								</li>
+
+
+
+
+							</ul>
+							<ul class="nav pull-right dynamic-font" style="line-height: 20px; padding-left: 0px;">
+								<li class="dropdown">
+									<a href="#"
+									   class="dropdown-toggle"
+									   data-toggle="dropdown">
+										<span id="ctl00_TabMenu1_lblUserName">Pete Johnson</span>
+										<b class="caret"></b>
+									</a>
+									<ul class="dropdown-menu">
+										<li>
+											<a id="ctl00_TabMenu1_lnkLogout" title="Click here to logout" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$lnkLogout&#39;,&#39;&#39;)">Logout</a>
+										</li>
+										<li class="divider"></li>
+										<li>
+											<a onclick=" return ShowChangeUserLoginPasswordDialog(event); " id="ctl00_TabMenu1_lnkChangePassword" title="Click here to change your user login password" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$lnkChangePassword&#39;,&#39;&#39;)">Change Login Password</a>
+										</li>
+										<li></li>
+										<li class="divider"></li>
+
+										<li>
+											<a href="#" onclick=" LaunchHelp('http://help.projectminder.com/PROJECTminderHelp.htm#release_notes/New_features.htm') ">New Features!</a>
+										</li>
+
+										<li>
+											<a href="#" onclick=" LaunchHelp('http://help.projectminder.com/PROJECTminderHelp.htm#projectminder_support/Hints,_tips_&_news.htm') ">Hints, Tips & News</a>
+										</li>
+
+										<li>
+											<a href="#" onclick=" LaunchHelp('http://project-solutions.iris.co.uk/forum/') ">Online Forum</a>
+										</li>
+
+										<li>
+											<a href="#" onclick=" LaunchHelp('http://help.projectminder.com/ProjectMinderHelp.htm') ">Help &amp; Training</a>
+										</li>
+
+
+
+
+
+
+
+									</ul>
+								</li>
+							</ul>
+							<div class="nav pull-right browser-notification">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+			<div class="submenu-navbar">
+				<div class="help-link-container dynamic-font">
+					<a id="ctl00_TabMenu1_contextHelpLink" title="Click here to get help with this page" class="context-help-btn large-res-only" onclick=" return LaunchContextHelp(); " context-help-url="http://help.projectminder.com/timesheets/Timesheet_history.htm" href="Controls/#">Get help with this page</a><a id="ctl00_TabMenu1_contextHelpLink2" title="Click here to get help with this page" class="context-help-btn small-res-only" onclick=" return LaunchContextHelp(); " context-help-url="http://help.projectminder.com/timesheets/Timesheet_history.htm" href="Controls/#"></a>
+				</div>
+				<div class="submenu-container">
+					<ul class="nav nav-tabs dynamic-font no-border-bottom">
+
+
+
+						<li>
+							<a id="ctl00_TabMenu1___theSubTabMenu_ctl00_btnSubMenuInactive" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$__theSubTabMenu$ctl00$btnSubMenuInactive&#39;,&#39;&#39;)">Current Timesheet</a>
+						</li>
+
+
+
+						<li class="active">
+							<a id="ctl00_TabMenu1___theSubTabMenu_ctl01_btnSubMenuActive" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$__theSubTabMenu$ctl01$btnSubMenuActive&#39;,&#39;&#39;)">Timesheet History</a>
+						</li>
+
+
+
+
+
+						<li>
+							<a id="ctl00_TabMenu1___theSubTabMenu_ctl02_btnSubMenuInactive" href="javascript:__doPostBack(&#39;ctl00$TabMenu1$__theSubTabMenu$ctl02$btnSubMenuInactive&#39;,&#39;&#39;)">Absence Requests</a>
+						</li>
+
+
+					</ul>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+
+
+
+
+			<!-- Alerts-->
+
+			<!--Title and text-->
+			<div id="titletext">
+				<div id="page-alert" class="alert" style="display: none;">
+				</div>
+				<div class="page-banner">
+
+					<div class="page-title">
+						<div class="subtitle">
+							View previous timesheets
+						</div>
+						<div class="underline"></div>
+					</div>
+				</div>
+				<div class="page-commands">
+					<div class="command-group">
+					</div>
+					<div class="command-group">
+					</div>
+					<div class="command-group">
+						<div id="actionbartop">
+							<div id="search-control" style="float: right; margin-left: 10px;">
+							</div>
+							<div id="ctl00_actionButtonsDiv" class="btn-group action-button-group" style="float: right; margin-left: 10px;"></div>
+							<div id="ctl00_actionButtonsWithDropDowns" style="float: right; margin-left: 10px;"></div>
+							<div id="ctl00_spnLeftAction" style="float: right; margin-left: 10px;"></div>
+							<div class="clearfix"></div>
+						</div>
+					</div>
+					<div style="clear: both;"></div>
+				</div>
+				<div style="clear: both;"></div>
+			</div>
+			<!--Main panel-->
+			<div id="content">
+
+
+
+				<!--Start narrow panel cheat for Firefox-->
+
+
+				<!-- Config Panel -->
+
+
+				<!--Main content-->
+				<div id="maincontent" class="clearfix">
+
+					<input type="hidden" name="ctl00$C1$x1$hSelectId" id="ctl00_C1_x1_hSelectId" />
+
+					<script language="javascript" type="text/javascript">
+<!--
+						function GetSelect() {
+							return document.getElementById('ctl00_C1_x1_hSelectId');
+						}
+					// -->
+				</script>
+
+					<div id='floatSearch0010' style="display: none;" class='floatSearch clearfix'>
+
+						<input class="image" type="image" style="border-width: 0px; float: left; margin-top: 2px" onclick=" javascript:CloseFreeTextSearch('0010');return false; " src="img/closepopupicon.gif" title="Cancel this search" />
+					</div>
+
+					<div id="ctl00_C1_x1_divXtable" class="genTable">
+						<div id='divXTable0010' class='clearfix grid-border' style='background-color: white; min-width: 314px;'>
+							<input type="hidden" id="tableHeight0010" value="360" /><div class='mainGenDivHeader accommodate-scroll-margin'>
+																						<table style='width: 100%;'>
+																							<tr class='header'>
+																								<td style='width: 33.92857%;'>
+																									<div style='min-width: 100px;'>
+																										<div class='header-sort-indicator'><a href="javascript:OnSort('0010',0);">Start Date
+																																			   <img align="top" src="img/filterdown_on.gif" /></a></div>
+																										<select class="hide" onchange=" OnFilter('0010', 0, this); ">
+																											<option value="0">All</option>
+																											<option value="1">Today</option>
+																											<option value="2">Tomorrow</option>
+																											<option value="3">Yesterday</option>
+																											<option value="4">This week</option>
+																											<option value="5">Next week</option>
+																											<option value="6">Last week</option>
+																											<option value="7">This month</option>
+																											<option value="8">Next month</option>
+																											<option value="9">Last month</option>
+																											<option value="10">This quarter</option>
+																											<option value="11">Next quarter</option>
+																											<option value="12">Last quarter</option>
+																											<option value="13">This year</option>
+																											<option value="14">Next year</option>
+																											<option value="15">Last year</option>
+																										</select></div>
+																								</td>
+																								<td style='width: 33.92857%;'>
+																									<div style='min-width: 100px;'>
+																										<div class='header-sort-indicator'><a href="javascript:OnSort('0010',1);">End Date</a></div>
+																										<select class="hide" onchange=" OnFilter('0010', 1, this); ">
+																											<option value="0">All</option>
+																											<option value="1">Today</option>
+																											<option value="2">Tomorrow</option>
+																											<option value="3">Yesterday</option>
+																											<option value="4">This week</option>
+																											<option value="5">Next week</option>
+																											<option value="6">Last week</option>
+																											<option value="7">This month</option>
+																											<option value="8">Next month</option>
+																											<option value="9">Last month</option>
+																											<option value="10">This quarter</option>
+																											<option value="11">Next quarter</option>
+																											<option value="12">Last quarter</option>
+																											<option value="13">This year</option>
+																											<option value="14">Next year</option>
+																											<option value="15">Last year</option>
+																										</select></div>
+																								</td>
+																								<td style='width: 27.14286%;'>
+																									<div style='min-width: 80px;'>
+																										<div class='header-sort-indicator'><a href="javascript:OnSort('0010',2);">Status</a></div>
+																										<select class="hide" onchange=" OnFilter('0010', 2, this); ">
+																											<option value="0">All</option>
+																											<option value="1">Draft</option>
+																											<option value="2">Submitted</option>
+																											<option value="3">Approved</option>
+																											<option value="4">Rejected</option>
+																										</select></div>
+																								</td>
+																								<td class='ftable-header-cog'>
+																									<div>
+																										<ul class='FTableMenu' id='ulFTableMenu_0010' onclick=' javascript:FTableMenuFix(event, "0010");return false; '>
+																											<li><a href='#' onclick=' javascript:FTableMenuFix(event, "0010");return false; '>
+																													<img src='img/cog.gif' width='16' height='16' /></a><ul>
+																																											<li style='display: none;' class='search FTableSearchStatus_0010'><a href='#' onclick=' javascript:return ActivateFreeTextSearch(event, "0010"); '>Free text search</a></li>
+																																											<li><a href='#' onclick=' javascript:return OnScrollDiv(this, "0010"); ' title='Click to switch the scrollbar on and off'>Hide scroll bar</a></li>
+																																											<li style='' class=''><a href='#' onclick=' javascript:return OnTableMax(event, "0010", "500"); ' title='Within limit of 500 maximum displayable entries, click to change...'>Set maximum table results</a></li>
+																																											<li style=''><a href='#' onclick=' return exportTable("0010"); '>Export visible table entries to CSV</a></li>
+																																											<li style=''><a href='#' onclick=' return clearListFilters("0010"); '>Reset Filters</a></li>
+																																										</ul>
+																											</li>
+																										</ul>
+																									</div>
+																								</td>
+																							</tr>
+																						</table>
+																					</div>
+							<div id="divXdata0010" style="height: 360px; width: 100%;" class="mainGenDiv">
+								<table style="width: 100%;">
+									<tr data-item-row-id='61701' class='ftable-body-row non-highlighted-row'>
+										<td style='width: 33.92857%;'>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',61701);" title="12 Aug 2013">12 Aug 2013</a></div>
+										</td>
+										<td style='width: 33.92857%'>
+											<div style='min-width: 100px;'>18 Aug 2013</div>
+										</td>
+										<td style='width: 27.14286%'>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td style='width: 5%'>
+											<div style='min-width: 20px;'>&nbsp;</div>
+										</td>
+									</tr>
+									<tr data-item-row-id='61167' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',61167);" title="05 Aug 2013">05 Aug 2013</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>11 Aug 2013</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='61166' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',61166);" title="29 Jul 2013">29 Jul 2013</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>04 Aug 2013</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='61039' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',61039);" title="22 Jul 2013">22 Jul 2013</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>28 Jul 2013</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='60835' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',60835);" title="15 Jul 2013">15 Jul 2013</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>21 Jul 2013</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='60621' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',60621);" title="08 Jul 2013">08 Jul 2013</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>14 Jul 2013</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='60271' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',60271);" title="01 Jul 2013">01 Jul 2013</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>07 Jul 2013</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='60144' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',60144);" title="24 Jun 2013">24 Jun 2013</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>30 Jun 2013</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='41817' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',41817);" title="17 Jun 2013">17 Jun 2013</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>23 Jun 2013</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='41500' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',41500);" title="06 Feb 2012">06 Feb 2012</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>12 Feb 2012</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='41499' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',41499);" title="30 Jan 2012">30 Jan 2012</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>05 Feb 2012</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='40423' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',40423);" title="23 Jan 2012">23 Jan 2012</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>29 Jan 2012</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='40133' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',40133);" title="16 Jan 2012">16 Jan 2012</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>22 Jan 2012</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='39811' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',39811);" title="09 Jan 2012">09 Jan 2012</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>15 Jan 2012</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='39288' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',39288);" title="02 Jan 2012">02 Jan 2012</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>08 Jan 2012</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='39199' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',39199);" title="26 Dec 2011">26 Dec 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>01 Jan 2012</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='38739' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',38739);" title="19 Dec 2011">19 Dec 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>25 Dec 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='38415' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',38415);" title="12 Dec 2011">12 Dec 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>18 Dec 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='38347' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',38347);" title="05 Dec 2011">05 Dec 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>11 Dec 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='37705' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',37705);" title="28 Nov 2011">28 Nov 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>04 Dec 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='37704' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',37704);" title="21 Nov 2011">21 Nov 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>27 Nov 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='37703' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',37703);" title="14 Nov 2011">14 Nov 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>20 Nov 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='37702' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',37702);" title="07 Nov 2011">07 Nov 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>13 Nov 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='36276' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',36276);" title="31 Oct 2011">31 Oct 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>06 Nov 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='36275' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',36275);" title="24 Oct 2011">24 Oct 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>30 Oct 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='36270' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',36270);" title="17 Oct 2011">17 Oct 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>23 Oct 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='36268' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',36268);" title="10 Oct 2011">10 Oct 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>16 Oct 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='34947' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',34947);" title="03 Oct 2011">03 Oct 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>09 Oct 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='34946' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',34946);" title="26 Sep 2011">26 Sep 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>02 Oct 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='34096' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',34096);" title="19 Sep 2011">19 Sep 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>25 Sep 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='34095' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',34095);" title="12 Sep 2011">12 Sep 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>18 Sep 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='33277' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',33277);" title="05 Sep 2011">05 Sep 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>11 Sep 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='33276' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',33276);" title="29 Aug 2011">29 Aug 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>04 Sep 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='33275' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',33275);" title="22 Aug 2011">22 Aug 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>28 Aug 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='32538' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',32538);" title="15 Aug 2011">15 Aug 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>21 Aug 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='31909' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',31909);" title="08 Aug 2011">08 Aug 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>14 Aug 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='31908' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',31908);" title="01 Aug 2011">01 Aug 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>07 Aug 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='30825' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',30825);" title="25 Jul 2011">25 Jul 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>31 Jul 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='30823' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',30823);" title="18 Jul 2011">18 Jul 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>24 Jul 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='30822' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',30822);" title="11 Jul 2011">11 Jul 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>17 Jul 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='30036' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',30036);" title="04 Jul 2011">04 Jul 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>10 Jul 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='29585' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',29585);" title="27 Jun 2011">27 Jun 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>03 Jul 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='29583' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',29583);" title="20 Jun 2011">20 Jun 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>26 Jun 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='29581' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',29581);" title="13 Jun 2011">13 Jun 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>19 Jun 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='28270' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',28270);" title="06 Jun 2011">06 Jun 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>12 Jun 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='28269' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',28269);" title="30 May 2011">30 May 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>05 Jun 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='28268' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',28268);" title="23 May 2011">23 May 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>29 May 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='28266' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',28266);" title="16 May 2011">16 May 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>22 May 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='28265' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',28265);" title="09 May 2011">09 May 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>15 May 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='26582' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',26582);" title="02 May 2011">02 May 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>08 May 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='26580' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',26580);" title="25 Apr 2011">25 Apr 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>01 May 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='26576' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',26576);" title="18 Apr 2011">18 Apr 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>24 Apr 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='26575' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',26575);" title="11 Apr 2011">11 Apr 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>17 Apr 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='24783' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',24783);" title="04 Apr 2011">04 Apr 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>10 Apr 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='24782' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',24782);" title="28 Mar 2011">28 Mar 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>03 Apr 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='24780' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',24780);" title="21 Mar 2011">21 Mar 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>27 Mar 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='24779' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',24779);" title="14 Mar 2011">14 Mar 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>20 Mar 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='23014' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',23014);" title="07 Mar 2011">07 Mar 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>13 Mar 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='23012' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',23012);" title="28 Feb 2011">28 Feb 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>06 Mar 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='23011' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',23011);" title="21 Feb 2011">21 Feb 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>27 Feb 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='23010' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',23010);" title="14 Feb 2011">14 Feb 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>20 Feb 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='21237' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',21237);" title="07 Feb 2011">07 Feb 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>13 Feb 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='21236' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',21236);" title="31 Jan 2011">31 Jan 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>06 Feb 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='21235' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',21235);" title="24 Jan 2011">24 Jan 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>30 Jan 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='21234' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',21234);" title="17 Jan 2011">17 Jan 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>23 Jan 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='21227' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',21227);" title="10 Jan 2011">10 Jan 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>16 Jan 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='19048' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',19048);" title="03 Jan 2011">03 Jan 2011</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>09 Jan 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='19044' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',19044);" title="27 Dec 2010">27 Dec 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>02 Jan 2011</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='19041' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',19041);" title="20 Dec 2010">20 Dec 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>26 Dec 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='18224' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',18224);" title="13 Dec 2010">13 Dec 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>19 Dec 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='17744' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',17744);" title="06 Dec 2010">06 Dec 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>12 Dec 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='17737' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',17737);" title="29 Nov 2010">29 Nov 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>05 Dec 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='17549' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',17549);" title="22 Nov 2010">22 Nov 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>28 Nov 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='16767' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',16767);" title="15 Nov 2010">15 Nov 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>21 Nov 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='16766' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',16766);" title="08 Nov 2010">08 Nov 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>14 Nov 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='15952' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',15952);" title="01 Nov 2010">01 Nov 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>07 Nov 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='15916' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',15916);" title="25 Oct 2010">25 Oct 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>31 Oct 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='15915' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',15915);" title="18 Oct 2010">18 Oct 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>24 Oct 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='15913' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',15913);" title="11 Oct 2010">11 Oct 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>17 Oct 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='15910' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',15910);" title="04 Oct 2010">04 Oct 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>10 Oct 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='14521' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',14521);" title="27 Sep 2010">27 Sep 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>03 Oct 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='13861' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',13861);" title="20 Sep 2010">20 Sep 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>26 Sep 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='13388' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',13388);" title="13 Sep 2010">13 Sep 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>19 Sep 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='13387' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',13387);" title="06 Sep 2010">06 Sep 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>12 Sep 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='12632' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',12632);" title="30 Aug 2010">30 Aug 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>05 Sep 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='12328' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',12328);" title="23 Aug 2010">23 Aug 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>29 Aug 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='12326' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',12326);" title="16 Aug 2010">16 Aug 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>22 Aug 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+									<tr data-item-row-id='11737' class='ftable-body-row non-highlighted-row'>
+										<td>
+											<div style='min-width: 100px; text-align: left;'><a href="javascript:OnSubmit('0010',11737);" title="09 Aug 2010">09 Aug 2010</a></div>
+										</td>
+										<td>
+											<div style='min-width: 100px;'>15 Aug 2010</div>
+										</td>
+										<td>
+											<div style='min-width: 80px;'>Approved</div>
+										</td>
+										<td></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+						<style type='text/css'>
+							.FTableSearchStatus_0010 { display: none; }
+						</style>
+					</div>
+
+					<br />
+
+
+
+
+					<div id="ctl00_divPassCtrl">
+
+						<script type="text/javascript">
+
+							var ie4 = document.all;
+							var nn6 = document.getElementById && !document.all;
+							var passwordRulesWindow = null;
+							var divPasswords, txtCurrentPassword, txtNewPassword, txtConfirmPassword;
+
+							function InitPasswordControls() {
+
+								divPasswords = document.getElementById("divPasswordControl");
+								txtCurrentPassword = document.getElementById("txtCurrentPassword");
+								txtNewPassword = document.getElementById("txtNewPassword");
+								txtConfirmPassword = document.getElementById("txtConfirmPassword");
+
+								jQuery('#divPasswordControl').on('hidden', function() {
+									BlankFields();
+									ResetBar();
+									ClosePasswordHelp();
+								});
+
+								jQuery('#btnSavePassword').click(function() {
+									SetPassword();
+								});
+							}
+
+							function ShowChangeUserLoginPasswordDialog(e) {
+
+								if (typeof PROJECTminder == "undefined") {
+									alert('The change password feature is not supported by this page, please navigate to the home/news page and try again.');
+									return false;
+								}
+
+								jQuery('#divPasswordControl').modal('show');
+
+								txtCurrentPassword.focus();
+
+								return false;
+							}
+
+							function ClosePasswordHelp() {
+
+								if (passwordRulesWindow && !passwordRulesWindow.closed) {
+									passwordRulesWindow.close();
+								}
+							}
+
+							function BlankFields() {
+
+								txtNewPassword.value = "";
+								txtConfirmPassword.value = "";
+								txtCurrentPassword.value = "";
+							}
+
+							//Validate password entries 
+
+							function ValidatePasswords() {
+								if (txtCurrentPassword.value == "") {
+									//Blank current password
+									alert("Please enter your current password!");
+									txtCurrentPassword.focus();
+									return false;
+								} else if (txtNewPassword.value == "") {
+									//Blank new password
+									alert("Please enter your new password!");
+									txtNewPassword.focus();
+									return false;
+								} else if (txtConfirmPassword.value == "") {
+									//Blank password confirmation
+									alert("Please confirm your new password!");
+									txtConfirmPassword.focus();
+									return false;
+								} else if (txtNewPassword.value != txtConfirmPassword.value) {
+									// New password and confirmed passwords don't match                
+									alert("Your new password entries do not match.\nPlease re-enter your new passwords making sure they match!");
+									txtNewPassword.value = "";
+									txtConfirmPassword.value = "";
+									txtNewPassword.focus();
+									return false;
+								}
+
+								/*alert ( "The password does not meet ProjectMinder security level requirements! \n " +
+		"The password must be between 6 and 12 characters in length and \n " +
+		"contain a combination of numeral [0-9], UPPER [A-Z] and lower [a-z] case letters. \n " +
+		"An underscore [ _ ] character may optionally be included."); */
+								return true;
+							}
+
+							function SetPassword() {
+
+								if (!ValidatePasswords())
+									return false;
+
+								if (typeof PROJECTminder != "undefined") {
+									PROJECTminder.UI.WebFormsApp.Library.AjaxMethod.SetUsersPortalPassword(txtCurrentPassword.value.trim(), txtNewPassword.value.trim(), SetUsersPortalPasswordCallback);
+								} else {
+									alert('The change password feature is not supported by this page, please navigate to the home/news page and try again.');
+								}
+
+								return false;
+							}
+
+							function SetUsersPortalPasswordCallback(response) {
+
+								if (response.value == 0) {
+									jQuery('#divPasswordControl').modal('hide');
+								} else if (response.value == -1) {
+									alert("The current password that has been entered is not valid! \n Please re-enter your current Password.");
+									txtCurrentPassword.value = "";
+									txtCurrentPassword.focus();
+								} else {
+									alert("Sorry your password did not save, please try again.");
+								}
+
+								return false;
+							}
+
+							function ClearPasswordFields() {
+
+								txtCurrentPassword.value = "";
+								txtNewPassword.value = "";
+								txtConfirmPassword.value = "";
+								ResetBar();
+							}
+
+							function CheckPasswordValidity(pass) {
+
+								var regExSymbols;
+								var regExNum;
+								var regExLower;
+								var regExUpper;
+								var noVal = 0;
+
+								// Reg expressions for validation
+								regExNum = /\d+/;
+								regExLower = /[a-z]+/;
+								regExUpper = /[A-Z]+/;
+								regExSymbols = /[\W]/;
+
+								// checks characters used and password length, not whether a word is an easily guess-able word 
+								// password between 6 and 20 characters long, numeric, upper/lower case and symbols characters
+								if (pass.length >= 6 && pass.length <= 20) {
+
+									noVal = 1;
+									// contains numbers
+									if (regExNum.test(pass)) {
+										noVal = 2;
+									}
+									// contains symbols
+									if (regExSymbols.test(pass)) {
+										noVal = 2;
+									}
+									// contains upper and lower case characters
+									if (regExLower.test(pass) && regExUpper.test(pass)) {
+										noVal = 2;
+									}
+									// contains numbers and upper case characters
+									if (regExNum.test(pass) && regExUpper.test(pass)) {
+										noVal = 2;
+									}
+									// contains numbers and lower case characters
+									if (regExLower.test(pass) && regExNum.test(pass)) {
+										noVal = 2;
+									}
+
+									// contains symbols and lower case characters
+									if (regExLower.test(pass) && regExSymbols.test(pass)) {
+										noVal = 2;
+									}
+
+									// contains symbols and upper case characters
+									if (regExSymbols.test(pass) && regExUpper.test(pass)) {
+										noVal = 2;
+									}
+
+									// Contains symbols and numbers
+									if (regExNum.test(pass) && regExSymbols.test(pass)) {
+										noVal = 3;
+									}
+									// contains numeric and upper/lower case characters          
+									if (regExNum.test(pass) && regExLower.test(pass) && regExUpper.test(pass)) {
+										noVal = 3;
+									}
+									// contains symbols and upper/lower case characters          
+									if (regExUpper.test(pass) && regExLower.test(pass) && regExSymbols.test(pass)) {
+										noVal = 3;
+									}
+									// contains symbols, numeric and upper case characters
+									if (regExUpper.test(pass) && regExNum.test(pass) && regExSymbols.test(pass)) {
+										noVal = 3;
+									}
+									// contains symbols, numeric and lower case characters
+									if (regExLower.test(pass) && regExNum.test(pass) && regExSymbols.test(pass)) {
+										noVal = 3;
+									}
+									// contains numeric,upper/lower case characters and symbols          
+									if (regExNum.test(pass) && regExLower.test(pass) && regExUpper.test(pass) && regExSymbols.test(pass)) {
+										noVal = 4;
+									}
+								} else {
+									noVal = 0;
+								}
+
+								if (pass.length == 0)
+									noVal = 5;
+
+								DrawBar(noVal);
+
+								return false;
+							}
+
+							function DrawBar(rating) {
+
+								if (rating > 5)
+									rating = 5;
+
+								var passStrn = document.getElementById("passStrength");
+								var negbar = document.getElementById("negBar");
+								var posbar = document.getElementById("posBar");
+								var passTooltip = document.getElementById("lblPassStrngth");
+								var hdnImg = document.getElementById("hdnImg");
+
+								var barLength = 150;
+
+								var passCols = new Array(5);
+								var passMsgs = new Array(5);
+								var passToolTip = new Array(5);
+								var passBarWidth = new Array(5);
+
+								passCols[0] = "#999"; // grey
+								passCols[1] = "#ff9"; // light faded yellow
+								passCols[2] = "#3d3"; // light faded green
+								passCols[3] = "#66f"; // light faded blue
+								passCols[4] = "#f66"; // light faded red
+								passCols[5] = "#fff"; // white
+
+								passMsgs[0] = "Weak";
+								passMsgs[1] = "Fair";
+								passMsgs[2] = "Good";
+								passMsgs[3] = "Strong";
+								passMsgs[4] = "Very Strong";
+								passMsgs[5] = "";
+
+								passBarWidth[0] = 30;
+								passBarWidth[1] = 60;
+								passBarWidth[2] = 90;
+								passBarWidth[3] = 120;
+								passBarWidth[4] = 150;
+								passBarWidth[5] = 0;
+
+								posbar.style.width = passBarWidth[rating] + "px";
+								negbar.style.width = (barLength - passBarWidth[rating]) + "px";
+
+								posbar.style.backgroundColor = passCols[rating];
+								negbar.style.backgroundColor = "#fff";
+
+								passStrn.innerHTML = passMsgs[rating];
+
+								return false;
+							}
+
+							function ResetBar() {
+
+								var posbar = document.getElementById("posBar");
+								var negbar = document.getElementById("negBar");
+								var passStrn = document.getElementById("passStrength");
+								var passTooltip = document.getElementById("lblPassStrngth");
+
+								posbar.style.width = "0px";
+								negbar.style.width = "150px";
+								posbar.style.bgcolor = "#ffffff";
+								negbar.style.bgcolor = "#ffffff";
+								passStrn.innerHTML = "";
+
+								return false;
+							}
+
+						</script>
+						<style type="text/css">
+							#passIndicator {
+								clear: both;
+								padding-left: 152px;
+								width: 150px;
+							}
+
+							#posBar, #negBar { margin-bottom: 5px; }
+
+							#posBar { border-right: 0; }
+
+							#negBar { border-left: 0; }
+						</style>
+						<div id='divPasswordControl' class='modal fade'>
+							<div class="modal-header">
+								<a class="close" data-dismiss="modal">×</a>
+								<h1>Change Password</h1>
+							</div>
+							<div class="modal-body" style="height: 275px;">
+								<div class='clearfix'>
+									<div class='row20px'></div>
+									<div class='row20px'>
+										<div class="label150px">
+											<span class="p">Current Password:</span>
+										</div>
+										<input id="txtCurrentPassword" type="password" class="input150px" maxlength="50" title="Current Password" />
+										<span class="requiredField">*</span>
+									</div>
+									<div class='row20px'>
+										<div class="label150px">
+											<span class="p">New Password:</span>
+										</div>
+										<input id="txtNewPassword" type="password" class="input150px" maxlength="20" title="New Password" onkeyup=" CheckPasswordValidity(this.value); " />
+										<span class="requiredField">*</span>
+									</div>
+									<div class='row20px'>
+										<div class="label150px">
+											<span class="p">Confirm New Password:</span>
+										</div>
+										<input id="txtConfirmPassword" type="password" class="input150px" maxlength="20" title="Confirm New Password" />
+										<span class="requiredField">*</span>
+									</div>
+									<div class='row20px'></div>
+									<div class='row20px'>
+										<div class="label150px">
+											<span class="h2">Password Strength:</span>
+										</div>
+										<div id="passStrength" style="float: left; font-weight: bold; padding-left: 2px;"></div>
+									</div>
+									<div id='passIndicator'>
+										<div id='posBar' style="float: left; height: 15px; width: 150px;"></div>
+										<div id='negBar' style="float: left; height: 15px; width: 0px;"></div>
+									</div>
+									<div class='row20px'>
+										<img src="img/information_16.png" style="border: 0px;" alt="Password rules?" />
+										<span class="p">It is recommended to increase password strength by using 6 or more characters and by combining one or more of the following character groups.</span>
+										<ul>
+											<li>Upper case characters: [A-Z]</li>
+											<li>Lower case characters: [a-z]</li>
+											<li>Numeric characters: [0-9]</li>
+											<li>Non word characters: [symbols], for example: $£%!@</li>
+										</ul>
+									</div>
+
+								</div>
+							</div>
+							<div class="modal-footer">
+								<div class="btn-group">
+									<a href="#" class="btn btn-primary" id="btnSavePassword">Save & Apply</a><a href="#" class="btn" id="btnCancel" data-dismiss="modal">Cancel</a>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+					<div style="clear: both;"></div>
+				</div>
+
+				<!--Close of narrow panel cheat for Firefox-->
+
+
+				<!--Close of content-->
+			</div>
+
+			<!--Footer-->
+			<div id="footer">
+				<div id="render">
+					<div id="hys-container">
+						<div id="college-hat"></div>
+						<div id="hys-text">
+							<div id="hys-title">
+								Have you seen?
+							</div>
+							<a id="ctl00_haveYouSeenLink" onclick=" help('http://www.projectminder.com/forum/Default.aspx?g=posts&amp;t=159', 'PROJECTminder'); " href="#">
+								<div id="ctl00_hysContent">COMING SOON! - V1 Project Accounting</div>
+							</a>
+						</div>
+					</div>
+					<div class="clearfix"></div>
+					<p>
+					</p>
+				</div>
+				<div id="copyright">
+					<span id="ctl00_Label1" class="footerp">© Copyright 2013 Advanced Computer Software Group plc. All Rights Reserved.</span>
+					<div style="font-weight: bold; margin-top: 10px; text-align: right;">
+						<span id="ctl00_lblDevDatabaseInfo" class="footerp"></span>
+						<span id="ctl00_lblPageBuild" class="footerp">page build:0.17 sec</span>
+					</div>
+				</div>
+			</div>
+
+
+
+			<script type="text/javascript">
+			//<![CDATA[
+				InitPasswordControls();
+//]]>
+		</script>
+		</form>
+
+
+
+
+
+		<img id="renewSession" style="display: none" />
+
+		<script language="javascript" type="text/javascript">
+			var renewSessionCtrl = document.getElementById('renewSession');
+			window.setInterval(function() { renewSessionCtrl.src = "SessionKeepAlive.aspx?par=" + Math.random(); }, 200000);
+// 200 seconds
+	</script>
+
+
+
+	</body>
+
+</html>

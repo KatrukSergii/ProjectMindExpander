@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using HtmlAgilityPack;
 using Model;
@@ -13,11 +15,53 @@ namespace Communication
     public class HtmlParser : IHtmlParser
     {
         private const string ViewstateSelector = "//input[@name = '__VIEWSTATE']";
+        private readonly Regex _timesheetIdRegex = new Regex(@"javascript:OnSubmit\('0010',(?<timesheetId>\d+)\);");
 
-        public string GetControlName(ProjectTimeType projectTimeType, int projectTaskIndex, int dayIndex,
-                                     TimeEntryFieldType timeEntryType)
+       
+        public TimesheetId GetLatestTimesheetId(string timesheetHistoryHtml)
         {
-           throw new NotImplementedException();
+            var latestTimesheet = ParseTimesheetHistory(timesheetHistoryHtml).First();
+            var timesheetId =  new TimesheetId(latestTimesheet.Key, latestTimesheet.Value);
+            return timesheetId;
+        }
+
+        /// <summary>
+        /// Extracts a (sorted desc) list of timesheet Ids and dates
+        /// </summary>
+        /// <param name="timesheetHistoryHtml"></param>
+        /// <returns></returns>
+        private Dictionary<string, string> ParseTimesheetHistory(string timesheetHistoryHtml)
+        {
+            const string timesheetSelector = "//tr[@data-item-row-id]/td/div/a";
+            var htmlDoc = new HtmlDocument();
+            var stringReader = new StringReader(timesheetHistoryHtml);
+            htmlDoc.Load(stringReader);
+
+            var unsortedList = new Dictionary<string, DateTime>();
+            var timesheetList = new Dictionary<string, string>();
+
+            if (htmlDoc.DocumentNode != null)
+            {
+                var timeSheetNodes = htmlDoc.DocumentNode.SelectNodes(timesheetSelector);
+                
+                foreach (var hyperlinkNode in timeSheetNodes)
+                {
+                    var link = hyperlinkNode.Attributes["href"].Value;
+                    var matches = _timesheetIdRegex.Match(link);
+                    var id = matches.Groups[1].Value;
+                    var date = hyperlinkNode.Attributes["title"].Value;
+                    var parsedDate = DateTime.Parse(date);
+                    unsortedList.Add(id,parsedDate);
+                }
+
+                // Sort the list so that the most recent timesheet is at the top
+                foreach (var kvp in unsortedList.OrderByDescending(x => x.Value))
+                {
+                    timesheetList.Add(kvp.Key, kvp.Value.ToString("dd MMM yyyy"));
+                }
+            }
+
+            return timesheetList;
         }
 
         /// <summary>

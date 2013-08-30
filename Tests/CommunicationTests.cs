@@ -42,15 +42,26 @@ namespace Tests
             var timesheet = scraper.LoginAndGetTimesheet();
             TestHelper.PrettyPrintTimesheet(timesheet);
             
-            // project 1 monday
-            timesheet.ProjectTimeItems[0].TimeEntries[0].LoggedTime = new TimeSpan(1,0,0);
+            // project 1 Sunday
+            var originalTime = timesheet.ProjectTimeItems[0].TimeEntries[6].LoggedTime;
+            timesheet.ProjectTimeItems[0].TimeEntries[6].LoggedTime = originalTime.Add(TimeSpan.FromMinutes(1));
 
             var updatedTimesheet = scraper.UpdateTimeSheet(timesheet);
             TestHelper.PrettyPrintTimesheet(updatedTimesheet);
 
-            Assert.AreEqual(1, updatedTimesheet.ProjectTimeItems[0].TimeEntries[0].LoggedTime.TotalHours);
+            Assert.AreNotEqual(timesheet, updatedTimesheet);
+            Assert.AreEqual(originalTime.Add(TimeSpan.FromMinutes(1)).TotalMinutes, timesheet.ProjectTimeItems[0].TimeEntries[6].LoggedTime.TotalMinutes);
         }  
 
+        [TestMethod]
+        public void GetLastTimesheet_CorrectLogin_CorrectTimesheet()
+        {
+            var timesheetParser = new HtmlParser();
+            var scraper = new WebScraper(timesheetParser);
+            var timesheet = scraper.LoginAndGetTimesheet();
+            var timesheetHistoryView = scraper.GetTimesheetHistoryView();
+
+        }
     }
 
 

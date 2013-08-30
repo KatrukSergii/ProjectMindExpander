@@ -75,6 +75,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeEntry.cs" />
     <Compile Include="Timesheet.cs" />
+    <Compile Include="TimesheetId.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.csproj">
