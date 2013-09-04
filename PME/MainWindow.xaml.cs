@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Configuration;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Autofac;
 using Communication;
 
@@ -25,7 +13,11 @@ namespace PME
         public MainWindow()
         {
             InitializeComponent();
-            var scraper = App.AutoFacContainer.Resolve<IWebScraper>();
+            
+            var username = ConfigurationManager.AppSettings["username"];
+            var password = ConfigurationManager.AppSettings["password"];
+
+            var scraper = App.AutoFacContainer.Resolve<IWebScraper>(new NamedParameter("username", username), new NamedParameter("password", password));
             DataContext = new MainWindowViewModel(scraper);
         }
     }

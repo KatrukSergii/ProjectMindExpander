@@ -27,13 +27,13 @@ namespace Communication
         private string _viewState;
         private readonly CookieContainer _cookies;
 
-        public WebScraper(IHtmlParser parser)
+        public WebScraper(IHtmlParser parser, string username, string password)
         {
             var baseUri = new Uri(Resources.baseUri);
             LOGINPAGE = new Uri(baseUri, Resources.loginPage);
             TIMESHEETPAGE = new Uri(baseUri,Resources.timesheetPage);
-            USERNAME = Resources.username;
-            PASSWORD = Resources.password;
+            USERNAME = username;
+            PASSWORD = password;
             _parser = parser;
             _cookies = new CookieContainer();
             var policy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);

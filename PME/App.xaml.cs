@@ -28,7 +28,7 @@ namespace PME
         private static void InitializeIoC()
         {
             var builder = new ContainerBuilder();
-            builder.RegisterModule<CommunicationModule>();
+            builder.RegisterModule<CommunicationModule>();            
             AutoFacContainer = builder.Build();
         }
     }

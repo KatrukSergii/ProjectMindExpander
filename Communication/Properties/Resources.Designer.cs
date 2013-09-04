@@ -79,29 +79,11 @@ namespace Communication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Aatchb1!.
-        /// </summary>
-        internal static string password {
-            get {
-                return ResourceManager.GetString("password", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to TimesheetView.aspx.
         /// </summary>
         internal static string timesheetPage {
             get {
                 return ResourceManager.GetString("timesheetPage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to pete.johnson@iris.co.uk.
-        /// </summary>
-        internal static string username {
-            get {
-                return ResourceManager.GetString("username", resourceCulture);
             }
         }
     }
