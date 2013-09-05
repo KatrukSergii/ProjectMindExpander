@@ -9,12 +9,14 @@ using Model;
 namespace Communication
 {
     /// <summary>
+    /// Webscraper is responsible to sending and receiving data to the website (and maintaining viewstate etc)
     /// Based on odetocode.com/articles/162.aspx
     /// </summary>
     public class WebScraper : IWebScraper
     {
         private readonly Uri LOGINPAGE;
         private readonly Uri TIMESHEETPAGE;
+        private readonly Uri TIMESHEETHISTORYVIEWPAGE;
 
         private readonly string USERNAME;
         private readonly string PASSWORD;
@@ -32,8 +34,11 @@ namespace Communication
             var baseUri = new Uri(Resources.baseUri);
             LOGINPAGE = new Uri(baseUri, Resources.loginPage);
             TIMESHEETPAGE = new Uri(baseUri,Resources.timesheetPage);
+            TIMESHEETHISTORYVIEWPAGE = new Uri(baseUri,Resources.timesheetHistoryViewPage);
+
             USERNAME = username;
             PASSWORD = password;
+
             _parser = parser;
             _cookies = new CookieContainer();
             var policy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
@@ -160,6 +165,10 @@ namespace Communication
         }
 
 
+        /// <summary>
+        /// Gets the HTML for the page that lists previous timesheet submissions
+        /// </summary>
+        /// <returns></returns>
         public string GetTimesheetHistoryView()
         {
             if (_cookies.Count == 0)
@@ -167,16 +176,44 @@ namespace Communication
                 throw new InvalidOperationException("Cannot get TimesheetHistoryView as login cookies have not been set");
             }
 
-            string timesheetHistoryView = string.Empty;
-            
-            string postData = HtmlHelper.ConstructQuerystring(
+            var postData = HtmlHelper.ConstructQuerystring(
                                                       USERNAMECONTROLNAME, USERNAME,
                                                       PASSWORDCONTROLNAME, PASSWORD,
                                                       "__EVENTTARGET", "ctl00$TabMenu1$__theSubTabMenu$ctl01$btnSubMenuInactive");
 
             var responseData = GetWebResponse(TIMESHEETPAGE, _cookies, postData);
 
-            return timesheetHistoryView;
+            _viewState = _parser.ParseViewState(responseData);
+
+            return responseData;
+        }
+
+        /// <summary>
+        /// Get a specific timesheet by Id (note must call GetTimesheetHistoryView first to set the ViewState to the correct value)
+        /// </summary>
+        /// <param name="timesheetId"></param>
+        /// <returns></returns>
+        public ObservableTimesheet GetTimesheet(string timesheetId)
+        {
+            if (_cookies.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot get Timesheet as login cookies have not been set");
+            }
+
+            var postData = HtmlHelper.ConstructQuerystring(
+                                                      "__EVENTTARGET", "XTABLE",
+                                                      "__EVENTARGUMENT", "0010" + timesheetId,
+                                                      "__VIEWSTATE", _viewState,
+                                                      "ctl00$hAction", string.Empty,
+                                                      "ctl00$hSave", string.Empty,
+                                                      "ctl00$C1$x1$hSelectId", string.Empty
+                                    );
+
+            var responseData = GetWebResponse(TIMESHEETHISTORYVIEWPAGE, _cookies, postData);
+            
+            var parser = new HtmlParser();
+            var updatedTimesheet = parser.ParseTimesheet(responseData, out _viewState);
+            return new ObservableTimesheet(updatedTimesheet);
         }
     }
 }

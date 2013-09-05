@@ -79,7 +79,7 @@ namespace Tests
 
         [TestMethod]
         [DeploymentItemAttribute("TimesheetHistoryView.htm")]
-        public void ParseTimesheetHistory_TimesheetHistoryHtml_ValidList()
+        public void GetLatestTimesheetId_TimesheetHistoryHtml_LatestTimesheet()
         {
             Dictionary<string, string> list = null;
 

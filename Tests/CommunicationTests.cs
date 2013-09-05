@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using Autofac;
 using Communication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,6 +15,8 @@ namespace Tests
     public class CommunicationTests
     {
         private IContainer _container;
+        private string _username;
+        private string _password;
 
         [TestInitialize]
         public void Setup()
@@ -21,24 +24,29 @@ namespace Tests
             var builder = new ContainerBuilder();
             builder.RegisterModule<CommunicationModule>();
             _container = builder.Build();
+            _username = ConfigurationManager.AppSettings["username"];
+            _password = ConfigurationManager.AppSettings["password"];
         }
 
         [TestMethod]
         public void GetTimesheet_GetProjectCodes_4ProjectCodes()
         {
             var timesheetParser = new HtmlParser();
-            var scraper = new WebScraper(timesheetParser);
+            var scraper = new WebScraper(timesheetParser, _username, _password);
             var timesheet = scraper.LoginAndGetTimesheet();
             Assert.IsNotNull(timesheet);
             Assert.AreEqual(37.5, timesheet.TotalRequiredHours.TotalHours);
             TestHelper.PrettyPrintTimesheet(timesheet);
         }
 
+        /// <summary>
+        /// Adds 1 minutes onto the logged time for project 1 on Sunday
+        /// </summary>
         [TestMethod]
         public void UpdateTimeSheet_UpdatedTimesheetValues_UpdateValuesInTheResponse()
         {
             var timesheetParser = new HtmlParser();
-            var scraper = new WebScraper(timesheetParser);
+            var scraper = new WebScraper(timesheetParser, _username, _password);
             var timesheet = scraper.LoginAndGetTimesheet();
             TestHelper.PrettyPrintTimesheet(timesheet);
             
@@ -53,14 +61,24 @@ namespace Tests
             Assert.AreEqual(originalTime.Add(TimeSpan.FromMinutes(1)).TotalMinutes, timesheet.ProjectTimeItems[0].TimeEntries[6].LoggedTime.TotalMinutes);
         }  
 
+        /// <summary>
+        /// 
+        /// </summary>
         [TestMethod]
-        public void GetLastTimesheet_CorrectLogin_CorrectTimesheet()
+        public void GetLastTimesheet_IncorrectLogin_InvalidOperationException()
         {
             var timesheetParser = new HtmlParser();
-            var scraper = new WebScraper(timesheetParser);
-            var timesheet = scraper.LoginAndGetTimesheet();
-            var timesheetHistoryView = scraper.GetTimesheetHistoryView();
-
+            var scraper = new WebScraper(timesheetParser, _username, _password);
+            try
+            {
+                _username = "foo";
+                _password = "bar";
+                var timesheet = scraper.LoginAndGetTimesheet();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Assert.AreEqual("Unable to login", ex.Message);
+            }
         }
     }
 

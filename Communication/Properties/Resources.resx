@@ -123,6 +123,9 @@
   <data name="timesheetPage" xml:space="preserve">
     <value>TimesheetView.aspx</value>
   </data>
+  <data name="timesheetHistoryViewPage" xml:space="preserve">
+    <value>TimesheetHistoryView.aspx</value>
+  </data>
   <data name="baseUri" xml:space="preserve">
     <value>https://secure.v1projectaccounting.com</value>
   </data>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Mime;
 using System.Text.RegularExpressions;
 using System.Web;
 using HtmlAgilityPack;
@@ -12,16 +13,19 @@ using Shared.Enum;
 
 namespace Communication
 {
+    /// <summary>
+    /// HtmlParser extracts data from HTML page strings 
+    /// </summary>
     public class HtmlParser : IHtmlParser
     {
         private const string ViewstateSelector = "//input[@name = '__VIEWSTATE']";
         private readonly Regex _timesheetIdRegex = new Regex(@"javascript:OnSubmit\('0010',(?<timesheetId>\d+)\);");
 
-       
+
         public TimesheetId GetLatestTimesheetId(string timesheetHistoryHtml)
         {
             var latestTimesheet = ParseTimesheetHistory(timesheetHistoryHtml).First();
-            var timesheetId =  new TimesheetId(latestTimesheet.Key, latestTimesheet.Value);
+            var timesheetId = new TimesheetId(latestTimesheet.Key, latestTimesheet.Value);
             return timesheetId;
         }
 
@@ -43,7 +47,7 @@ namespace Communication
             if (htmlDoc.DocumentNode != null)
             {
                 var timeSheetNodes = htmlDoc.DocumentNode.SelectNodes(timesheetSelector);
-                
+
                 foreach (var hyperlinkNode in timeSheetNodes)
                 {
                     var link = hyperlinkNode.Attributes["href"].Value;
@@ -51,7 +55,7 @@ namespace Communication
                     var id = matches.Groups[1].Value;
                     var date = hyperlinkNode.Attributes["title"].Value;
                     var parsedDate = DateTime.Parse(date);
-                    unsortedList.Add(id,parsedDate);
+                    unsortedList.Add(id, parsedDate);
                 }
 
                 // Sort the list so that the most recent timesheet is at the top
@@ -71,19 +75,20 @@ namespace Communication
         /// <param name="timesheetHtml"></param>
         /// <param name="viewstate"></param>
         /// <returns></returns>
+        /// <exception cref="ApplicationException">Invalid timesheet ID throws ApplicationException</exception>
         public Timesheet ParseTimesheet(string timesheetHtml, out string viewstate)
         {
             const string projectSelector = "//select[@name = 'ctl00$C1$ProjectGrid$ctl{0}$ddlProject']/option[@selected='selected']";
             const string projectTaskSelector = "//select[@name = 'ctl00$C1$ProjectGrid$ctl{0}$ddlProjectTask']/option[@selected='selected']";
-            
+
             const string loggedTimeSelector = "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$txtLoggedTime{1}']";
-            const string extraTimeSelector =  "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$hdExtraTime{1}']";
-            const string notesSelector =  "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$hdNotes0{1}']";
-            const string workDetailSelector =  "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$hdWorkDetailId0{1}']";
+            const string extraTimeSelector = "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$hdExtraTime{1}']";
+            const string notesSelector = "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$hdNotes0{1}']";
+            const string workDetailSelector = "//input[@name = 'ctl00$C1$ProjectGrid$ctl{0}$hdWorkDetailId0{1}']";
 
             const string nonProjectSelector = "//select[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$ddlInternalProject']/option[@selected='selected']";
             const string nonProjectTaskSelector = "//select[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$ddlInternalProjectTask']/option[@selected='selected']";
-            
+
             const string nonProjectLoggedTimeSelector = "//input[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$txtLoggedTime{1}']";
             const string nonProjectExtraTimeSelector = "//input[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$hdExtraTime{1}']";
             const string nonProjectNotesSelector = "//input[@name = 'ctl00$C1$InternalProjectGrid$ctl{0}$hdNotes{1}']";
@@ -105,24 +110,49 @@ namespace Communication
             var stringReader = new StringReader(timesheetHtml);
 
             htmlDoc.Load(stringReader);
-            
+
             if (htmlDoc.DocumentNode != null)
             {
                 AssertNoErrors(htmlDoc.DocumentNode, loginErrorSelector);
 
-                // Timesheet title, e.g. '08 Jul 2013 to 14 Jul 2013 by Joe Bloggs (Draft)'
-                timesheet.Title = htmlDoc.DocumentNode.SelectSingleNode(titleSelector).InnerText.Trim();
+                try
+                {
+                    // Timesheet title, e.g. '08 Jul 2013 to 14 Jul 2013 by Joe Bloggs (Draft)'
+                    timesheet.Title = htmlDoc.DocumentNode.SelectSingleNode(titleSelector).InnerText.Trim();
 
-                timesheet.TimesheetId =
-                    htmlDoc.DocumentNode.SelectSingleNode(timesheetIdSelector).Attributes["value"].Value;
+                    timesheet.TimesheetId =
+                        htmlDoc.DocumentNode.SelectSingleNode(timesheetIdSelector).Attributes["value"].Value;
 
-                timesheet.ProjectTimeItems = GetTimesheetItems(htmlDoc.DocumentNode,projectSelector,projectTaskSelector,loggedTimeSelector,extraTimeSelector,notesSelector,workDetailSelector);
-                timesheet.NonProjectActivityItems = GetTimesheetItems(htmlDoc.DocumentNode, nonProjectSelector, nonProjectTaskSelector, nonProjectLoggedTimeSelector, nonProjectExtraTimeSelector, nonProjectNotesSelector, nonProjectWorkDetailSelector );
+                    if (!timesheet.TimesheetId.Equals("0"))
+                    {
+                        throw new ApplicationException("The Timesheet has an invalid ID");
+                    }
 
-                timesheet.RequiredHours = GetRequiredHours(htmlDoc.DocumentNode, requiredHoursSelector);
-                timesheet.TotalRequiredHours = htmlDoc.DocumentNode.SelectSingleNode(totalRequiredHoursSelector).Attributes["value"].Value.ToTimeSpan();
-                
-                viewstate = htmlDoc.DocumentNode.SelectSingleNode(ViewstateSelector).Attributes["value"].Value;
+                    timesheet.ProjectTimeItems = GetTimesheetItems(htmlDoc.DocumentNode, projectSelector,
+                                                                       projectTaskSelector, loggedTimeSelector,
+                                                                       extraTimeSelector, notesSelector,
+                                                                       workDetailSelector);
+                    timesheet.NonProjectActivityItems = GetTimesheetItems(htmlDoc.DocumentNode, nonProjectSelector,
+                                                                          nonProjectTaskSelector,
+                                                                          nonProjectLoggedTimeSelector,
+                                                                          nonProjectExtraTimeSelector,
+                                                                          nonProjectNotesSelector,
+                                                                          nonProjectWorkDetailSelector);
+
+                    timesheet.RequiredHours = GetRequiredHours(htmlDoc.DocumentNode, requiredHoursSelector);
+                    timesheet.TotalRequiredHours =
+                        htmlDoc.DocumentNode.SelectSingleNode(totalRequiredHoursSelector).Attributes["value"].Value
+                                                                                                             .ToTimeSpan
+                            ();
+
+                    viewstate = htmlDoc.DocumentNode.SelectSingleNode(ViewstateSelector).Attributes["value"].Value;
+
+                }
+                catch (NullReferenceException ex)
+                {
+                    // Log exception here
+                    throw new ApplicationException("Unable to load timesheet - an error has occurred");
+                }
             }
 
             return timesheet;
@@ -137,7 +167,7 @@ namespace Communication
 
             if (htmlDoc.DocumentNode != null)
             {
-                viewstate = HttpUtility.UrlEncodeUnicode(htmlDoc.DocumentNode.SelectSingleNode(ViewstateSelector).Attributes["value"].Value); 
+                viewstate = HttpUtility.UrlEncodeUnicode(htmlDoc.DocumentNode.SelectSingleNode(ViewstateSelector).Attributes["value"].Value);
             }
 
             return viewstate;
@@ -181,27 +211,27 @@ namespace Communication
             return requiredHours;
         }
 
-        private List<ProjectTaskTimesheetItem> GetTimesheetItems(HtmlNode htmlNode, string projectSelector, 
-            string projectTaskSelector, 
-            string loggedTimeSelector, 
-            string extraTimeSelector, 
-            string notesSelector, 
+        private List<ProjectTaskTimesheetItem> GetTimesheetItems(HtmlNode htmlNode, string projectSelector,
+            string projectTaskSelector,
+            string loggedTimeSelector,
+            string extraTimeSelector,
+            string notesSelector,
             string workDetailSelector)
         {
             var projectTimeItems = new List<ProjectTaskTimesheetItem>();
-            
+
             HtmlNode projectCode = null;
 
             // index starts at 2 because of the naming of the ASP.net controls - i.e. first is ctl00$C1$ProjectGrid$ctl2
             var i = 2;
-            
+
             while (projectCode != null || i == 2)
             {
                 var index = i.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0');
-                
+
                 var projectControlName = string.Format(projectSelector, index);
                 projectCode = htmlNode.SelectSingleNode(projectControlName);
-                
+
                 if (projectCode != null)
                 {
                     // assume that there is a task combo control for each project combo control;
@@ -254,7 +284,7 @@ namespace Communication
         /// <param name="projectCode"></param>
         /// <param name="taskCode"></param>
         /// <returns></returns>
-        private ProjectTaskTimesheetItem AddTimesheetItem(List<ProjectTaskTimesheetItem> projectTimeItems, HtmlNode projectCode, HtmlNode taskCode )
+        private ProjectTaskTimesheetItem AddTimesheetItem(List<ProjectTaskTimesheetItem> projectTimeItems, HtmlNode projectCode, HtmlNode taskCode)
         {
             var projectCodePickListItem = GetPickListItemFromCombobox(projectCode);
             var projectTaskCodePickListItem = GetPickListItemFromCombobox(taskCode);
@@ -271,7 +301,16 @@ namespace Communication
 
         //    // Substring is in place of 'ends-with' (needed because some of the dropdown names end with ddlProjectTask)
         //    foreach (HtmlNode link in htmlDocumentNode.SelectNodes("//select['ddlProject' = substring(@name,string-length(@name) - string-length('ddlProject') +1)]/option[@selected='selected']"))
-       
 
+        /// <summary>
+        /// Construct a timesheet from an approved (i.e. old) timesheet HTML string
+        /// </summary>
+        /// <param name="timesheetHtml"></param>
+        /// <param name="viewState"></param>
+        /// <returns></returns>
+        public Timesheet ParseApprovedTimesheet(string timesheetHtml, out string viewState)
+        {
+            throw new NotImplementedException("Not implemented ParseApprovedTimesheet");
+        }
     }
 }

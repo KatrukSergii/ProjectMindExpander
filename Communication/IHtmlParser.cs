@@ -8,6 +8,8 @@ namespace Communication
     {
         Timesheet ParseTimesheet(string timesheetHtml, out string viewState);
 
+        Timesheet ParseApprovedTimesheet(string timesheetHtml, out string viewState);
+
         TimesheetId GetLatestTimesheetId(string timesheetHistoryHtml);
 
         string ParseViewState(string html);

@@ -79,6 +79,15 @@ namespace Communication.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to TimesheetHistoryView.aspx.
+        /// </summary>
+        internal static string timesheetHistoryViewPage {
+            get {
+                return ResourceManager.GetString("timesheetHistoryViewPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to TimesheetView.aspx.
         /// </summary>
         internal static string timesheetPage {
