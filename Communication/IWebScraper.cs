@@ -26,7 +26,7 @@ namespace Communication
         /// </summary>
         /// <param name="timesheetId"></param>
         /// <returns></returns>
-        ObservableTimesheet GetTimesheet(string timesheetId);
+        ObservableTimesheet GetApprovedTimesheet(string timesheetId);
 
 
         /// <summary>

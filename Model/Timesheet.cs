@@ -27,10 +27,14 @@ namespace Model
         public string TimesheetId { get; set; }
         public List<ProjectTaskTimesheetItem> ProjectTimeItems { get; set; }
         public List<ProjectTaskTimesheetItem> NonProjectActivityItems { get; set; }
+
         // Should contain 7 items - 1 for each day of the week
         public List<TimeSpan> RequiredHours { get; set; }
         public TimeSpan TotalRequiredHours { get; set; }
-        
+
+        // Should contain 7 items - 1 for each day of the week
+        public List<DateTime> WeekDates { get; set; }
+
         // Should contain 8 items - 1 for each day of the week and a weekly total
         public List<HoursSummary> Totals { get; set; }
     }

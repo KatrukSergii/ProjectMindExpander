@@ -56,7 +56,7 @@ namespace Tests
         /// Make sure all 7 project time entries are read
         /// </summary>
         [TestMethod]
-        [DeploymentItemAttribute("TestTimeSheet.htm")]
+        [DeploymentItem("TestTimeSheet.htm")]
         public void Parse_FullTimesheet_ProjectTimeEntries()
         {
             Timesheet timesheet;
@@ -78,10 +78,9 @@ namespace Tests
         }
 
         [TestMethod]
-        [DeploymentItemAttribute("TimesheetHistoryView.htm")]
+        [DeploymentItem("TimesheetHistoryView.htm")]
         public void GetLatestTimesheetId_TimesheetHistoryHtml_LatestTimesheet()
         {
-            Dictionary<string, string> list = null;
 
             using (var streamReader = new StreamReader("TimesheetHistoryView.htm"))
             {
@@ -90,6 +89,23 @@ namespace Tests
                 var latestTimesheetId = parser.GetLatestTimesheetId(htmlString);
                 Assert.AreEqual("61701",latestTimesheetId.Id);
                 Assert.AreEqual("12 Aug 2013", latestTimesheetId.DateString);
+            }
+        }
+
+
+        [TestMethod]
+        [DeploymentItem("TestApprovedTimesheet.htm")]
+        public void ParseApprovedTimesheet_ApprovedTimesheetHtml_Timesheet()
+        {
+
+            using (var streamReader = new StreamReader("TimesheetHistoryView.htm"))
+            {
+                var parser = _container.Resolve<IHtmlParser>();
+                var htmlString = streamReader.ReadToEnd();
+                string viewState;
+                var approvedTimesheet = parser.ParseTimesheet(htmlString, out viewState);
+                Assert.AreEqual("61701", approvedTimesheet.TimesheetId);
+                Assert.AreEqual("12 Aug 2013 to 18 Aug 2013 by Pete Johnson (Approved)", approvedTimesheet.Title);
             }
         }
     }

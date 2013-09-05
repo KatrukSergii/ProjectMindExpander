@@ -37,7 +37,7 @@ namespace Tests
             var scraper = _container.Resolve<IWebScraper>(new NamedParameter("username", _username), new NamedParameter("password", _password));
             var timesheet = scraper.LoginAndGetTimesheet();
             var timesheethistoryView = scraper.GetTimesheetHistoryView(); // this updates the viewstate
-            var oldTimesheet = scraper.GetTimesheet("61701"); // Note - it is possible to view other people's timesheets by sending a valid timesheet ID here
+            var oldTimesheet = scraper.GetApprovedTimesheet("61701"); // Note - it is possible to view other people's timesheets by sending a valid timesheet ID here
             Assert.IsNotNull(oldTimesheet);
             Assert.AreEqual("61701",oldTimesheet.TimesheetId);
         }
@@ -46,14 +46,19 @@ namespace Tests
         /// INTEGRATION TEST
         /// </summary>
         [TestMethod]
-        public void GetTimesheet_InvalidTimesheetId_CurrentTimesheet()
+        public void GetTimesheet_InvalidTimesheetId_EmptyTimesheet()
         {
             var scraper = _container.Resolve<IWebScraper>(new NamedParameter("username", _username), new NamedParameter("password", _password));
             var timesheet = scraper.LoginAndGetTimesheet();
             var timesheethistoryView = scraper.GetTimesheetHistoryView(); // this updates the viewstate
-            var oldTimesheet = scraper.GetTimesheet("99999"); 
-            Assert.IsNotNull(oldTimesheet);
-            Assert.AreEqual("99999", oldTimesheet.TimesheetId);
+            try
+            {
+                var oldTimesheet = scraper.GetApprovedTimesheet("99999");
+            }
+            catch (ApplicationException ex)
+            {
+                Assert.AreEqual("The Timesheet has an invalid ID", ex.Message);
+            }
         }
     }
 }

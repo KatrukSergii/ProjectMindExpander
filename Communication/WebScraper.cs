@@ -193,7 +193,7 @@ namespace Communication
         /// </summary>
         /// <param name="timesheetId"></param>
         /// <returns></returns>
-        public ObservableTimesheet GetTimesheet(string timesheetId)
+        public ObservableTimesheet GetApprovedTimesheet(string timesheetId)
         {
             if (_cookies.Count == 0)
             {
@@ -212,7 +212,7 @@ namespace Communication
             var responseData = GetWebResponse(TIMESHEETHISTORYVIEWPAGE, _cookies, postData);
             
             var parser = new HtmlParser();
-            var updatedTimesheet = parser.ParseTimesheet(responseData, out _viewState);
+            var updatedTimesheet = parser.ParseApprovedTimesheet(responseData, out _viewState);
             return new ObservableTimesheet(updatedTimesheet);
         }
     }

@@ -123,7 +123,7 @@ namespace Communication
                     timesheet.TimesheetId =
                         htmlDoc.DocumentNode.SelectSingleNode(timesheetIdSelector).Attributes["value"].Value;
 
-                    if (!timesheet.TimesheetId.Equals("0"))
+                    if (timesheet.TimesheetId.Equals("0"))
                     {
                         throw new ApplicationException("The Timesheet has an invalid ID");
                     }
@@ -310,7 +310,7 @@ namespace Communication
         /// <returns></returns>
         public Timesheet ParseApprovedTimesheet(string timesheetHtml, out string viewState)
         {
-            throw new NotImplementedException("Not implemented ParseApprovedTimesheet");
+            throw new NotImplementedException("not implemented yet!");
         }
     }
 }
