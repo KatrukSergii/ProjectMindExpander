@@ -93,6 +93,7 @@
     <Content Include="TimesheetHistoryView.htm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="TimesheetWithHoliday.html" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\PME\App.config">

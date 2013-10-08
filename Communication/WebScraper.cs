@@ -1,9 +1,11 @@
-﻿using Communication.Properties;
+﻿using Autofac;
+using Communication.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Cache;
+using Infrastructure;
 using Model;
 
 namespace Communication
@@ -210,9 +212,9 @@ namespace Communication
                                     );
 
             var responseData = GetWebResponse(TIMESHEETHISTORYVIEWPAGE, _cookies, postData);
-            
-            var parser = new HtmlParser();
-            var updatedTimesheet = parser.ParseApprovedTimesheet(responseData, out _viewState);
+
+            var parser = Container.Instance.Resolve<IHtmlParser>();
+            var updatedTimesheet = parser.ParseTimesheet(responseData, out _viewState, isApprovedTimesheet: true);
             return new ObservableTimesheet(updatedTimesheet);
         }
     }

@@ -42,10 +42,12 @@
   <ItemGroup>
     <Compile Include="DataStructures\ObservableList.cs" />
     <Compile Include="DataStructures\PropertyData.cs" />
+    <Compile Include="Ensure.cs" />
     <Compile Include="Enum\ProjectTimeType.cs" />
     <Compile Include="Enum\PropertyType.cs" />
     <Compile Include="Enum\TimeEntryFieldType.cs" />
     <Compile Include="Interfaces\IAttachEventHandler.cs" />
+    <Compile Include="TimesheetType.cs" />
     <Compile Include="Utility\GenericCopier.cs" />
     <Compile Include="Utility\IEnumerableExtensions.cs" />
     <Compile Include="Utility\ListUtility.cs" />

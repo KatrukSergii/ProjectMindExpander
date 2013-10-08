@@ -1,14 +1,11 @@
 ﻿
-using System.Collections.Generic;
 using Model;
 
 namespace Communication
 {
     public interface IHtmlParser
     {
-        Timesheet ParseTimesheet(string timesheetHtml, out string viewState);
-
-        Timesheet ParseApprovedTimesheet(string timesheetHtml, out string viewState);
+        Timesheet ParseTimesheet(string timesheetHtml, out string viewState, bool isApprovedTimesheet = false);
 
         TimesheetId GetLatestTimesheetId(string timesheetHistoryHtml);
 

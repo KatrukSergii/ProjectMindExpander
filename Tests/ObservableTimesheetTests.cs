@@ -14,9 +14,9 @@ namespace Tests
             var ts = new Timesheet();
             for(int i = 0; i < 7; i++)
             {
-                ts.RequiredHours.Add(new TimeSpan(7,30,0));    
+                ts.RequiredHours[i] = new TimeSpan(7,30,0);
             }
-
+            
             // Project items
             var projectCode1 = new PickListItem(0,"p1");
             var taskCode1 = new PickListItem(0, "t1");
@@ -174,11 +174,13 @@ namespace Tests
         {
             var timesheet = CreateDummyTimesheet();
             timesheet.ProjectTimeItems[0].TimeEntries[6].LoggedTime = TimeSpan.FromHours(8);  // 30 mins greater than required hours
-            timesheet.ProjectTimeItems[0].TimeEntries[6].ExtraTime = TimeSpan.FromMinutes(30);
+            timesheet.ProjectTimeItems[0].TimeEntries[6].ExtraTime = TimeSpan.FromMinutes(30);   // extra time is ignored (and then cleared)
             timesheet.ProjectTimeItems[1].TimeEntries[6].LoggedTime = TimeSpan.FromMinutes(30);  // 60 mins 
             timesheet.ProjectTimeItems[1].TimeEntries[6].ExtraTime = TimeSpan.FromMinutes(30);
             timesheet.ProjectTimeItems[2].TimeEntries[6].LoggedTime = TimeSpan.FromMinutes(30);  // 90 mins
             timesheet.ProjectTimeItems[2].TimeEntries[6].ExtraTime = TimeSpan.FromMinutes(30);
+
+            // 90 mins extra time logged so far for Project items...
 
             timesheet.NonProjectActivityItems[0].TimeEntries[6].LoggedTime = TimeSpan.FromMinutes(30);  // 120 mins greater than required hours
             timesheet.NonProjectActivityItems[0].TimeEntries[6].ExtraTime = TimeSpan.FromMinutes(30);
@@ -219,7 +221,7 @@ namespace Tests
             var changes = timesheet.ExtractChanges();
             Assert.AreEqual(1, changes.Count);
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", changes.Keys.First());
-            Assert.AreEqual("00:01:00", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0"]);
+            Assert.AreEqual("0:01", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0"]);
         }
 
         [TestMethod]
@@ -238,13 +240,13 @@ namespace Tests
             Assert.AreEqual(3, changes.Count);
             
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", changes.Keys.Take(1).Last());
-            Assert.AreEqual("00:01:00", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0"]);
+            Assert.AreEqual("0:01", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0"]);
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl03$txtLoggedTime0", changes.Keys.Take(2).Last());
-            Assert.AreEqual("00:02:00", changes["ctl00$C1$ProjectGrid$ctl03$txtLoggedTime0"]);
+            Assert.AreEqual("0:02", changes["ctl00$C1$ProjectGrid$ctl03$txtLoggedTime0"]);
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl04$txtLoggedTime0", changes.Keys.Take(3).Last());
-            Assert.AreEqual("00:03:00", changes["ctl00$C1$ProjectGrid$ctl04$txtLoggedTime0"]);
+            Assert.AreEqual("0:03", changes["ctl00$C1$ProjectGrid$ctl04$txtLoggedTime0"]);
         }
 
         [TestMethod]
@@ -267,16 +269,16 @@ namespace Tests
             // changes are ordered project+task then day of the week
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", changes.Keys.Take(1).Last());
-            Assert.AreEqual("00:01:00", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0"]);
+            Assert.AreEqual("0:01", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0"]);
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$hdExtraTime0", changes.Keys.Take(2).Last());
-            Assert.AreEqual("00:02:00", changes["ctl00$C1$ProjectGrid$ctl02$hdExtraTime0"]);
+            Assert.AreEqual("0:02", changes["ctl00$C1$ProjectGrid$ctl02$hdExtraTime0"]);
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl03$txtLoggedTime0", changes.Keys.Take(3).Last());
-            Assert.AreEqual("00:03:00", changes["ctl00$C1$ProjectGrid$ctl03$txtLoggedTime0"]);
+            Assert.AreEqual("0:03", changes["ctl00$C1$ProjectGrid$ctl03$txtLoggedTime0"]);
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl03$hdExtraTime0", changes.Keys.Take(4).Last());
-            Assert.AreEqual("00:04:00", changes["ctl00$C1$ProjectGrid$ctl03$hdExtraTime0"]);
+            Assert.AreEqual("0:04", changes["ctl00$C1$ProjectGrid$ctl03$hdExtraTime0"]);
         }
 
         [TestMethod]
@@ -299,16 +301,16 @@ namespace Tests
             // changes are ordered project+task then day of the week
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", changes.Keys.Take(1).Last());
-            Assert.AreEqual("00:03:00", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0"]);
+            Assert.AreEqual("0:03", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0"]);
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$hdExtraTime0", changes.Keys.Take(2).Last());
-            Assert.AreEqual("00:04:00", changes["ctl00$C1$ProjectGrid$ctl02$hdExtraTime0"]);
+            Assert.AreEqual("0:04", changes["ctl00$C1$ProjectGrid$ctl02$hdExtraTime0"]);
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$txtLoggedTime6", changes.Keys.Take(3).Last());
-            Assert.AreEqual("00:01:00", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime6"]);
+            Assert.AreEqual("0:01", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime6"]);
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$hdExtraTime6", changes.Keys.Take(4).Last());
-            Assert.AreEqual("00:02:00", changes["ctl00$C1$ProjectGrid$ctl02$hdExtraTime6"]);
+            Assert.AreEqual("0:02", changes["ctl00$C1$ProjectGrid$ctl02$hdExtraTime6"]);
         }
 
         [TestMethod]
@@ -330,17 +332,17 @@ namespace Tests
 
             // Project
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0", changes.Keys.Take(1).Last());
-            Assert.AreEqual("00:01:00", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0"]);
+            Assert.AreEqual("0:01", changes["ctl00$C1$ProjectGrid$ctl02$txtLoggedTime0"]);
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$hdExtraTime0", changes.Keys.Take(2).Last());
-            Assert.AreEqual("00:02:00", changes["ctl00$C1$ProjectGrid$ctl02$hdExtraTime0"]);
+            Assert.AreEqual("0:02", changes["ctl00$C1$ProjectGrid$ctl02$hdExtraTime0"]);
 
             // Non-Project
             Assert.AreEqual("ctl00$C1$InternalProjectGrid$ctl02$txtLoggedTime0", changes.Keys.Take(3).Last());
-            Assert.AreEqual("00:03:00", changes["ctl00$C1$InternalProjectGrid$ctl02$txtLoggedTime0"]);
+            Assert.AreEqual("0:03", changes["ctl00$C1$InternalProjectGrid$ctl02$txtLoggedTime0"]);
 
             Assert.AreEqual("ctl00$C1$InternalProjectGrid$ctl02$hdExtraTime0", changes.Keys.Take(4).Last());
-            Assert.AreEqual("00:04:00", changes["ctl00$C1$InternalProjectGrid$ctl02$hdExtraTime0"]);
+            Assert.AreEqual("0:04", changes["ctl00$C1$InternalProjectGrid$ctl02$hdExtraTime0"]);
         }
 
 
@@ -366,9 +368,9 @@ namespace Tests
             Assert.AreEqual(2, changes.Count);
 
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl02$hdExtraTime0", changes.Keys.Take(1).Last());
-            Assert.AreEqual("01:30:00", changes["ctl00$C1$ProjectGrid$ctl02$hdExtraTime0"]);  // i.e. 90 mins extra time total
+            Assert.AreEqual("1:30", changes["ctl00$C1$ProjectGrid$ctl02$hdExtraTime0"]);  // i.e. 90 mins extra time total
             Assert.AreEqual("ctl00$C1$ProjectGrid$ctl03$hdExtraTime0", changes.Keys.Take(2).Last());
-            Assert.AreEqual("00:00:00", changes["ctl00$C1$ProjectGrid$ctl03$hdExtraTime0"]);  //  30 minutes deleted
+            Assert.AreEqual("0:00", changes["ctl00$C1$ProjectGrid$ctl03$hdExtraTime0"]);  //  30 minutes deleted
         }
         #endregion
     }

@@ -1,4 +1,6 @@
 ﻿using Autofac;
+using Communication.ParserStrategy;
+using Shared;
 
 namespace Communication
 {
@@ -12,6 +14,9 @@ namespace Communication
                         .AsImplementedInterfaces()
                         .AsSelf()
                         .As(q => q.BaseType);
+
+            builder.RegisterType<DraftTimesheetParserStrategy>().Keyed<ITimesheetParserStrategy>(TimesheetType.Draft);
+            builder.RegisterType<ApprovedTimesheetParserStrategy>().Keyed<ITimesheetParserStrategy>(TimesheetType.Approved);
         }
     }
 }

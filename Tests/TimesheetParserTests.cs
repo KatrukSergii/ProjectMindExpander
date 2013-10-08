@@ -93,20 +93,20 @@ namespace Tests
         }
 
 
-        [TestMethod]
-        [DeploymentItem("TestApprovedTimesheet.htm")]
-        public void ParseApprovedTimesheet_ApprovedTimesheetHtml_Timesheet()
-        {
+        //[TestMethod]
+        //[DeploymentItem("TestApprovedTimesheet.htm")]
+        //public void ParseApprovedTimesheet_ApprovedTimesheetHtml_Timesheet()
+        //{
 
-            using (var streamReader = new StreamReader("TimesheetHistoryView.htm"))
-            {
-                var parser = _container.Resolve<IHtmlParser>();
-                var htmlString = streamReader.ReadToEnd();
-                string viewState;
-                var approvedTimesheet = parser.ParseTimesheet(htmlString, out viewState);
-                Assert.AreEqual("61701", approvedTimesheet.TimesheetId);
-                Assert.AreEqual("12 Aug 2013 to 18 Aug 2013 by Pete Johnson (Approved)", approvedTimesheet.Title);
-            }
-        }
+        //    using (var streamReader = new StreamReader("TestApprovedTimesheet.htm"))
+        //    {
+        //        var parser = _container.Resolve<IHtmlParser>();
+        //        var htmlString = streamReader.ReadToEnd();
+        //        string viewState;
+        //        var approvedTimesheet = parser.ParseApprovedTimesheet(htmlString, out viewState);
+        //        Assert.AreEqual("61701", approvedTimesheet.TimesheetId);
+        //        Assert.AreEqual("12 Aug 2013 to 18 Aug 2013 by Pete Johnson (Approved)", approvedTimesheet.Title);
+        //    }
+        //}
     }
 }
